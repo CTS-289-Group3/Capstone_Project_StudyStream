@@ -1,0 +1,557 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StudyStream — Stay organized, stay ahead.</title>
+
+  <!-- Nice font pairing -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ss-yellow: #FCAF17;
+      --ss-yellow-bright: #FFDD00;
+      --ss-blue: #007DC5;
+      --ss-blue-deep: #034EA2;
+      --ss-ink: #231F20;
+      --ss-soft: #f6f8fc;
+      --ss-line: #dfe7f2;
+      --ss-text: #445064;
+      --ss-white: #ffffff;
+    }
+
+    body {
+      font-family: 'Nunito', Arial, sans-serif;
+      background: #ffffff;
+      color: var(--ss-ink);
+    }
+
+    a { text-decoration: none; }
+
+    /* NAV */
+    .ss-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 38px;
+      background: rgba(255,255,255,0.96);
+      border-bottom: 1px solid #edf1f7;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(10px);
+    }
+
+    .ss-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .ss-logo-mark {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, rgba(252,175,23,0.12), rgba(0,125,197,0.12));
+      border: 1px solid rgba(0,125,197,0.12);
+    }
+
+    .ss-logo-text {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: 0.5px;
+    }
+
+    .ss-logo-text span:first-child {
+      color: var(--ss-yellow);
+    }
+
+    .ss-logo-text span:last-child {
+      color: var(--ss-blue-deep);
+    }
+
+    .ss-nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .ss-nav-links a {
+      color: var(--ss-blue-deep);
+      transition: 0.2s ease;
+    }
+
+    .ss-nav-links a:hover {
+      color: var(--ss-yellow);
+    }
+
+    .ss-nav-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .ss-btn-ghost,
+    .ss-btn-solid,
+    .ss-cta-yellow,
+    .ss-cta-outline {
+      font-family: 'Nunito', sans-serif;
+    }
+
+    .ss-btn-ghost {
+      font-size: 14px;
+      padding: 10px 18px;
+      border: 1.8px solid var(--ss-blue);
+      border-radius: 999px;
+      color: var(--ss-blue);
+      background: transparent;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .ss-btn-solid {
+      font-size: 14px;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 999px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--ss-blue), var(--ss-blue-deep));
+      cursor: pointer;
+      font-weight: 700;
+      box-shadow: 0 10px 22px rgba(3,78,162,0.18);
+    }
+
+    /* HERO */
+    .ss-hero {
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at top left, rgba(255,221,0,0.22), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(0,125,197,0.18), transparent 26%),
+        linear-gradient(160deg, #ffffff 0%, #f5f9ff 100%);
+      padding: 76px 38px 90px;
+    }
+
+    .ss-hero-inner {
+      max-width: 1220px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      align-items: center;
+      gap: 42px;
+    }
+
+    .ss-hero-text {
+      max-width: 560px;
+    }
+
+    .ss-hero-eyebrow {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--ss-blue-deep);
+      background: rgba(0,125,197,0.08);
+      border: 1px solid rgba(0,125,197,0.12);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 8px 12px;
+      border-radius: 999px;
+      margin-bottom: 18px;
+    }
+
+    .ss-hero-headline {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 54px;
+      line-height: 1.08;
+      font-weight: 800;
+      color: var(--ss-blue-deep);
+      margin-bottom: 18px;
+    }
+
+    .ss-hero-headline .gold {
+      color: var(--ss-yellow);
+    }
+
+    .ss-hero-sub {
+      font-size: 18px;
+      color: var(--ss-text);
+      line-height: 1.7;
+      max-width: 520px;
+      margin-bottom: 28px;
+    }
+
+    .ss-hero-ctas {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .ss-cta-yellow {
+      font-size: 15px;
+      font-weight: 800;
+      padding: 13px 24px;
+      background: linear-gradient(135deg, var(--ss-yellow), var(--ss-yellow-bright));
+      color: var(--ss-ink);
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      box-shadow: 0 14px 30px rgba(252,175,23,0.22);
+    }
+
+    .ss-cta-outline {
+      font-size: 15px;
+      font-weight: 800;
+      padding: 13px 24px;
+      background: #fff;
+      color: var(--ss-blue-deep);
+      border: 1.5px solid rgba(0,125,197,0.2);
+      border-radius: 999px;
+      cursor: pointer;
+    }
+
+    /* HERO VISUAL */
+    .ss-hero-visual {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .ss-logo-card {
+      width: 100%;
+      max-width: 470px;
+      background: rgba(255,255,255,0.86);
+      border: 1px solid rgba(0,125,197,0.12);
+      border-radius: 30px;
+      padding: 36px 26px;
+      box-shadow:
+        0 24px 50px rgba(3,78,162,0.12),
+        0 8px 18px rgba(0,125,197,0.08);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 560px;
+    }
+
+    .ss-logo-card img {
+      width: 100%;
+      max-width: 340px;
+      height: auto;
+      display: block;
+    }
+
+    /* WAVE */
+    .ss-wave {
+      width: 100%;
+      display: block;
+      margin-top: -1px;
+    }
+
+    /* FEATURES */
+    .ss-features {
+      padding: 70px 38px 80px;
+      background: var(--ss-soft);
+    }
+
+    .ss-features-inner {
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    .ss-section-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 34px;
+      font-weight: 800;
+      color: var(--ss-blue-deep);
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .ss-section-sub {
+      font-size: 16px;
+      color: #66758a;
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .ss-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .ss-card {
+      background: #fff;
+      border-radius: 22px;
+      padding: 24px;
+      border: 1px solid var(--ss-line);
+      box-shadow: 0 10px 30px rgba(3,78,162,0.04);
+    }
+
+    .ss-card-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      font-size: 22px;
+    }
+
+    .ss-card-icon.yellow { background: #FFF4CF; }
+    .ss-card-icon.blue { background: #E5F2FB; }
+    .ss-card-icon.green { background: #EAF7EE; }
+
+    .ss-card h3 {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--ss-ink);
+      margin-bottom: 8px;
+    }
+
+    .ss-card p {
+      font-size: 14px;
+      color: #66758a;
+      line-height: 1.7;
+    }
+
+    /* TAGLINE BAND */
+    .ss-band {
+      background: linear-gradient(135deg, var(--ss-yellow), var(--ss-yellow-bright));
+      padding: 28px 32px;
+      text-align: center;
+    }
+
+    .ss-band-text {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--ss-ink);
+    }
+
+    .ss-band-text span {
+      color: var(--ss-blue-deep);
+    }
+
+    /* FOOTER */
+    .ss-footer {
+      background: #1d2735;
+      padding: 22px 38px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    .ss-footer-logo {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .ss-footer-logo span:first-child { color: var(--ss-yellow); }
+    .ss-footer-logo span:last-child { color: #56b4f0; }
+
+    .ss-footer-copy,
+    .ss-footer-links {
+      font-size: 12px;
+      color: rgba(255,255,255,0.62);
+    }
+
+    .ss-footer-links {
+      display: flex;
+      gap: 16px;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 980px) {
+      .ss-hero-inner {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+
+      .ss-hero-text {
+        margin: 0 auto;
+      }
+
+      .ss-hero-sub {
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .ss-hero-ctas {
+        justify-content: center;
+      }
+
+      .ss-logo-card {
+        min-height: auto;
+        padding: 28px 20px;
+      }
+
+      .ss-logo-card img {
+        max-width: 240px;
+      }
+
+      .ss-cards {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .ss-nav {
+        flex-wrap: wrap;
+        gap: 14px;
+        padding: 16px 20px;
+      }
+
+      .ss-nav-links {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+      }
+
+      .ss-nav-actions {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .ss-hero {
+        padding: 58px 20px 72px;
+      }
+
+      .ss-hero-headline {
+        font-size: 40px;
+      }
+
+      .ss-logo-text {
+        font-size: 24px;
+      }
+
+      .ss-features,
+      .ss-footer {
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <div class="ss-nav">
+    <div class="ss-logo">
+      <div class="ss-logo-mark">
+        <svg width="22" height="26" viewBox="0 0 28 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M6 3 Q4 3 4 5 L4 8 L14 14 L24 8 L24 5 Q24 3 22 3 Z" fill="#FCAF17"/>
+          <path d="M4 24 L14 18 L24 24 L24 27 Q24 29 22 29 L6 29 Q4 29 4 27 Z" fill="#007DC5"/>
+          <line x1="14" y1="14" x2="14" y2="18" stroke="#FCAF17" stroke-width="2.5"/>
+        </svg>
+      </div>
+      <div class="ss-logo-text"><span>STUDY</span><span>STREAM</span></div>
+    </div>
+
+    <div class="ss-nav-links">
+      <a href="#features">Features</a>
+    </div>
+
+    <div class="ss-nav-actions">
+      <button class="ss-btn-ghost">Sign in</button>
+      <button class="ss-btn-solid">Get started</button>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <section class="ss-hero">
+    <div class="ss-hero-inner">
+      <div class="ss-hero-text">
+        <div class="ss-hero-eyebrow">School • Life • Work</div>
+        <h1 class="ss-hero-headline">
+          Stay organized. <br>
+          <span class="gold">Stay ahead.</span>
+        </h1>
+        <p class="ss-hero-sub">
+          StudyStream helps students manage classes, responsibilities, and real life without feeling buried under a mountain of tabs, deadlines, and mental sticky notes.
+        </p>
+        <div class="ss-hero-ctas">
+          <button class="ss-cta-yellow">Get started free</button>
+          <button class="ss-cta-outline">See how it works</button>
+        </div>
+      </div>
+
+      <div class="ss-hero-visual">
+        <div class="ss-logo-card">
+            <img src="{% static 'accounts/images/logo.png' %}" alt="StudyStream logo">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WAVE DIVIDER -->
+  <svg class="ss-wave" viewBox="0 0 1440 70" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+    <path d="M0,34 C280,78 1040,0 1440,34 L1440,70 L0,70 Z" fill="#f6f8fc"/>
+    <path d="M0,46 C380,10 1080,62 1440,44 L1440,70 L0,70 Z" fill="#007DC5" opacity="0.09"/>
+  </svg>
+
+  
+  
+  <!-- FEATURES -->
+  <section class="ss-features" id="features">
+    <div class="ss-features-inner">
+      <div class="ss-section-title">Everything you need to stay on track</div>
+      <div class="ss-section-sub">
+        One place to organize school, work, deadlines, and daily life without the clutter circus.
+      </div>
+
+      <div class="ss-cards">
+        <div class="ss-card">
+          <div class="ss-card-icon yellow">📋</div>
+          <h3>Task breakdown</h3>
+          <p>Turn overwhelming projects into smaller steps so students can actually begin instead of freeze at the starting line.</p>
+        </div>
+
+        <div class="ss-card">
+          <div class="ss-card-icon blue">🗓</div>
+          <h3>Time blocking</h3>
+          <p>Map out school, work, and life in a clearer way with focused planning blocks that make busy weeks easier to manage.</p>
+        </div>
+
+        <div class="ss-card">
+          <div class="ss-card-icon green">⚠️</div>
+          <h3>Conflict detection</h3>
+          <p>Spot overloaded weeks before they crash into you. StudyStream helps flag stress points earlier, not after the fire starts.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAGLINE BAND -->
+  <div class="ss-band">
+    <div class="ss-band-text">Less stress. <span>More progress.</span></div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="ss-footer">
+    <div class="ss-footer-logo"><span>STUDY</span><span>STREAM</span></div>
+    <div class="ss-footer-copy">© 2025 StudyStream. All rights reserved.</div>
+    <div class="ss-footer-links">
+      <span>Privacy</span>
+      <span>Terms</span>
+      <span>Contact</span>
+    </div>
+  </footer>
+
+</body>
+</html>

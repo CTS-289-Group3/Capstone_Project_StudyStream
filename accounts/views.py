@@ -29,3 +29,6 @@ def register_view(request):
 def logout_view(request):
     logout(request)
     return redirect('/accounts/login/')
+
+def home(request):
+    return render(request, 'accounts/home.html')
