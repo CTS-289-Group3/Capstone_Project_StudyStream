@@ -6,6 +6,10 @@
 <body>
     <h1>Welcome to StudyStream!</h1>
     <p>You are logged in as {{ user.username }}</p>
-    <a href="/logout">Logout</a>
+    <a href="/change-password/">Change Password</a> |
+    <form method="post" action="/logout/" style="display:inline">
+        {% csrf_token %}
+        <button type="submit">Logout</button>
+    </form>
 </body>
 </html>
