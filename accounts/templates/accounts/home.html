@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>StudyStream — Stay organized, stay ahead.</title>
 
-  <!-- Nice font pairing -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
@@ -51,33 +50,12 @@
     .ss-logo {
       display: flex;
       align-items: center;
-      gap: 12px;
     }
 
-    .ss-logo-mark {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      display: grid;
-      place-items: center;
-      background: linear-gradient(135deg, rgba(252,175,23,0.12), rgba(0,125,197,0.12));
-      border: 1px solid rgba(0,125,197,0.12);
-    }
-
-    .ss-logo-text {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 28px;
-      font-weight: 800;
-      line-height: 1;
-      letter-spacing: 0.5px;
-    }
-
-    .ss-logo-text span:first-child {
-      color: var(--ss-yellow);
-    }
-
-    .ss-logo-text span:last-child {
-      color: var(--ss-blue-deep);
+    .ss-logo img {
+      height: 48px;
+      width: auto;
+      display: block;
     }
 
     .ss-nav-links {
@@ -104,9 +82,7 @@
     }
 
     .ss-btn-ghost,
-    .ss-btn-solid,
-    .ss-cta-yellow,
-    .ss-cta-outline {
+    .ss-btn-solid {
       font-family: 'Nunito', sans-serif;
     }
 
@@ -148,7 +124,7 @@
       max-width: 1220px;
       margin: 0 auto;
       display: grid;
-      grid-template-columns: 1.05fr 0.95fr;
+      grid-template-columns: 0.95fr 1.05fr;
       align-items: center;
       gap: 42px;
     }
@@ -173,7 +149,7 @@
 
     .ss-hero-headline {
       font-family: 'Montserrat', sans-serif;
-      font-size: 54px;
+      font-size: 60px;
       line-height: 1.08;
       font-weight: 800;
       color: var(--ss-blue-deep);
@@ -189,36 +165,7 @@
       color: var(--ss-text);
       line-height: 1.7;
       max-width: 520px;
-      margin-bottom: 28px;
-    }
-
-    .ss-hero-ctas {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 14px;
-    }
-
-    .ss-cta-yellow {
-      font-size: 15px;
-      font-weight: 800;
-      padding: 13px 24px;
-      background: linear-gradient(135deg, var(--ss-yellow), var(--ss-yellow-bright));
-      color: var(--ss-ink);
-      border: none;
-      border-radius: 999px;
-      cursor: pointer;
-      box-shadow: 0 14px 30px rgba(252,175,23,0.22);
-    }
-
-    .ss-cta-outline {
-      font-size: 15px;
-      font-weight: 800;
-      padding: 13px 24px;
-      background: #fff;
-      color: var(--ss-blue-deep);
-      border: 1.5px solid rgba(0,125,197,0.2);
-      border-radius: 999px;
-      cursor: pointer;
+      margin-bottom: 0;
     }
 
     /* HERO VISUAL */
@@ -392,10 +339,6 @@
         margin-right: auto;
       }
 
-      .ss-hero-ctas {
-        justify-content: center;
-      }
-
       .ss-logo-card {
         min-height: auto;
         padding: 28px 20px;
@@ -436,14 +379,14 @@
         font-size: 40px;
       }
 
-      .ss-logo-text {
-        font-size: 24px;
-      }
-
       .ss-features,
       .ss-footer {
         padding-left: 20px;
         padding-right: 20px;
+      }
+
+      .ss-logo img {
+        height: 40px;
       }
     }
   </style>
@@ -453,14 +396,7 @@
   <!-- NAV -->
   <div class="ss-nav">
     <div class="ss-logo">
-      <div class="ss-logo-mark">
-        <svg width="22" height="26" viewBox="0 0 28 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M6 3 Q4 3 4 5 L4 8 L14 14 L24 8 L24 5 Q24 3 22 3 Z" fill="#FCAF17"/>
-          <path d="M4 24 L14 18 L24 24 L24 27 Q24 29 22 29 L6 29 Q4 29 4 27 Z" fill="#007DC5"/>
-          <line x1="14" y1="14" x2="14" y2="18" stroke="#FCAF17" stroke-width="2.5"/>
-        </svg>
-      </div>
-      <div class="ss-logo-text"><span>STUDY</span><span>STREAM</span></div>
+      <img src="{% static 'accounts/images/logo2.png' %}" alt="StudyStream logo">
     </div>
 
     <div class="ss-nav-links">
@@ -468,14 +404,21 @@
     </div>
 
     <div class="ss-nav-actions">
-      <button class="ss-btn-ghost">Sign in</button>
-      <button class="ss-btn-solid">Get started</button>
+      <a class="ss-btn-ghost" href="{% url 'login' %}">Sign in</a>
+      <a class="ss-btn-solid" href="{% url 'register' %}">Get started</a>
     </div>
   </div>
 
   <!-- HERO -->
   <section class="ss-hero">
     <div class="ss-hero-inner">
+
+      <div class="ss-hero-visual">
+        <div class="ss-logo-card">
+          <img src="{% static 'accounts/images/logo.png' %}" alt="StudyStream logo">
+        </div>
+      </div>
+
       <div class="ss-hero-text">
         <div class="ss-hero-eyebrow">School • Life • Work</div>
         <h1 class="ss-hero-headline">
@@ -485,17 +428,8 @@
         <p class="ss-hero-sub">
           StudyStream helps students manage classes, responsibilities, and real life without feeling buried under a mountain of tabs, deadlines, and mental sticky notes.
         </p>
-        <div class="ss-hero-ctas">
-          <button class="ss-cta-yellow">Get started free</button>
-          <button class="ss-cta-outline">See how it works</button>
-        </div>
       </div>
 
-      <div class="ss-hero-visual">
-        <div class="ss-logo-card">
-            <img src="{% static 'accounts/images/logo.png' %}" alt="StudyStream logo">
-        </div>
-      </div>
     </div>
   </section>
 
@@ -505,8 +439,6 @@
     <path d="M0,46 C380,10 1080,62 1440,44 L1440,70 L0,70 Z" fill="#007DC5" opacity="0.09"/>
   </svg>
 
-  
-  
   <!-- FEATURES -->
   <section class="ss-features" id="features">
     <div class="ss-features-inner">
