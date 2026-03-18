@@ -1,0 +1,128 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - StudyStream</title>
+  <style>
+    :root {
+      --ss-yellow: #FCAF17;
+      --ss-blue: #007DC5;
+      --ss-blue-deep: #034EA2;
+      --ss-ink: #231F20;
+      --ss-soft: #f5f9ff;
+      --ss-line: #dfe7f2;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito', Arial, sans-serif;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(252,175,23,0.16), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(0,125,197,0.12), transparent 28%),
+        linear-gradient(160deg, #ffffff 0%, var(--ss-soft) 100%);
+      color: var(--ss-ink);
+      padding: 24px;
+    }
+
+    .wrap {
+      max-width: 980px;
+      margin: 0 auto;
+      background: #fff;
+      border: 1px solid var(--ss-line);
+      border-radius: 20px;
+      box-shadow: 0 20px 45px rgba(3,78,162,0.08);
+      overflow: hidden;
+    }
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--ss-line);
+      background: rgba(255,255,255,0.95);
+    }
+
+    .brand {
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      color: var(--ss-blue-deep);
+    }
+
+    .logout {
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 700;
+      border: 1.6px solid var(--ss-blue);
+      color: var(--ss-blue);
+      border-radius: 999px;
+      padding: 8px 14px;
+    }
+
+    .content {
+      padding: 34px 24px;
+      display: grid;
+      gap: 16px;
+    }
+
+    h1 {
+      font-size: 34px;
+      line-height: 1.15;
+      color: var(--ss-blue-deep);
+    }
+
+    h1 span { color: var(--ss-yellow); }
+
+    p {
+      color: #4f6076;
+      font-size: 16px;
+      line-height: 1.6;
+      max-width: 70ch;
+    }
+
+    .card {
+      margin-top: 10px;
+      border: 1px solid var(--ss-line);
+      border-radius: 14px;
+      background: #fff;
+      padding: 16px;
+    }
+
+    .card-title {
+      font-weight: 800;
+      color: var(--ss-blue-deep);
+      margin-bottom: 8px;
+    }
+
+    @media (max-width: 640px) {
+      body { padding: 14px; }
+      h1 { font-size: 28px; }
+      .content { padding: 26px 16px; }
+      .top { padding: 14px 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div class="brand">StudyStream Dashboard</div>
+      <a class="logout" href="{% url 'logout' %}">Log out</a>
+    </div>
+
+    <div class="content">
+      <h1>Welcome back, <span>{{ request.user.username }}</span>.</h1>
+      <p>This is your private dashboard. Only signed-in users can access this page.</p>
+
+      <div class="card">
+        <div class="card-title">Next step</div>
+        <p>You can now start adding your actual dashboard content here, such as upcoming assignments, schedule blocks, and progress tracking widgets.</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
