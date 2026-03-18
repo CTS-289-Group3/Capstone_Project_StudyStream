@@ -1,21 +1,539 @@
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>StudyStream - Login</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In — StudyStream</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ss-yellow: #FCAF17;
+      --ss-yellow-bright: #FFDD00;
+      --ss-blue: #007DC5;
+      --ss-blue-deep: #034EA2;
+      --ss-ink: #231F20;
+      --ss-soft: #f6f8fc;
+      --ss-line: #dfe7f2;
+      --ss-text: #445064;
+      --ss-white: #ffffff;
+    }
+
+    body {
+      font-family: 'Nunito', Arial, sans-serif;
+      background: #ffffff;
+      color: var(--ss-ink);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    a { text-decoration: none; }
+
+    /* ── NAV ── */
+    .ss-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 38px;
+      background: rgba(255,255,255,0.96);
+      border-bottom: 1px solid #edf1f7;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(10px);
+    }
+
+    .ss-logo img {
+      height: 48px;
+      width: auto;
+      display: block;
+    }
+
+    .ss-nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .ss-nav-links a {
+      color: var(--ss-blue-deep);
+      transition: 0.2s ease;
+    }
+    .ss-nav-links a:hover { color: var(--ss-yellow); }
+
+    .ss-nav-actions { display: flex; gap: 12px; align-items: center; }
+
+    .ss-btn-ghost,
+    .ss-btn-solid {
+      font-family: 'Nunito', sans-serif;
+      font-size: 14px;
+      padding: 10px 18px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .ss-btn-ghost {
+      border: 1.8px solid var(--ss-blue);
+      color: var(--ss-blue);
+      background: transparent;
+    }
+
+    .ss-btn-solid {
+      border: none;
+      color: #fff;
+      background: linear-gradient(135deg, var(--ss-blue), var(--ss-blue-deep));
+      box-shadow: 0 10px 22px rgba(3,78,162,0.18);
+    }
+
+    /* ── MAIN CONTENT ── */
+    .ss-main {
+      flex: 1;
+      background:
+        radial-gradient(circle at top left, rgba(255,221,0,0.18), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(0,125,197,0.14), transparent 26%),
+        linear-gradient(160deg, #ffffff 0%, #f5f9ff 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 38px;
+    }
+
+    .ss-login-wrapper {
+      max-width: 980px;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      background: #fff;
+      border-radius: 28px;
+      border: 1px solid var(--ss-line);
+      box-shadow:
+        0 30px 60px rgba(3,78,162,0.10),
+        0 8px 18px rgba(0,125,197,0.06);
+      overflow: hidden;
+    }
+
+    /* Left panel — logo showcase */
+    .ss-login-left {
+      background:
+        radial-gradient(circle at 30% 30%, rgba(255,221,0,0.28), transparent 55%),
+        radial-gradient(circle at 80% 80%, rgba(0,125,197,0.22), transparent 50%),
+        linear-gradient(150deg, #eaf4fc 0%, #f0f6ff 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 52px 40px;
+      gap: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* subtle decorative circles */
+    .ss-login-left::before,
+    .ss-login-left::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.13;
+    }
+    .ss-login-left::before {
+      width: 260px; height: 260px;
+      background: var(--ss-yellow);
+      top: -80px; left: -80px;
+    }
+    .ss-login-left::after {
+      width: 180px; height: 180px;
+      background: var(--ss-blue);
+      bottom: -60px; right: -50px;
+    }
+
+    .ss-login-left img {
+      width: 100%;
+      max-width: 280px;
+      height: auto;
+      display: block;
+      position: relative;
+      z-index: 1;
+      filter: drop-shadow(0 16px 28px rgba(3,78,162,0.14));
+    }
+
+    .ss-login-tagline {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--ss-blue-deep);
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .ss-login-tagline span { color: var(--ss-yellow); }
+
+    /* Right panel — form */
+    .ss-login-right {
+      padding: 52px 44px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .ss-login-eyebrow {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--ss-blue-deep);
+      background: rgba(0,125,197,0.08);
+      border: 1px solid rgba(0,125,197,0.12);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 6px 12px;
+      border-radius: 999px;
+      margin-bottom: 16px;
+    }
+
+    .ss-login-heading {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--ss-blue-deep);
+      margin-bottom: 6px;
+      line-height: 1.15;
+    }
+
+    .ss-login-heading .gold { color: var(--ss-yellow); }
+
+    .ss-login-sub {
+      font-size: 14px;
+      color: #66758a;
+      margin-bottom: 30px;
+    }
+
+    /* Form */
+    .ss-form { display: flex; flex-direction: column; gap: 16px; }
+
+    .ss-field { display: flex; flex-direction: column; gap: 6px; }
+
+    .ss-field label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--ss-text);
+    }
+
+    .ss-field input {
+      font-family: 'Nunito', sans-serif;
+      font-size: 14px;
+      padding: 12px 16px;
+      border: 1.8px solid var(--ss-line);
+      border-radius: 12px;
+      background: var(--ss-soft);
+      color: var(--ss-ink);
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .ss-field input:focus {
+      border-color: var(--ss-blue);
+      box-shadow: 0 0 0 3px rgba(0,125,197,0.12);
+      background: #fff;
+    }
+
+    .ss-form-row {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .ss-forgot {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--ss-blue);
+    }
+    .ss-forgot:hover { color: var(--ss-blue-deep); }
+
+    .ss-submit {
+      font-family: 'Nunito', sans-serif;
+      font-size: 15px;
+      font-weight: 800;
+      padding: 14px;
+      border: none;
+      border-radius: 999px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--ss-blue), var(--ss-blue-deep));
+      cursor: pointer;
+      box-shadow: 0 10px 24px rgba(3,78,162,0.22);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      margin-top: 4px;
+    }
+
+    .ss-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px rgba(3,78,162,0.28);
+    }
+
+    .ss-divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #b0bac8;
+      font-size: 12px;
+      margin: 4px 0;
+    }
+
+    .ss-divider::before,
+    .ss-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--ss-line);
+    }
+
+    .ss-register-cta {
+      text-align: center;
+      font-size: 13px;
+      color: #66758a;
+      margin-top: 4px;
+    }
+
+    .ss-register-cta a {
+      font-weight: 800;
+      color: var(--ss-blue);
+    }
+
+    .ss-register-cta a:hover { color: var(--ss-blue-deep); }
+
+    /* Django form errors */
+    .ss-errors {
+      background: #fff2f2;
+      border: 1.5px solid #f5c0c0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #c0392b;
+    }
+
+    .ss-success {
+      background: #f1fff3;
+      border: 1.5px solid #b8e3bf;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #1f7a33;
+    }
+
+    /* ── WAVE ── */
+    .ss-wave {
+      width: 100%;
+      display: block;
+      margin-top: -1px;
+    }
+
+    /* ── TAGLINE BAND ── */
+    .ss-band {
+      background: linear-gradient(135deg, var(--ss-yellow), var(--ss-yellow-bright));
+      padding: 20px 32px;
+      text-align: center;
+    }
+
+    .ss-band-text {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--ss-ink);
+    }
+
+    .ss-band-text span { color: var(--ss-blue-deep); }
+
+    /* ── FOOTER ── */
+    .ss-footer {
+      background: #1d2735;
+      padding: 22px 38px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    .ss-footer-logo {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .ss-footer-logo span:first-child { color: var(--ss-yellow); }
+    .ss-footer-logo span:last-child { color: #56b4f0; }
+
+    .ss-footer-copy,
+    .ss-footer-links {
+      font-size: 12px;
+      color: rgba(255,255,255,0.62);
+    }
+
+    .ss-footer-links { display: flex; gap: 16px; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 800px) {
+      .ss-login-wrapper {
+        grid-template-columns: 1fr;
+      }
+
+      .ss-login-left {
+        padding: 36px 28px;
+      }
+
+      .ss-login-left img { max-width: 200px; }
+
+      .ss-login-right { padding: 36px 28px; }
+
+      .ss-login-heading { font-size: 26px; }
+    }
+
+    @media (max-width: 520px) {
+      .ss-nav {
+        flex-wrap: wrap;
+        gap: 14px;
+        padding: 16px 20px;
+      }
+
+      .ss-nav-actions { width: 100%; justify-content: center; }
+
+      .ss-main { padding: 32px 16px; }
+
+      .ss-footer { padding: 18px 20px; }
+
+      .ss-logo img { height: 40px; }
+    }
+  </style>
 </head>
 <body>
-    <h1>Login</h1>
 
-    {% if form.errors %}
-        <p style="color:red">Invalid username or password.</p>
-    {% endif %}
+  <!-- NAV -->
+  <div class="ss-nav">
+    <div class="ss-logo">
+      <img src="{% static 'accounts/images/logo2.png' %}" alt="StudyStream logo">
+    </div>
 
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Login</button>
-    </form>
+    <div class="ss-nav-links">
+      <a href="{% url 'home' %}">Home</a>
+    </div>
 
-    <p>Don't have an account? <a href="/accounts/register/">Register here</a></p>
+    <div class="ss-nav-actions">
+      <a class="ss-btn-ghost" href="{% url 'login' %}">Sign in</a>
+      <a class="ss-btn-solid" href="{% url 'register' %}">Get started</a>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <main class="ss-main">
+    <div class="ss-login-wrapper">
+
+      <!-- LEFT: Logo panel -->
+      <div class="ss-login-left">
+        <img src="{% static 'accounts/images/logo.png' %}" alt="StudyStream logo">
+        <div class="ss-login-tagline">
+          Less stress.<br><span>More progress.</span>
+        </div>
+      </div>
+
+      <!-- RIGHT: Login form -->
+      <div class="ss-login-right">
+        <h1 class="ss-login-heading">
+          Sign in to<br><span class="gold">StudyStream.</span>
+        </h1>
+        <p class="ss-login-sub">Pick up right where you left off.</p>
+
+        <!-- Django form — swap the inner fields for {{ form.as_p }} or manual fields -->
+        <form method="post" class="ss-form">
+          {% csrf_token %}
+
+          {% if messages %}
+            {% for message in messages %}
+              {% if 'success' in message.tags %}
+                <div class="ss-success">{{ message }}</div>
+              {% else %}
+                <div class="ss-errors">{{ message }}</div>
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+
+          {% if form.errors %}
+            <div class="ss-errors">
+              Your username or password didn't match. Please try again.
+            </div>
+          {% endif %}
+
+          <div class="ss-field">
+            <label for="id_username">Username</label>
+            <input
+              type="text"
+              id="id_username"
+              name="username"
+              placeholder="Enter your username"
+              autocomplete="username"
+              required
+            >
+          </div>
+
+          <div class="ss-field">
+            <label for="id_password">Password</label>
+            <input
+              type="password"
+              id="id_password"
+              name="password"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              required
+            >
+          </div>
+
+          <div class="ss-form-row">
+            <a class="ss-forgot" href="#">Forgot password?</a>
+          </div>
+
+          <button type="submit" class="ss-submit">Sign in →</button>
+
+          <div class="ss-divider">or</div>
+
+          <div class="ss-register-cta">
+            Don't have an account? <a href="{% url 'register' %}">Create one free</a>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- WAVE DIVIDER -->
+  <svg class="ss-wave" viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+    <path d="M0,34 C280,68 1040,0 1440,34 L1440,60 L0,60 Z" fill="#FCAF17" opacity="0.9"/>
+    <path d="M0,44 C380,10 1080,56 1440,38 L1440,60 L0,60 Z" fill="#FFDD00" opacity="0.55"/>
+  </svg>
+
+  <!-- TAGLINE BAND -->
+  <div class="ss-band">
+    <div class="ss-band-text">Less stress. <span>More progress.</span></div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="ss-footer">
+    <div class="ss-footer-logo"><span>STUDY</span><span>STREAM</span></div>
+    <div class="ss-footer-copy">© 2025 StudyStream. All rights reserved.</div>
+    <div class="ss-footer-links">
+      <span>Privacy</span>
+      <span>Terms</span>
+      <span>Contact</span>
+    </div>
+  </footer>
+
 </body>
 </html>
