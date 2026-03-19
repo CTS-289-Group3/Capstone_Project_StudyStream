@@ -1,17 +1,1017 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>StudyStream - Dashboard</title>
-</head>
-<body>
-    <h1>Welcome to StudyStream, {{ user.username }}! 👋</h1>
-    <p>You are logged in and viewing your dashboard.</p>
+{% extends "accounts/base.html" %}
+{% load static %}
 
-    <hr>
+{% block title %}Dashboard — StudyStream{% endblock %}
 
-    <h3>Quick Links</h3>
-    <ul>
-        <li><a href="/accounts/logout/">Logout</a></li>
-    </ul>
-</body>
-</html>
+{% block nav_links %}
+  <a href="{% url 'home' %}">Home</a>
+  <a href="#" class="active">Dashboard</a>
+  <a href="#">My Classes</a>
+  <a href="#">Group Projects</a>
+{% endblock %}
+
+{% block nav_actions %}
+  <div class="ss-user-chip">
+    <div class="ss-avatar">{{ user.username|slice:":1"|upper }}</div>
+    {{ user.username }}
+  </div>
+  <a class="ss-btn ss-btn-ghost" href="{% url 'logout' %}" style="padding:8px 14px;font-size:12px;">Sign out</a>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* ─────────────────────────────────────────
+     DASHBOARD LAYOUT
+  ───────────────────────────────────────── */
+  .dash-wrap {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 32px 28px 48px;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    grid-template-rows: auto 1fr;
+    gap: 22px;
+    animation: dashIn 0.55s cubic-bezier(0.22,1,0.36,1) both;
+  }
+
+  @keyframes dashIn {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── HEADER ROW (full width) ── */
+  .dash-header {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  .dash-greeting {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--text-primary);
+    line-height: 1.2;
+  }
+
+  .dash-greeting em {
+    font-style: normal;
+    color: var(--ss-yellow);
+  }
+
+  .dash-date {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-top: 3px;
+  }
+
+  .dash-header-actions {
+    display: flex;
+    gap: 10px;
+  }
+
+  /* ── SIDEBAR ── */
+  .dash-sidebar {
+    grid-column: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  /* ── MAIN AREA ── */
+  .dash-main {
+    grid-column: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  /* ─────────────────────────────────────────
+     STAT PILLS ROW
+  ───────────────────────────────────────── */
+  .dash-stats {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+
+  .stat-pill {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: 18px;
+    padding: 18px 20px;
+    box-shadow: var(--shadow-card);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.25s ease;
+    animation: statIn 0.5s cubic-bezier(0.22,1,0.36,1) both;
+  }
+
+  .stat-pill:nth-child(1) { animation-delay: 0.05s; }
+  .stat-pill:nth-child(2) { animation-delay: 0.10s; }
+  .stat-pill:nth-child(3) { animation-delay: 0.15s; }
+  .stat-pill:nth-child(4) { animation-delay: 0.20s; }
+
+  @keyframes statIn {
+    from { opacity: 0; transform: translateY(10px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .stat-pill:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 36px rgba(3,78,162,0.14);
+  }
+
+  .stat-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  .stat-icon.yellow { background: linear-gradient(135deg, rgba(252,175,23,0.25), rgba(255,221,0,0.12)); }
+  .stat-icon.blue   { background: linear-gradient(135deg, rgba(0,125,197,0.20), rgba(83,183,232,0.10)); }
+  .stat-icon.green  { background: linear-gradient(135deg, rgba(0,176,76,0.20), rgba(0,176,76,0.08)); }
+  .stat-icon.red    { background: linear-gradient(135deg, rgba(239,68,68,0.20), rgba(239,68,68,0.08)); }
+
+  .stat-info { flex: 1; min-width: 0; }
+
+  .stat-value {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 26px;
+    font-weight: 900;
+    color: var(--text-primary);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-top: 3px;
+  }
+
+  /* ─────────────────────────────────────────
+     WORKLOAD INDICATOR  (sidebar)
+  ───────────────────────────────────────── */
+  .workload-card {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: var(--shadow-card);
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .workload-weeks {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .workload-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .workload-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    width: 52px;
+    flex-shrink: 0;
+  }
+
+  .workload-bar-wrap {
+    flex: 1;
+    height: 8px;
+    background: var(--input-bg);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .workload-bar {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.8s cubic-bezier(0.22,1,0.36,1);
+  }
+
+  .workload-bar.green { background: linear-gradient(90deg, #00B04C, #8DC63F); }
+  .workload-bar.yellow { background: linear-gradient(90deg, #FCAF17, #FFDD00); }
+  .workload-bar.red    { background: linear-gradient(90deg, #ef4444, #f97316); }
+
+  .workload-badge {
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 999px;
+    flex-shrink: 0;
+  }
+
+  .badge-green  { background: rgba(0,176,76,0.15);  color: #00803a; }
+  .badge-yellow { background: rgba(252,175,23,0.18); color: #a06000; }
+  .badge-red    { background: rgba(239,68,68,0.15);  color: #dc2626; }
+
+  [data-theme="dark"] .badge-green  { color: #4ade80; }
+  [data-theme="dark"] .badge-yellow { color: #fcd34d; }
+  [data-theme="dark"] .badge-red    { color: #f87171; }
+
+  /* ─────────────────────────────────────────
+     CLASS LIST  (sidebar)
+  ───────────────────────────────────────── */
+  .classes-card {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: var(--shadow-card);
+    flex: 1;
+  }
+
+  .class-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.18s ease;
+    margin-bottom: 2px;
+  }
+
+  .class-item:hover { background: var(--input-bg); }
+
+  .class-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .class-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    flex: 1;
+  }
+
+  .class-count {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: var(--input-bg);
+    border-radius: 999px;
+    padding: 2px 8px;
+  }
+
+  /* ─────────────────────────────────────────
+     WEEK CALENDAR  (main)
+  ───────────────────────────────────────── */
+  .calendar-card {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 22px;
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+  }
+
+  .calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .calendar-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text-primary);
+  }
+
+  .view-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--input-bg);
+    border-radius: 10px;
+    padding: 3px;
+  }
+
+  .view-tab {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: background 0.18s, color 0.18s;
+    border: none;
+    background: transparent;
+  }
+
+  .view-tab.active {
+    background: var(--bg-card-solid);
+    color: var(--ss-blue-deep);
+    box-shadow: 0 2px 8px rgba(3,78,162,0.10);
+  }
+
+  /* 7-column week grid */
+  .week-grid {
+    display: grid;
+    grid-template-columns: 48px repeat(7, 1fr);
+    gap: 0;
+  }
+
+  .week-day-header {
+    font-size: 11px;
+    font-weight: 800;
+    text-align: center;
+    padding: 8px 4px;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .week-day-header.today-col {
+    color: var(--ss-blue);
+  }
+
+  .week-day-date {
+    font-size: 18px;
+    font-weight: 900;
+    text-align: center;
+    padding: 4px 4px 10px;
+    color: var(--text-secondary);
+    font-family: 'Montserrat', sans-serif;
+  }
+
+  .week-day-date.today-col {
+    color: var(--ss-blue-deep);
+  }
+
+  .today-badge-wrap {
+    display: flex;
+    justify-content: center;
+  }
+
+  .today-badge {
+    background: linear-gradient(135deg, var(--ss-blue), var(--ss-blue-deep));
+    color: #fff;
+    font-size: 18px;
+    font-weight: 900;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Montserrat', sans-serif;
+    box-shadow: 0 4px 14px rgba(3,78,162,0.30);
+  }
+
+  .week-time-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-align: right;
+    padding-right: 8px;
+    line-height: 28px;
+    height: 28px;
+  }
+
+  .week-cell {
+    border-top: 1px solid var(--border-subtle);
+    height: 28px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .week-cell:hover { background: rgba(0,125,197,0.04); }
+
+  /* assignment blocks */
+  .cal-event {
+    position: absolute;
+    left: 3px;
+    right: 3px;
+    border-radius: 6px;
+    padding: 2px 6px;
+    font-size: 10px;
+    font-weight: 700;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    z-index: 2;
+    cursor: pointer;
+    transition: filter 0.15s, transform 0.15s;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+  }
+
+  .cal-event:hover {
+    filter: brightness(1.08);
+    transform: scaleY(1.03);
+  }
+
+  /* ─────────────────────────────────────────
+     TASK LIST  (main)
+  ───────────────────────────────────────── */
+  .tasks-card {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 22px;
+    box-shadow: var(--shadow-card);
+  }
+
+  .tasks-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .task-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 10px;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: background 0.18s ease;
+    border-bottom: 1px solid var(--border-subtle);
+    animation: taskIn 0.4s cubic-bezier(0.22,1,0.36,1) both;
+  }
+
+  .task-item:last-child { border-bottom: none; }
+  .task-item:hover { background: var(--input-bg); }
+
+  @keyframes taskIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  .task-item:nth-child(1) { animation-delay: 0.1s; }
+  .task-item:nth-child(2) { animation-delay: 0.15s; }
+  .task-item:nth-child(3) { animation-delay: 0.20s; }
+  .task-item:nth-child(4) { animation-delay: 0.25s; }
+  .task-item:nth-child(5) { animation-delay: 0.30s; }
+
+  .task-check {
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    border: 2px solid var(--border-subtle);
+    flex-shrink: 0;
+    margin-top: 1px;
+    transition: background 0.2s, border-color 0.2s;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .task-check.done {
+    background: linear-gradient(135deg, var(--ss-green), #8DC63F);
+    border-color: var(--ss-green);
+    color: #fff;
+    font-size: 11px;
+  }
+
+  .task-check:hover { border-color: var(--ss-blue); }
+
+  .task-body { flex: 1; min-width: 0; }
+
+  .task-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .task-name.done { text-decoration: line-through; color: var(--text-muted); }
+
+  .task-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+    flex-wrap: wrap;
+  }
+
+  .task-class-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .task-class-name {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+  }
+
+  .task-due {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+  }
+
+  .due-soon { background: rgba(252,175,23,0.15); color: #a06000; }
+  .due-ok   { background: rgba(0,176,76,0.12);   color: #00803a; }
+  .due-late { background: rgba(239,68,68,0.12);   color: #dc2626; }
+
+  [data-theme="dark"] .due-soon { color: #fcd34d; }
+  [data-theme="dark"] .due-ok   { color: #4ade80; }
+  [data-theme="dark"] .due-late { color: #f87171; }
+
+  .task-progress {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+  }
+
+  .progress-bar-wrap {
+    flex: 1;
+    height: 4px;
+    background: var(--input-bg);
+    border-radius: 999px;
+    overflow: hidden;
+    max-width: 120px;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--ss-blue), var(--ss-blue-light));
+    transition: width 0.8s cubic-bezier(0.22,1,0.36,1);
+  }
+
+  .progress-text {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-muted);
+  }
+
+  /* ─────────────────────────────────────────
+     CONFLICT ALERT BANNER
+  ───────────────────────────────────────── */
+  .conflict-banner {
+    background: linear-gradient(135deg, rgba(239,68,68,0.10), rgba(252,175,23,0.08));
+    border: 1px solid rgba(239,68,68,0.22);
+    border-left: 4px solid #ef4444;
+    border-radius: 14px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    animation: pulseAlert 2.5s ease-in-out infinite;
+  }
+
+  @keyframes pulseAlert {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+    50%       { box-shadow: 0 0 0 4px rgba(239,68,68,0.08); }
+  }
+
+  .conflict-icon { font-size: 20px; flex-shrink: 0; }
+
+  .conflict-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: #dc2626;
+    margin-bottom: 2px;
+  }
+
+  [data-theme="dark"] .conflict-title { color: #f87171; }
+
+  .conflict-desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  /* ─────────────────────────────────────────
+     RESPONSIVE
+  ───────────────────────────────────────── */
+  @media (max-width: 1024px) {
+    .dash-wrap {
+      grid-template-columns: 1fr;
+    }
+    .dash-sidebar, .dash-main { grid-column: 1; }
+    .dash-stats { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 600px) {
+    .dash-wrap { padding: 16px 14px 36px; gap: 14px; }
+    .dash-stats { grid-template-columns: 1fr 1fr; }
+    .stat-value { font-size: 22px; }
+    .week-grid { display: none; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dash-wrap">
+
+  <!-- ── HEADER ── -->
+  <div class="dash-header">
+    <div>
+      <div class="dash-greeting">
+        Good morning, <em>{{ user.username }}</em> 👋
+      </div>
+      <div class="dash-date" id="dashDate">Loading date…</div>
+    </div>
+    <div class="dash-header-actions">
+      <button class="ss-btn ss-btn-solid" style="font-size:13px;padding:9px 18px;">
+        + Add Assignment
+      </button>
+    </div>
+  </div>
+
+  <!-- ── STAT PILLS ── -->
+  <div class="dash-stats">
+    <div class="stat-pill">
+      <div class="stat-icon yellow">📋</div>
+      <div class="stat-info">
+        <div class="stat-value">7</div>
+        <div class="stat-label">Due this week</div>
+      </div>
+    </div>
+    <div class="stat-pill">
+      <div class="stat-icon blue">✅</div>
+      <div class="stat-info">
+        <div class="stat-value">12</div>
+        <div class="stat-label">Completed</div>
+      </div>
+    </div>
+    <div class="stat-pill">
+      <div class="stat-icon green">📚</div>
+      <div class="stat-info">
+        <div class="stat-value">5</div>
+        <div class="stat-label">Active classes</div>
+      </div>
+    </div>
+    <div class="stat-pill">
+      <div class="stat-icon red">⚠️</div>
+      <div class="stat-info">
+        <div class="stat-value">2</div>
+        <div class="stat-label">Overdue</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="dash-sidebar">
+
+    <!-- Workload density -->
+    <div class="workload-card">
+      <div class="card-title">📊 Workload Ahead</div>
+      <div class="workload-weeks">
+        <div class="workload-row">
+          <span class="workload-label">This wk</span>
+          <div class="workload-bar-wrap">
+            <div class="workload-bar red" style="width:88%"></div>
+          </div>
+          <span class="workload-badge badge-red">Heavy</span>
+        </div>
+        <div class="workload-row">
+          <span class="workload-label">Next wk</span>
+          <div class="workload-bar-wrap">
+            <div class="workload-bar yellow" style="width:62%"></div>
+          </div>
+          <span class="workload-badge badge-yellow">Moderate</span>
+        </div>
+        <div class="workload-row">
+          <span class="workload-label">Wk 3</span>
+          <div class="workload-bar-wrap">
+            <div class="workload-bar green" style="width:38%"></div>
+          </div>
+          <span class="workload-badge badge-green">Light</span>
+        </div>
+        <div class="workload-row">
+          <span class="workload-label">Wk 4</span>
+          <div class="workload-bar-wrap">
+            <div class="workload-bar green" style="width:28%"></div>
+          </div>
+          <span class="workload-badge badge-green">Light</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- My classes -->
+    <div class="classes-card">
+      <div class="card-title">🎓 My Classes</div>
+      <div class="class-item">
+        <div class="class-dot" style="background:#ef4444"></div>
+        <span class="class-name">Biology 201</span>
+        <span class="class-count">3 due</span>
+      </div>
+      <div class="class-item">
+        <div class="class-dot" style="background:#3b82f6"></div>
+        <span class="class-name">History 102</span>
+        <span class="class-count">1 due</span>
+      </div>
+      <div class="class-item">
+        <div class="class-dot" style="background:#8b5cf6"></div>
+        <span class="class-name">CS 150</span>
+        <span class="class-count">2 due</span>
+      </div>
+      <div class="class-item">
+        <div class="class-dot" style="background:#10b981"></div>
+        <span class="class-name">English 201</span>
+        <span class="class-count">0 due</span>
+      </div>
+      <div class="class-item">
+        <div class="class-dot" style="background:#f59e0b"></div>
+        <span class="class-name">Math 301</span>
+        <span class="class-count">1 due</span>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ── MAIN CONTENT ── -->
+  <div class="dash-main">
+
+    <!-- Conflict alert -->
+    <div class="conflict-banner">
+      <div class="conflict-icon">🚨</div>
+      <div>
+        <div class="conflict-title">Workload Warning — This Week</div>
+        <div class="conflict-desc">You have 2 exams + 1 lab report + 1 group presentation converging within 48 hours (Fri–Sat). Consider moving your Math problem set to next week.</div>
+      </div>
+    </div>
+
+    <!-- Weekly calendar -->
+    <div class="calendar-card">
+      <div class="calendar-header">
+        <div class="calendar-title">📅 Week View</div>
+        <div class="view-tabs">
+          <button class="view-tab active">Week</button>
+          <button class="view-tab">Month</button>
+          <button class="view-tab">By Class</button>
+        </div>
+      </div>
+
+      <div class="week-grid" id="weekGrid">
+        <!-- Rendered by JS below -->
+      </div>
+    </div>
+
+    <!-- Task list -->
+    <div class="tasks-card">
+      <div class="tasks-header">
+        <div class="card-title" style="margin-bottom:0;">📌 Upcoming Tasks</div>
+        <button class="ss-btn ss-btn-ghost" style="font-size:12px;padding:6px 14px;">View all</button>
+      </div>
+
+      <div class="task-item">
+        <div class="task-check">  </div>
+        <div class="task-body">
+          <div class="task-name">Lab Report — Cell Division</div>
+          <div class="task-meta">
+            <div class="task-class-dot" style="background:#ef4444"></div>
+            <span class="task-class-name">Biology 201</span>
+            <span class="task-due due-late">Overdue</span>
+          </div>
+          <div class="task-progress">
+            <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:40%"></div></div>
+            <span class="progress-text">2 / 5 steps</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="task-item">
+        <div class="task-check">  </div>
+        <div class="task-body">
+          <div class="task-name">Research Paper — Algorithms</div>
+          <div class="task-meta">
+            <div class="task-class-dot" style="background:#8b5cf6"></div>
+            <span class="task-class-name">CS 150</span>
+            <span class="task-due due-soon">Due Fri</span>
+          </div>
+          <div class="task-progress">
+            <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:60%"></div></div>
+            <span class="progress-text">3 / 5 steps</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="task-item">
+        <div class="task-check done">✓</div>
+        <div class="task-body">
+          <div class="task-name done">Discussion Post — Reconstruction Era</div>
+          <div class="task-meta">
+            <div class="task-class-dot" style="background:#3b82f6"></div>
+            <span class="task-class-name">History 102</span>
+            <span class="task-due due-ok">Done</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="task-item">
+        <div class="task-check">  </div>
+        <div class="task-body">
+          <div class="task-name">Problem Set 7</div>
+          <div class="task-meta">
+            <div class="task-class-dot" style="background:#f59e0b"></div>
+            <span class="task-class-name">Math 301</span>
+            <span class="task-due due-soon">Due Sun</span>
+          </div>
+          <div class="task-progress">
+            <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:10%"></div></div>
+            <span class="progress-text">1 / 8 steps</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="task-item">
+        <div class="task-check">  </div>
+        <div class="task-body">
+          <div class="task-name">Group Presentation Slides</div>
+          <div class="task-meta">
+            <div class="task-class-dot" style="background:#10b981"></div>
+            <span class="task-class-name">English 201</span>
+            <span class="task-due due-soon">Due Sat</span>
+          </div>
+          <div class="task-progress">
+            <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:75%"></div></div>
+            <span class="progress-text">6 / 8 steps</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- end dash-main -->
+</div><!-- end dash-wrap -->
+
+<script>
+// ── Date display ──
+(function() {
+  const el = document.getElementById('dashDate');
+  if (!el) return;
+  const now = new Date();
+  el.textContent = now.toLocaleDateString('en-US', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  });
+})();
+
+// ── Week grid builder ──
+(function() {
+  const grid = document.getElementById('weekGrid');
+  if (!grid) return;
+
+  const today = new Date();
+  const dayOfWeek = today.getDay(); // 0=Sun
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - ((dayOfWeek + 6) % 7));
+
+  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const times = ['8 AM','9 AM','10 AM','11 AM','12 PM','1 PM','2 PM','3 PM','4 PM','5 PM'];
+
+  // Class colour map
+  const classColors = {
+    'BIO': { bg:'rgba(239,68,68,0.75)',  text:'#fff' },
+    'HIS': { bg:'rgba(59,130,246,0.75)', text:'#fff' },
+    'CS':  { bg:'rgba(139,92,246,0.75)', text:'#fff' },
+    'ENG': { bg:'rgba(16,185,129,0.75)', text:'#fff' },
+    'MAT': { bg:'rgba(245,158,11,0.80)', text:'#fff' },
+  };
+
+  // Sample events: { day:0-6, startSlot:0-9, spanSlots, label, cls }
+  const events = [
+    { day:0, startSlot:0, spanSlots:2, label:'BIO Lecture', cls:'BIO' },
+    { day:0, startSlot:4, spanSlots:1, label:'Lab Report', cls:'BIO' },
+    { day:1, startSlot:1, spanSlots:1, label:'HIS Discussion', cls:'HIS' },
+    { day:1, startSlot:5, spanSlots:2, label:'CS Lab', cls:'CS' },
+    { day:2, startSlot:0, spanSlots:2, label:'BIO Lecture', cls:'BIO' },
+    { day:2, startSlot:3, spanSlots:1, label:'ENG Workshop', cls:'ENG' },
+    { day:3, startSlot:2, spanSlots:1, label:'MAT Lecture', cls:'MAT' },
+    { day:3, startSlot:5, spanSlots:2, label:'CS Research', cls:'CS' },
+    { day:4, startSlot:1, spanSlots:1, label:'HIS Exam', cls:'HIS' },
+    { day:4, startSlot:6, spanSlots:1, label:'Group Pres.', cls:'ENG' },
+  ];
+
+  // Header row: empty corner + 7 day labels
+  const cornerHeader = document.createElement('div');
+  grid.appendChild(cornerHeader);
+
+  days.forEach(function(d, i) {
+    const date = new Date(monday);
+    date.setDate(monday.getDate() + i);
+    const isToday = date.toDateString() === today.toDateString();
+
+    const header = document.createElement('div');
+    header.className = 'week-day-header' + (isToday ? ' today-col' : '');
+    header.textContent = d;
+    grid.appendChild(header);
+  });
+
+  // Date number row
+  const cornerDate = document.createElement('div');
+  grid.appendChild(cornerDate);
+
+  days.forEach(function(d, i) {
+    const date = new Date(monday);
+    date.setDate(monday.getDate() + i);
+    const isToday = date.toDateString() === today.toDateString();
+
+    const dateCell = document.createElement('div');
+    dateCell.className = 'week-day-date' + (isToday ? ' today-col' : '');
+
+    if (isToday) {
+      dateCell.innerHTML = '<div class="today-badge-wrap"><div class="today-badge">' + date.getDate() + '</div></div>';
+    } else {
+      dateCell.textContent = date.getDate();
+    }
+    grid.appendChild(dateCell);
+  });
+
+  // Time slot rows
+  times.forEach(function(t, rowIdx) {
+    const timeLabel = document.createElement('div');
+    timeLabel.className = 'week-time-label';
+    timeLabel.textContent = t;
+    grid.appendChild(timeLabel);
+
+    days.forEach(function(d, colIdx) {
+      const cell = document.createElement('div');
+      cell.className = 'week-cell';
+
+      // Find events for this slot
+      events.forEach(function(ev) {
+        if (ev.day === colIdx && ev.startSlot === rowIdx) {
+          const block = document.createElement('div');
+          block.className = 'cal-event';
+          const c = classColors[ev.cls];
+          block.style.cssText = 'background:' + c.bg + ';color:' + c.text + ';top:2px;height:' + (ev.spanSlots * 28 - 6) + 'px;';
+          block.textContent = ev.label;
+          block.title = ev.label;
+          cell.appendChild(block);
+        }
+      });
+
+      grid.appendChild(cell);
+    });
+  });
+})();
+
+// ── View tab switcher ──
+document.querySelectorAll('.view-tab').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.view-tab').forEach(function(b) { b.classList.remove('active'); });
+    this.classList.add('active');
+  });
+});
+
+// ── Task checkboxes ──
+document.querySelectorAll('.task-check').forEach(function(check) {
+  check.addEventListener('click', function() {
+    const isDone = this.classList.contains('done');
+    this.classList.toggle('done');
+    this.textContent = isDone ? '' : '✓';
+    const nameEl = this.closest('.task-item').querySelector('.task-name');
+    if (nameEl) nameEl.classList.toggle('done', !isDone);
+  });
+});
+</script>
+{% endblock %}
