@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyStream - Dashboard</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/index.global.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/index.global.min.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f8f9fc;
+            color: #333;
+        }
+
+        header {
+            background: #057EE4;
+            color: white;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        #calendar {
+            min-height: 650px;
+            width: 100%;
+        }
+
+        .lists {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .event-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .event-item:last-child {
+            border-bottom: none;
+        }
+
+        @media (max-width: 768px) {
+            .lists {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Welcome to StudyStream, {{ user.username }}! 👋</h1>
+        <p>You are logged in and viewing your dashboard.</p>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <h2>Quick Links</h2>
+            <ul>
+                <li><a href="/accounts/logout/">Logout</a></li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>My Calendar</h2>
+            <div id="calendar"></div>
+        </div>
+
+        <div class="lists">
+            <div class="card">
+                <h3>Personal Events</h3>
+                {% if personal_events %}
+                    {% for event in personal_events %}
+                        <div class="event-item">
+                            <strong>{{ event.title }}</strong><br>
+                            {{ event.event_date }}
+                            {% if event.start_time %} at {{ event.start_time }}{% endif %}
+                            {% if event.location %}<br>{{ event.location }}{% endif %}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No personal events yet.</p>
+                {% endif %}
+            </div>
+
+            <div class="card">
+                <h3>Work Shifts</h3>
+                {% if work_shifts %}
+                    {% for shift in work_shifts %}
+                        <div class="event-item">
+                            <strong>
+                                {% if shift.job_title %}
+                                    {{ shift.job_title }}
+                                {% else %}
+                                    Work Shift
+                                {% endif %}
+                            </strong><br>
+                            {{ shift.shift_date }}<br>
+                            {{ shift.start_time }} - {{ shift.end_time }}
+                            {% if shift.location %}<br>{{ shift.location }}{% endif %}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No work shifts yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const calendarEl = document.getElementById('calendar');
+            const events = {{ calendar_events_json|safe }};
+
+            console.log("Calendar element:", calendarEl);
+            console.log("Calendar events:", events);
+
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                contentHeight: 'auto',
+                events: events
+            });
+
+            calendar.render();
+        });
+    </script>
+</body>
+</html> 
