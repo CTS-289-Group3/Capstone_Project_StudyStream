@@ -6,6 +6,8 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
+from .models import Profile
+from .forms import ProfileForm
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -57,3 +59,17 @@ def home(request):
 @login_required(login_url='/accounts/login/')
 def dashboard_view(request):
     return render(request, 'accounts/dashboard.html')
+
+@never_cache
+@login_required(login_url='/accounts/login/')
+def profile_view(request):
+    profile, created = Profile.objects.get_or_create(user=request.user)
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Profile updated successfully.')
+            return redirect('/accounts/profile/')
+    else:
+        form = ProfileForm(instance=profile)
+    return render(request, 'accounts/profile.html', {'form': form})
