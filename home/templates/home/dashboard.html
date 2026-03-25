@@ -95,6 +95,14 @@
             font-size: 15px;
             color: var(--blue-dark);
             cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.15s ease, box-shadow 0.2s ease;
+        }
+        .ss-nav-avatar:hover,
+        .ss-nav-avatar:focus-visible {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(252, 175, 23, 0.4);
+            outline: none;
         }
         .ss-nav-logout {
             font-size: 13px;
@@ -546,7 +554,7 @@
         </div>
         <div class="ss-nav-right">
             <span class="ss-nav-greeting">Welcome back, <strong>{{ user.username }}</strong> 👋</span>
-            <div class="ss-nav-avatar">{{ user.username|first|upper }}</div>
+            <a href="{% url 'profile' %}" class="ss-nav-avatar" aria-label="Open profile">{{ user.username|first|upper }}</a>
             <a href="/accounts/logout/" class="ss-nav-logout">Sign out</a>
         </div>
     </nav>
