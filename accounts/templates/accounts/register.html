@@ -180,7 +180,7 @@
 
     /* Right panel */
     .ss-login-right {
-      padding: 48px 44px;
+      padding: 52px 44px;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -188,7 +188,7 @@
 
     .ss-login-heading {
       font-family: 'Montserrat', sans-serif;
-      font-size: 30px;
+      font-size: 32px;
       font-weight: 800;
       color: var(--ss-blue-deep);
       margin-bottom: 6px;
@@ -203,10 +203,25 @@
       margin-bottom: 26px;
     }
 
-    /* Form */
-    .ss-form { display: flex; flex-direction: column; gap: 14px; }
+    /* Eyebrow pill badge */
+    .ss-login-eyebrow {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--ss-blue-deep);
+      background: rgba(0,125,197,0.08);
+      border: 1px solid rgba(0,125,197,0.12);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 6px 12px;
+      border-radius: 999px;
+      margin-bottom: 16px;
+    }
 
-    .ss-field { display: flex; flex-direction: column; gap: 5px; }
+    /* Form */
+    .ss-form { display: flex; flex-direction: column; gap: 16px; }
+
+    .ss-field { display: flex; flex-direction: column; gap: 6px; }
 
     .ss-field label {
       font-size: 13px;
@@ -217,7 +232,7 @@
     .ss-field input {
       font-family: 'Nunito', sans-serif;
       font-size: 14px;
-      padding: 11px 16px;
+      padding: 12px 16px;
       border: 1.8px solid var(--ss-line);
       border-radius: 12px;
       background: var(--ss-soft);
@@ -301,6 +316,7 @@
       text-align: center;
       font-size: 13px;
       color: #66758a;
+      margin-top: 4px;
     }
 
     .ss-login-cta a {
@@ -406,6 +422,7 @@
 
       <!-- RIGHT: Register form -->
       <div class="ss-login-right">
+        <span class="ss-login-eyebrow">School · Life · Work</span>
         <h1 class="ss-login-heading">
           Create your<br><span class="gold">StudyStream account.</span>
         </h1>
