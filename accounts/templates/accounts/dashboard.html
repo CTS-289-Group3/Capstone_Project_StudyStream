@@ -36,12 +36,15 @@
       border-radius: 20px;
       box-shadow: 0 20px 45px rgba(3,78,162,0.08);
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
 
     .top {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: nowrap;
       gap: 14px;
       padding: 18px 20px;
       border-bottom: 1px solid var(--ss-line);
@@ -99,6 +102,16 @@
       margin-bottom: 8px;
     }
 
+    .profile-btn {
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--ss-blue), var(--ss-blue-deep));
+      color: #fff;
+      border-radius: 999px;
+      padding: 8px 18px;
+    }
+
     @media (max-width: 640px) {
       body { padding: 14px; }
       h1 { font-size: 28px; }
@@ -111,7 +124,10 @@
   <div class="wrap">
     <div class="top">
       <div class="brand">StudyStream Dashboard</div>
-      <a class="logout" href="{% url 'logout' %}">Log out</a>
+      <div style="display:flex; gap:10px; align-items:center; flex-shrink:0; margin-left:auto;">
+        <a class="profile-btn" href="{% url 'profile' %}">My Profile</a>
+        <a class="logout" href="{% url 'logout' %}">Log out</a>
+      </div>
     </div>
 
     <div class="content">
