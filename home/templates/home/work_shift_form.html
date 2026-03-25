@@ -1,0 +1,316 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Work Shift</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --yellow: #FCAF17;
+            --blue: #007DC5;
+            --blue-dark: #034EA2;
+            --bg: #F4F7FB;
+            --surface: #FFFFFF;
+            --text: #1A2540;
+            --muted: #6B7A99;
+            --border: #E4EAF4;
+            --shadow: 0 2px 16px rgba(3,78,162,0.08);
+            --radius: 14px;
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 28px 16px;
+        }
+
+        .ss-wrap {
+            max-width: 760px;
+            margin: 0 auto;
+        }
+
+        .ss-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 24px;
+        }
+
+        h1 {
+            margin: 0 0 8px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 28px;
+            color: var(--blue-dark);
+        }
+
+        .ss-sub {
+            margin: 0 0 20px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .ss-form p {
+            margin: 0 0 14px;
+        }
+
+        .ss-quick-link {
+            font-size: 12px;
+            color: var(--blue-dark);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .ss-quick-link:hover {
+            text-decoration: underline;
+        }
+
+        .ss-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .ss-field {
+            margin-bottom: 14px;
+        }
+
+        .ss-field-full {
+            grid-column: 1 / -1;
+        }
+
+        .ss-field-meta {
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .ss-inline-note {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .ss-form label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text);
+        }
+
+        .ss-form input,
+        .ss-form textarea,
+        .ss-form select {
+            width: 100%;
+            font-family: inherit;
+            font-size: 14px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 12px;
+            background: #fff;
+            color: var(--text);
+        }
+
+        .ss-form textarea {
+            min-height: 96px;
+            resize: vertical;
+        }
+
+        .errorlist {
+            margin: 0 0 8px;
+            padding: 8px 10px;
+            list-style: none;
+            border-radius: 8px;
+            background: #FFE8E8;
+            color: #7B1B1B;
+            font-size: 13px;
+        }
+
+        .ss-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .ss-form-errors {
+            margin: 0 0 12px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            background: #FFE8E8;
+            color: #7B1B1B;
+            font-size: 13px;
+        }
+
+        .ss-form-errors ul {
+            margin: 0;
+            padding-left: 18px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--blue-dark);
+            color: #fff;
+        }
+
+        .btn-secondary {
+            background: #fff;
+            color: var(--blue-dark);
+            border: 1px solid var(--border);
+        }
+
+        @media (max-width: 680px) {
+            .ss-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ss-wrap">
+        <div class="ss-card">
+            <h1>Add Work Shift</h1>
+            <p class="ss-sub">Create a work shift and it will appear on your dashboard calendar.</p>
+
+            <form method="post" class="ss-form">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="ss-form-errors">{{ form.non_field_errors }}</div>
+                {% endif %}
+
+                <div class="ss-grid">
+                    <div class="ss-field ss-field-full">
+                        {{ form.job_title.label_tag }}
+                        {{ form.job_title }}
+                        {{ form.job_title.errors }}
+                        <div class="ss-field-meta">
+                            <datalist id="jobTitleOptions">
+                                {% for job_title in job_title_options %}
+                                    <option value="{{ job_title }}"></option>
+                                {% endfor %}
+                            </datalist>
+                            <span class="ss-inline-note">Type or pick from suggestions in the same field.</span>
+                            <a href="{% url 'recurring_job_title_list' %}" class="ss-quick-link">Manage job titles{% if recurring_job_title_count %} ({{ recurring_job_title_count }}){% endif %}</a>
+                        </div>
+                    </div>
+
+                    <div class="ss-field">
+                        {{ form.shift_date.label_tag }}
+                        {{ form.shift_date }}
+                        {{ form.shift_date.errors }}
+                    </div>
+
+                    <div class="ss-field">
+                        <label for="shiftPreset">Recurring Shift Template</label>
+                        <select id="shiftPreset">
+                            <option value="">Apply a saved/common shift...</option>
+                            {% for preset in shift_presets %}
+                                <option data-start="{{ preset.start }}" data-end="{{ preset.end }}" data-location="{{ preset.location|default:'' }}">{{ preset.label }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="ss-field-meta">
+                            <a href="{% url 'recurring_shift_list' %}" class="ss-quick-link">Manage recurring shifts{% if recurring_count %} ({{ recurring_count }}){% endif %}</a>
+                        </div>
+                    </div>
+
+                    <div class="ss-field">
+                        {{ form.start_time.label_tag }}
+                        {{ form.start_time }}
+                        {{ form.start_time.errors }}
+                    </div>
+
+                    <div class="ss-field">
+                        {{ form.end_time.label_tag }}
+                        {{ form.end_time }}
+                        {{ form.end_time.errors }}
+                    </div>
+
+                    <div class="ss-field ss-field-full">
+                        {{ form.location.label_tag }}
+                        {{ form.location }}
+                        {{ form.location.errors }}
+                        <div class="ss-field-meta">
+                            <datalist id="locationOptions">
+                                {% for location in location_options %}
+                                    <option value="{{ location }}"></option>
+                                {% endfor %}
+                            </datalist>
+                            <span class="ss-inline-note">Type or pick from suggestions in the same field.</span>
+                            <a href="{% url 'recurring_location_list' %}" class="ss-quick-link">Manage locations{% if recurring_location_count %} ({{ recurring_location_count }}){% endif %}</a>
+                        </div>
+                    </div>
+
+                    <div class="ss-field ss-field-full">
+                        {{ form.notes.label_tag }}
+                        {{ form.notes }}
+                        {{ form.notes.errors }}
+                        <div class="ss-inline-note">You can still type custom values even when using quick picks.</div>
+                    </div>
+                </div>
+
+                <div class="ss-actions">
+                    <button type="submit" class="btn btn-primary">Save Shift</button>
+                    <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const shiftPreset = document.getElementById('shiftPreset');
+            const jobTitleInput = document.getElementById('id_job_title');
+            const startTimeInput = document.getElementById('id_start_time');
+            const endTimeInput = document.getElementById('id_end_time');
+            const locationInput = document.getElementById('id_location');
+
+            if (jobTitleInput) {
+                jobTitleInput.setAttribute('list', 'jobTitleOptions');
+            }
+
+            if (locationInput) {
+                locationInput.setAttribute('list', 'locationOptions');
+            }
+
+            if (shiftPreset && startTimeInput && endTimeInput) {
+                shiftPreset.addEventListener('change', function () {
+                    const selected = shiftPreset.options[shiftPreset.selectedIndex];
+                    const start = selected.dataset.start;
+                    const end = selected.dataset.end;
+                    const location = selected.dataset.location;
+
+                    if (start && end) {
+                        startTimeInput.value = start;
+                        endTimeInput.value = end;
+                    }
+
+                    if (location && locationInput) {
+                        locationInput.value = location;
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

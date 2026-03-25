@@ -1,6 +1,12 @@
 # Capstone_Project_StudyStream
 StudyStream capstone project for group 3!
 
+> **Important:** After cloning and creating your `.venv`, you **must** run migrations before starting the server or you will get database errors.
+> ```bash
+> python manage.py migrate
+> ```
+> See [Step 3](#3-run-django-setup-commands) below for the full setup order.
+
 ## Local setup
 
 ### 1) Create and activate a virtual environment

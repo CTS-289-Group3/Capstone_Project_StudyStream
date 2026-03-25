@@ -21,7 +21,7 @@ class CustomUserCreationForm(UserCreationForm):
 
 def login_view(request):
     if request.user.is_authenticated:
-        return redirect('/accounts/dashboard/')
+        return redirect('/dashboard/')
 
     if request.method == 'GET' and request.GET.get('next'):
         messages.error(request, 'Please sign in to continue.')
@@ -31,7 +31,7 @@ def login_view(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            return redirect('/accounts/dashboard/')
+            return redirect('/dashboard/')
     else:
         form = AuthenticationForm()
     return render(request, 'accounts/login.html', {'form': form})
@@ -54,11 +54,6 @@ def logout_view(request):
 
 def home(request):
     return render(request, 'accounts/home.html')
-
-@never_cache
-@login_required(login_url='/accounts/login/')
-def dashboard_view(request):
-    return render(request, 'accounts/dashboard.html')
 
 @never_cache
 @login_required(login_url='/accounts/login/')

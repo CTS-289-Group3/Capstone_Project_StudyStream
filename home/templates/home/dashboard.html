@@ -1,0 +1,706 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyStream – Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/index.global.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/index.global.min.js"></script>
+     <link rel="icon" type="image/png" href="{% static 'accounts/images/logo.png' %}">
+    <style>
+        /* ── Brand Tokens ───────────────────────────────────────── */
+        :root {
+            --yellow:       #FCAF17;
+            --yellow-light: #FFDD00;
+            --blue:         #007DC5;
+            --blue-dark:    #034EA2;
+            --bg:           #F4F7FB;
+            --surface:      #FFFFFF;
+            --text:         #1A2540;
+            --text-muted:   #6B7A99;
+            --border:       #E4EAF4;
+            --shadow:       0 2px 16px rgba(3,78,162,0.08);
+            --radius:       14px;
+            --radius-sm:    8px;
+        }
+
+        /* ── Reset & Base ───────────────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* ── Top Nav ────────────────────────────────────────────── */
+        .ss-nav {
+            background: var(--blue-dark);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            height: 64px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 20px rgba(3,78,162,0.25);
+        }
+        .ss-nav-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .ss-nav-logo {
+            height: 38px;
+            width: auto;
+        }
+        .ss-nav-wordmark {
+            font-family: 'Nunito', sans-serif;
+            font-weight: 900;
+            font-size: 20px;
+            letter-spacing: -0.5px;
+            line-height: 1;
+        }
+        .ss-nav-wordmark .w1 { color: var(--yellow); }
+        .ss-nav-wordmark .w2 { color: #fff; }
+
+        .ss-nav-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .ss-nav-greeting {
+            font-size: 13px;
+            color: rgba(255,255,255,0.7);
+        }
+        .ss-nav-greeting strong {
+            color: var(--yellow);
+            font-weight: 700;
+        }
+        .ss-nav-avatar {
+            width: 36px;
+            height: 36px;
+            background: var(--yellow);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 800;
+            font-size: 15px;
+            color: var(--blue-dark);
+            cursor: pointer;
+        }
+        .ss-nav-logout {
+            font-size: 13px;
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            padding: 6px 14px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 20px;
+            transition: all 0.2s;
+        }
+        .ss-nav-logout:hover {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+
+        /* ── Page Header Banner ─────────────────────────────────── */
+        .ss-banner {
+            background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue) 100%);
+            padding: 32px 32px 48px;
+            position: relative;
+            overflow: hidden;
+        }
+        .ss-banner::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        .ss-banner-content {
+            position: relative;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .ss-banner-eyebrow {
+            font-family: 'Nunito', sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--yellow);
+            margin-bottom: 8px;
+        }
+        .ss-banner-title {
+            font-family: 'Nunito', sans-serif;
+            font-size: 28px;
+            font-weight: 900;
+            color: #fff;
+            margin-bottom: 6px;
+        }
+        .ss-banner-title span { color: var(--yellow); }
+        .ss-banner-sub {
+            font-size: 14px;
+            color: rgba(255,255,255,0.65);
+        }
+        .ss-banner-wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            line-height: 0;
+        }
+
+        /* ── Main Layout ────────────────────────────────────────── */
+        .ss-main {
+            max-width: 1100px;
+            margin: -24px auto 40px;
+            padding: 0 24px;
+            position: relative;
+        }
+
+        /* ── Stat Pills ─────────────────────────────────────────── */
+        .ss-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .ss-stat {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 18px 20px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            border-left: 4px solid transparent;
+        }
+        .ss-stat.yellow { border-left-color: var(--yellow); }
+        .ss-stat.blue   { border-left-color: var(--blue); }
+        .ss-stat.navy   { border-left-color: var(--blue-dark); }
+        .ss-stat-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        .ss-stat.yellow .ss-stat-icon { background: #FFF8E7; }
+        .ss-stat.blue   .ss-stat-icon { background: #E8F4FD; }
+        .ss-stat.navy   .ss-stat-icon { background: #E8EEF8; }
+        .ss-stat-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .ss-stat-value {
+            font-family: 'Nunito', sans-serif;
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--text);
+            line-height: 1.1;
+        }
+
+        /* ── Card ───────────────────────────────────────────────── */
+        .ss-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+        .ss-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--border);
+        }
+        .ss-card-title {
+            font-family: 'Nunito', sans-serif;
+            font-size: 17px;
+            font-weight: 800;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .ss-card-title .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 3px;
+            flex-shrink: 0;
+        }
+        .dot-yellow { background: var(--yellow); }
+        .dot-blue   { background: var(--blue); }
+        .ss-card-badge {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+            background: var(--bg);
+            color: var(--text-muted);
+        }
+        .ss-add-menu {
+            position: relative;
+        }
+        .ss-add-trigger {
+            list-style: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 8px 12px;
+            background: #fff;
+            color: var(--blue-dark);
+            font-size: 13px;
+            font-weight: 700;
+        }
+        .ss-add-trigger::-webkit-details-marker {
+            display: none;
+        }
+        .ss-add-trigger:hover {
+            border-color: var(--blue);
+            color: var(--blue);
+        }
+        .ss-add-list {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 8px);
+            min-width: 210px;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            z-index: 20;
+        }
+        .ss-add-item {
+            display: block;
+            padding: 10px 12px;
+            text-decoration: none;
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .ss-add-item:hover {
+            background: #F8FBFF;
+            color: var(--blue-dark);
+        }
+
+        /* ── Calendar overrides ─────────────────────────────────────── */
+        #calendar {
+            min-height: 600px;
+        }
+
+        /* Toolbar title */
+        .fc .fc-toolbar-title {
+            font-family: 'Nunito', sans-serif;
+            font-size: 18px;
+            font-weight: 900;
+            color: var(--text);
+        }
+
+        /* All buttons base style */
+        .fc .fc-button-primary {
+            background: var(--surface) !important;
+            border: 1.5px solid var(--border) !important;
+            color: var(--text-muted) !important;
+            font-family: 'DM Sans', sans-serif !important;
+            font-size: 12px !important;
+            font-weight: 500 !important;
+            border-radius: 20px !important;
+            padding: 5px 14px !important;
+            box-shadow: none !important;
+            transition: all 0.15s !important;
+        }
+
+        .fc .fc-button-primary:hover {
+            border-color: var(--blue) !important;
+            color: var(--blue) !important;
+            background: var(--surface) !important;
+        }
+
+        /* Active view button (Month / Week / Day) */
+        .fc .fc-button-primary:not(:disabled).fc-button-active {
+            background: var(--blue) !important;
+            border-color: var(--blue) !important;
+            color: #fff !important;
+            font-weight: 600 !important;
+        }
+
+        /* Today button */
+        .fc .fc-today-button {
+            background: var(--yellow) !important;
+            border-color: var(--yellow) !important;
+            color: var(--blue-dark) !important;
+            font-weight: 700 !important;
+        }
+
+        .fc .fc-today-button:disabled {
+            opacity: 0.5 !important;
+        }
+
+        /* Prev / Next arrow buttons */
+        .fc .fc-prev-button,
+        .fc .fc-next-button {
+            border-radius: 50% !important;
+            width: 32px !important;
+            height: 32px !important;
+            padding: 0 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+
+        /* Day-of-week headers (Sun, Mon, etc.) */
+        .fc .fc-col-header-cell-cushion {
+            font-family: 'Nunito', sans-serif;
+            font-weight: 800;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            text-decoration: none;
+        }
+
+        /* Day number links */
+        .fc .fc-daygrid-day-number {
+            font-family: 'Nunito', sans-serif;
+            font-weight: 800;
+            font-size: 13px;
+            color: var(--text-muted);
+            text-decoration: none;
+            width: 26px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        /* Today highlight */
+        .fc .fc-daygrid-day.fc-day-today {
+            background: rgba(252, 175, 23, 0.07) !important;
+        }
+
+        .fc .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+            background: var(--yellow);
+            color: var(--blue-dark);
+        }
+
+        /* Day cells — rounded card feel */
+        .fc .fc-daygrid-day {
+            border-radius: 10px;
+        }
+
+        /* Grid lines */
+        .fc-theme-standard td,
+        .fc-theme-standard th {
+            border-color: var(--border);
+        }
+
+        .fc-theme-standard .fc-scrollgrid {
+            border-color: var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        /* Event pills */
+        .fc .fc-event {
+            border: none !important;
+            border-radius: 6px !important;
+            font-family: 'DM Sans', sans-serif !important;
+            font-size: 11px !important;
+            font-weight: 600 !important;
+            padding: 2px 6px !important;
+            cursor: pointer;
+        }
+
+        /* Color-coded event types */
+        .fc .fc-event.personal-event,
+        .fc .fc-daygrid-event.personal-event,
+        .fc .fc-timegrid-event.personal-event {
+            background: #E0B640 !important;
+            color: #111111 !important;
+            border-color: #C89F2E !important;
+        }
+
+        .fc .fc-event.personal-event .fc-event-main,
+        .fc .fc-event.personal-event .fc-event-title,
+        .fc .fc-event.personal-event .fc-event-time {
+            color: #111111 !important;
+        }
+
+        .fc .fc-event.work-event,
+        .fc .fc-daygrid-event.work-event,
+        .fc .fc-timegrid-event.work-event {
+            background: #65B66A !important;
+            color: #111111 !important;
+            border-color: #4E9A53 !important;
+        }
+
+        .fc .fc-event.work-event .fc-event-main,
+        .fc .fc-event.work-event .fc-event-title,
+        .fc .fc-event.work-event .fc-event-time {
+            color: #111111 !important;
+        }
+
+        .fc .fc-event.school-event,
+        .fc .fc-event {
+            background: #E8F4FD !important;
+            color: #034EA2 !important;
+        }
+        
+
+        /* ── Event Lists ────────────────────────────────────────── */
+        .ss-lists {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .ss-event-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .ss-event-item:last-child { border-bottom: none; }
+        .ss-event-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-top: 5px;
+            flex-shrink: 0;
+        }
+        .dot-personal { background: var(--yellow); }
+        .dot-work     { background: var(--blue); }
+        .ss-event-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text);
+            margin-bottom: 2px;
+        }
+        .ss-event-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+        .ss-empty {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-style: italic;
+            padding: 12px 0;
+        }
+
+        /* ── Footer ─────────────────────────────────────────────── */
+        .ss-footer {
+            text-align: center;
+            padding: 24px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .ss-footer strong { color: var(--blue); }
+
+        /* ── Responsive ─────────────────────────────────────────── */
+        @media (max-width: 768px) {
+            .ss-nav { padding: 0 16px; }
+            .ss-banner { padding: 24px 16px 40px; }
+            .ss-main { padding: 0 16px; }
+            .ss-stats { grid-template-columns: 1fr; }
+            .ss-lists { grid-template-columns: 1fr; }
+            .ss-nav-greeting { display: none; }
+            .ss-card-header {
+                flex-wrap: wrap;
+                gap: 10px;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ── Navigation ───────────────────────────────────────────── -->
+    <nav class="ss-nav">
+        <div class="ss-nav-left">
+            <img src="{% static 'accounts/images/logo.png' %}" alt="StudyStream" class="ss-nav-logo">
+            <div class="ss-nav-wordmark">
+                <span class="w1">STUDY</span><span class="w2">STREAM</span>
+            </div>
+        </div>
+        <div class="ss-nav-right">
+            <span class="ss-nav-greeting">Welcome back, <strong>{{ user.username }}</strong> 👋</span>
+            <div class="ss-nav-avatar">{{ user.username|first|upper }}</div>
+            <a href="/accounts/logout/" class="ss-nav-logout">Sign out</a>
+        </div>
+    </nav>
+
+    <!-- ── Banner ───────────────────────────────────────────────── -->
+    <div class="ss-banner">
+        <div class="ss-banner-content">
+            <div class="ss-banner-eyebrow">School · Life · Work</div>
+            <div class="ss-banner-title">Your Dashboard, <span>{{ user.username }}</span></div>
+            <div class="ss-banner-sub">Stay organized. Stay ahead.</div>
+        </div>
+        <div class="ss-banner-wave">
+            <svg viewBox="0 0 1440 32" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="display:block;width:100%;height:32px;">
+                <path d="M0,16 C360,32 1080,0 1440,16 L1440,32 L0,32 Z" fill="#F4F7FB"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- ── Main ─────────────────────────────────────────────────── -->
+    <main class="ss-main">
+
+        <!-- Stat pills -->
+        <div class="ss-stats">
+            <div class="ss-stat yellow">
+                <div class="ss-stat-icon">📋</div>
+                <div class="ss-stat-info">
+                    <div class="ss-stat-label">Personal Events</div>
+                    <div class="ss-stat-value">{{ personal_events|length }}</div>
+                </div>
+            </div>
+            <div class="ss-stat blue">
+                <div class="ss-stat-icon">💼</div>
+                <div class="ss-stat-info">
+                    <div class="ss-stat-label">Work Shifts</div>
+                    <div class="ss-stat-value">{{ work_shifts|length }}</div>
+                </div>
+            </div>
+            <div class="ss-stat navy">
+                <div class="ss-stat-icon">🗓</div>
+                <div class="ss-stat-info">
+                    <div class="ss-stat-label">Total on Calendar</div>
+                    <div class="ss-stat-value">{{ total_events }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calendar -->
+        <div class="ss-card">
+            <div class="ss-card-header">
+                <div class="ss-card-title">
+                    <span class="dot dot-blue"></span>My Calendar
+                </div>
+                <details class="ss-add-menu">
+                    <summary class="ss-add-trigger">+ Add</summary>
+                    <div class="ss-add-list">
+                        <a href="{% url 'add_personal_event' %}" class="ss-add-item">Add Personal Event</a>
+                        <a href="{% url 'add_work_shift' %}" class="ss-add-item">Add Work Shift</a>
+                    </div>
+                </details>
+            </div>
+            <div id="calendar"></div>
+        </div>
+
+        <!-- Event Lists -->
+        <div class="ss-lists">
+
+            <!-- Personal Events -->
+            <div class="ss-card">
+                <div class="ss-card-header">
+                    <div class="ss-card-title">
+                        <span class="dot dot-yellow"></span>Personal Events
+                    </div>
+                    <span class="ss-card-badge">{{ personal_events|length }} upcoming</span>
+                </div>
+                {% if personal_events %}
+                    {% for event in personal_events %}
+                        <div class="ss-event-item">
+                            <span class="ss-event-dot dot-personal"></span>
+                            <div class="ss-event-body">
+                                <div class="ss-event-title">{{ event.title }}</div>
+                                <div class="ss-event-meta">
+                                    📅 {{ event.event_date }}
+                                    {% if event.start_time %} · ⏰ {{ event.start_time }}{% endif %}
+                                    {% if event.location %}<br>📍 {{ event.location }}{% endif %}
+                                    {% if event.recurrence_label %}<br>🔁 {{ event.recurrence_label }}{% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="ss-empty">No personal events yet. Add one to get started!</p>
+                {% endif %}
+            </div>
+
+            <!-- Work Shifts -->
+            <div class="ss-card">
+                <div class="ss-card-header">
+                    <div class="ss-card-title">
+                        <span class="dot dot-blue"></span>Work Shifts
+                    </div>
+                    <span class="ss-card-badge">{{ work_shifts|length }} scheduled</span>
+                </div>
+                {% if work_shifts %}
+                    {% for shift in work_shifts %}
+                        <div class="ss-event-item">
+                            <span class="ss-event-dot dot-work"></span>
+                            <div class="ss-event-body">
+                                <div class="ss-event-title">
+                                    {% if shift.job_title %}{{ shift.job_title }}{% else %}Work Shift{% endif %}
+                                </div>
+                                <div class="ss-event-meta">
+                                    📅 {{ shift.shift_date }}<br>
+                                    ⏰ {{ shift.start_time }} – {{ shift.end_time }}
+                                    {% if shift.location %}<br>📍 {{ shift.location }}{% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="ss-empty">No work shifts yet. Add your schedule here!</p>
+                {% endif %}
+            </div>
+
+        </div>
+    </main>
+
+    <!-- ── Footer ───────────────────────────────────────────────── -->
+    <footer class="ss-footer">
+        <strong>StudyStream</strong> &nbsp;·&nbsp; Less stress. More progress. &nbsp;·&nbsp; © 2026
+    </footer>
+
+    {{ calendar_events|json_script:"calendar-events-data" }}
+
+    <!-- ── FullCalendar Init ──────────────────────────────────────── -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const calendarEl = document.getElementById('calendar');
+            const events = JSON.parse(document.getElementById('calendar-events-data').textContent);
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                contentHeight: 'auto',
+                eventColor: '#007DC5',
+                eventBorderColor: 'transparent',
+                eventTextColor: '#ffffff',
+                events: events
+            });
+            calendar.render();
+        });
+    </script>
+
+</body>
+</html>
