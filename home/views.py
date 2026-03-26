@@ -3,6 +3,7 @@ from calendar import monthrange
 from datetime import date, time, timedelta
 
 from django.contrib.auth.decorators import login_required
+from django.core.serializers.json import DjangoJSONEncoder
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
@@ -286,15 +287,47 @@ def home_view(request):
             'color_hex': shift.color_hex or '#10b981',
         })
 
+    today_local = timezone.localdate()
+
+    one_time_personal = PersonalEvent.objects.filter(
+        user=user,
+        event_date__gte=today_local,
+        event_date__lte=today_local + timedelta(days=90),
+    ).order_by('event_date', 'start_time')
+
+    recurring_personal = RecurringPersonalEvent.objects.filter(user=user, is_active=True)
+
+    personal_events_data = []
+    for event in one_time_personal:
+        personal_events_data.append({
+            'title': event.title,
+            'event_date': event.event_date.isoformat(),
+            'start_time': event.start_time.strftime('%H:%M') if event.start_time else None,
+            'location': event.location or '',
+            'recurrence_label': '',
+            'color_hex': event.color_hex or '#FCAF17',
+        })
+    for occ in _generate_recurring_personal_occurrences(recurring_personal, today_local, today_local + timedelta(days=90)):
+        personal_events_data.append({
+            'title': occ['title'],
+            'event_date': occ['event_date'].isoformat(),
+            'start_time': occ['start_time'].strftime('%H:%M') if occ['start_time'] else None,
+            'location': occ.get('location', '') or '',
+            'recurrence_label': occ.get('recurrence_label', ''),
+            'color_hex': '#FCAF17',
+        })
+    personal_events_data.sort(key=lambda e: (e['event_date'], e['start_time'] or ''))
+
     context = {
         'user': user,
         'profile_display_name': profile_display_name,
         'profile_avatar_text': profile_avatar_text,
-        'semesters_json': json.dumps(semesters),
-        'courses_json': json.dumps(courses),
-        'assignments_json': json.dumps(assignments_data),
-        'tags_json': json.dumps(tags),
-        'work_shifts_json': json.dumps(work_shifts_data),
+        'semesters_json': json.dumps(semesters, cls=DjangoJSONEncoder),
+        'courses_json': json.dumps(courses, cls=DjangoJSONEncoder),
+        'assignments_json': json.dumps(assignments_data, cls=DjangoJSONEncoder),
+        'tags_json': json.dumps(tags, cls=DjangoJSONEncoder),
+        'work_shifts_json': json.dumps(work_shifts_data, cls=DjangoJSONEncoder),
+        'personal_events_json': json.dumps(personal_events_data, cls=DjangoJSONEncoder),
         'active_sem_id': active_sem.id if active_sem else None,
         'stats': {
             'due_this_week': due_this_week,

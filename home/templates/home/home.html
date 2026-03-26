@@ -267,7 +267,7 @@
 .dash-main { display:flex; flex-direction:column; gap:18px; }
 
 /* ── CALENDAR ── */
-.calendar-card { background:var(--card); backdrop-filter:blur(20px); border:1px solid var(--card-border); border-radius:20px; padding:18px; box-shadow:var(--shadow); overflow:hidden; }
+.calendar-card { background:var(--card); backdrop-filter:blur(20px); border:1px solid var(--card-border); border-radius:20px; padding:18px; box-shadow:var(--shadow); overflow:visible; }
 .calendar-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:8px; }
 .calendar-nav { display:flex; align-items:center; gap:8px; }
 .cal-nav-btn { background:var(--input-bg); border:1px solid var(--input-border); border-radius:8px; padding:5px 10px; color:var(--text); cursor:pointer; font-size:13px; font-weight:700; transition:background .15s; }
@@ -316,13 +316,14 @@
 
 /* Day view */
 #dayView { display:none; }
-#dayView.active { display:block; }
-.day-header-row { font-family:'Montserrat',sans-serif; font-size:18px; font-weight:900; color:var(--text); margin-bottom:12px; }
-.day-slot { display:flex;gap:10px;padding:6px 0;border-bottom:1px solid var(--card-border); }
-.day-time { font-size:11px;font-weight:700;color:var(--muted);width:48px;flex-shrink:0;padding-top:2px; }
-.day-events { flex:1;display:flex;flex-direction:column;gap:4px; }
-.day-event { border-radius:8px;padding:5px 10px;font-size:12px;font-weight:700;color:#fff; }
-.day-slot.shift-slot { padding:4px 0; }
+#dayView.active { display:block; max-height:520px; overflow-y:auto; }
+.day-header-row { font-family:'Montserrat',sans-serif; font-size:18px; font-weight:900; color:var(--text); padding:10px 0 12px; position:sticky; top:0; background:var(--card); z-index:2; }
+.day-slot { display:flex; min-height:52px; border-bottom:1px solid var(--card-border); }
+.day-time { font-size:11px;font-weight:700;color:var(--muted);width:56px;flex-shrink:0;padding:8px 10px 0 0;text-align:right;border-right:1px solid var(--card-border); }
+.day-events { flex:1;padding:5px 8px;display:flex;flex-direction:column;gap:4px; }
+.day-event { border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;color:#fff;display:flex;align-items:center;gap:6px;width:100%;box-sizing:border-box;cursor:default; }
+.day-event.clickable { cursor:pointer; }
+.day-slot.shift-slot { background:transparent; }
 
 /* ── TASKS ── */
 .tasks-card { background:var(--card);backdrop-filter:blur(20px);border:1px solid var(--card-border);border-radius:20px;padding:18px;box-shadow:var(--shadow); }
@@ -462,6 +463,14 @@ body.modal-open { overflow:hidden; }
 .add-new-link { display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--ss-blue);cursor:pointer;padding-top:10px;border-top:1px solid var(--card-border);margin-top:6px;transition:opacity .15s; }
 .add-new-link:hover { opacity:.75; }
 
+/* Sidebar week event items */
+.sb-event-item { display:flex;align-items:flex-start;gap:9px;padding:8px 0;border-bottom:1px solid var(--card-border); }
+.sb-event-item:last-child { border-bottom:none; }
+.sb-event-dot { width:9px;height:9px;border-radius:50%;margin-top:4px;flex-shrink:0; }
+.sb-event-info { flex:1;min-width:0; }
+.sb-event-title { font-size:13px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+.sb-event-meta { font-size:11px;color:var(--text2);margin-top:2px;line-height:1.5; }
+
 /* Responsive */
 @media(max-width:1024px) {
   .dash-wrap { grid-template-columns:1fr; }
@@ -484,12 +493,13 @@ body.modal-open { overflow:hidden; }
   /* eslint-disable */
   // VS Code: Django template tags below are valid server-side syntax, not JS errors
   const SS_DATA = {
-    semesters:   {{ semesters_json|safe }},
-    courses:     {{ courses_json|safe }},
-    assignments: {{ assignments_json|safe }},
-    tags:        {{ tags_json|safe }},
-    workShifts:  {{ work_shifts_json|safe }},
-    activeSemId: {{ active_sem_id|default:"null" }},
+    semesters:      {{ semesters_json|safe }},
+    courses:        {{ courses_json|safe }},
+    assignments:    {{ assignments_json|safe }},
+    tags:           {{ tags_json|safe }},
+    workShifts:     {{ work_shifts_json|safe }},
+    personalEvents: {{ personal_events_json|safe }},
+    activeSemId:    {{ active_sem_id|default:"null" }},
     csrfToken:   '{{ csrf_token }}',
     urls: {
       semCreate:  '/accounts/api/semesters/create/',
@@ -570,13 +580,19 @@ body.modal-open { overflow:hidden; }
 
     <!-- Semesters -->
     <div class="g-card">
-      <div class="g-card-title">🗓 Semesters</div>
+      <div class="g-card-title">
+        🗓 Semesters
+        <button class="ss-btn ss-btn-solid" onclick="openSemesterModal()" style="margin-left:auto;font-size:11px;padding:5px 12px;">+ Add</button>
+      </div>
       <div id="semesterList"></div>
     </div>
 
     <!-- My Courses -->
     <div class="g-card">
-      <div class="g-card-title">🎓 My Courses</div>
+      <div class="g-card-title">
+        🎓 My Courses
+        <button class="ss-btn ss-btn-solid" onclick="openCourseModal()" style="margin-left:auto;font-size:11px;padding:5px 12px;">+ Add</button>
+      </div>
       <div id="courseList"></div>
     </div>
 
@@ -588,6 +604,26 @@ body.modal-open { overflow:hidden; }
         <input class="form-input" id="quickTagName" placeholder="New tag…" style="flex:1;padding:7px 11px;font-size:12px;">
         <button class="ss-btn ss-btn-solid" onclick="quickCreateTag()" style="font-size:11px;padding:7px 12px;">Add</button>
       </div>
+    </div>
+
+    <!-- Personal Events (this week) -->
+    <div class="g-card">
+      <div class="g-card-title">
+        📋 Personal Events
+        <span id="sidebarPersonalEventsCount" style="margin-left:auto;font-size:9px;font-weight:800;padding:2px 7px;border-radius:999px;background:rgba(252,175,23,.18);color:#b07d00;letter-spacing:.05em;"></span>
+      </div>
+      <div id="sidebarPersonalEvents"></div>
+      <a href="{% url 'add_personal_event' %}" class="add-new-link">＋ Add personal event</a>
+    </div>
+
+    <!-- Work Shifts (this week) -->
+    <div class="g-card">
+      <div class="g-card-title">
+        💼 Work Shifts
+        <span id="sidebarWorkShiftsCount" style="margin-left:auto;font-size:9px;font-weight:800;padding:2px 7px;border-radius:999px;background:rgba(16,185,129,.15);color:#047857;letter-spacing:.05em;"></span>
+      </div>
+      <div id="sidebarWorkShifts"></div>
+      <a href="{% url 'add_work_shift' %}" class="add-new-link">＋ Add work shift</a>
     </div>
 
   </aside>
@@ -874,6 +910,14 @@ function parseLocalDate(isoStr) {
   return new Date(local);
 }
 
+// Returns YYYY-MM-DD in local timezone (avoids UTC offset shifting the date)
+function localDateStr(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 function url(template, id) {
   return template.replace('{id}', id);
 }
@@ -918,11 +962,12 @@ document.querySelectorAll('.modal-overlay').forEach(ov => {
    STATE
 ═════════════════════════════════════════════ */
 let state = {
-  semesters:   SS_DATA.semesters,
-  courses:     SS_DATA.courses,
-  assignments: SS_DATA.assignments,
-  tags:        SS_DATA.tags,
-  workShifts:  SS_DATA.workShifts,
+  semesters:      SS_DATA.semesters,
+  courses:        SS_DATA.courses,
+  assignments:    SS_DATA.assignments,
+  tags:           SS_DATA.tags,
+  workShifts:     SS_DATA.workShifts,
+  personalEvents: SS_DATA.personalEvents,
 };
 let activeFilter = 'all';
 
@@ -1620,6 +1665,10 @@ function getWorkShiftsByDate(dateStr) {
   return state.workShifts.filter(s => s.shift_date === dateStr);
 }
 
+function getPersonalEventsByDate(dateStr) {
+  return state.personalEvents.filter(e => e.event_date === dateStr);
+}
+
 /* ── WEEK ── */
 function addCell(grid, txt, cls='week-time-label') {
   const el = document.createElement('div');
@@ -1689,7 +1738,7 @@ function renderWeekCal() {
 
     for (let i=0;i<7;i++) {
       const d = new Date(base); d.setDate(base.getDate()+i);
-      const dateStr = d.toISOString().slice(0,10);
+      const dateStr = localDateStr(d);
       const cell = document.createElement('div');
       cell.className = 'week-cell';
 
@@ -1718,6 +1767,21 @@ function renderWeekCal() {
           ev.style.cssText = `background:${s.color_hex};top:2px;height:22px;`;
           ev.textContent = s.title;
           ev.title = `${s.title} — ${s.start_time}–${s.end_time}${s.location ? ' @ ' + s.location : ''}`;
+          cell.appendChild(ev);
+        }
+      });
+
+      // Show personal events starting in this hour (or all-day at hour 0)
+      const pevents = getPersonalEventsByDate(dateStr);
+      pevents.forEach(pe => {
+        const ph = pe.start_time ? parseInt(pe.start_time.split(':')[0], 10) : 0;
+        if (ph === h) {
+          const ev = document.createElement('div');
+          ev.className = 'cal-event';
+          ev.style.cssText = `background:${pe.color_hex || '#FCAF17'};color:#1A2540;top:2px;height:22px;`;
+          ev.textContent = pe.title;
+          const timeStr = pe.start_time ? ` — ${pe.start_time}` : '';
+          ev.title = `${pe.title}${timeStr}${pe.location ? ' @ ' + pe.location : ''}`;
           cell.appendChild(ev);
         }
       });
@@ -1762,7 +1826,7 @@ function renderMonthCal() {
   // Day cells
   for (let d=1;d<=daysInMonth;d++) {
     const date    = new Date(ref.getFullYear(), ref.getMonth(), d);
-    const dateStr = date.toISOString().slice(0,10);
+    const dateStr = localDateStr(date);
     const isToday = date.toDateString() === today.toDateString();
     const asgs    = getAssignmentsByDate(dateStr);
 
@@ -1781,6 +1845,11 @@ function renderMonthCal() {
       html += `<div class="month-event" style="background:${s.color_hex};" title="${s.title} ${s.start_time}–${s.end_time}">${s.title}</div>`;
     });
 
+    const pevents = getPersonalEventsByDate(dateStr);
+    pevents.forEach(pe => {
+      html += `<div class="month-event" style="background:${pe.color_hex || '#FCAF17'};color:#1A2540;" title="${pe.title}${pe.start_time ? ' ' + pe.start_time : ''}">${pe.title}</div>`;
+    });
+
     cell.innerHTML = html;
     grid.appendChild(cell);
   }
@@ -1795,18 +1864,19 @@ function renderDayCal() {
 
   $('calLabel').textContent = target.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
 
-  const dateStr = target.toISOString().slice(0,10);
-  const dayAsgs = getAssignmentsByDate(dateStr);
-  const dayShifts = getWorkShiftsByDate(dateStr);
+  const dateStr     = localDateStr(target);
+  const dayAsgs     = getAssignmentsByDate(dateStr);
+  const dayShifts   = getWorkShiftsByDate(dateStr);
+  const dayPersonal = getPersonalEventsByDate(dateStr);
 
-  const hours = Array.from({length:24}, (_,i) => i); // full 24h
+  const hours = Array.from({length:24}, (_,i) => i);
   let html = `<div class="day-header-row">${target.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})}</div>`;
 
   hours.forEach(h => {
-    const label = h < 12 ? `${h}:00 AM` : h === 12 ? '12:00 PM' : `${h-12}:00 PM`;
+    const label = h === 0 ? '12 AM' : h < 12 ? `${h} AM` : h === 12 ? '12 PM' : `${h-12} PM`;
+
     const slotAsgs = dayAsgs.filter(a => parseLocalDate(a.due_date).getHours() === h);
 
-    // A shift covers hour h if startHour <= h and (endHour > h, or endHour === h with endMinute > 0)
     const slotShifts = dayShifts.filter(s => {
       const sh = parseInt(s.start_time.split(':')[0], 10);
       const eh = parseInt(s.end_time.split(':')[0], 10);
@@ -1814,33 +1884,50 @@ function renderDayCal() {
       return sh <= h && (eh > h || (eh === h && em > 0));
     });
 
-    // Build slot-level background/border from any covering shift
-    let slotBg = '';
-    let slotBorder = '';
+    const slotPersonal = dayPersonal.filter(pe => {
+      const ph = pe.start_time ? parseInt(pe.start_time.split(':')[0], 10) : 0;
+      return ph === h;
+    });
+
+    // Tint row if a shift covers this hour
+    let slotStyle = '';
     if (slotShifts.length > 0) {
       const hex = slotShifts[0].color_hex;
-      slotBg = `background:${hex}22;`;
-      slotBorder = `border-left:3px solid ${hex};`;
+      slotStyle = `style="background:${hex}18;border-left:3px solid ${hex};"`;
     }
-    const slotClass = slotShifts.length > 0 ? ' shift-slot' : '';
 
+    // Shift label pill only at the start hour
     const startShifts = slotShifts.filter(s => parseInt(s.start_time.split(':')[0], 10) === h);
-    const shiftLabelHtml = startShifts.map(s => {
+    const shiftHtml = startShifts.map(s => {
       const tip = `${s.title} ${s.start_time}–${s.end_time}${s.location ? ' @ ' + s.location : ''}`;
-      return `<div class="day-event" style="background:${s.color_hex};" title="${tip}">${s.title} <span style="font-weight:400;opacity:0.85;">${s.start_time}–${s.end_time}</span></div>`;
+      return `<div class="day-event" style="background:${s.color_hex};" title="${tip}"><span>${s.title}</span><span style="font-weight:400;opacity:0.8;font-size:11px;">${s.start_time}–${s.end_time}</span></div>`;
     }).join('');
 
-    html += `<div class="day-slot${slotClass}" style="${slotBg}${slotBorder}">
+    const personalHtml = slotPersonal.map(pe => {
+      const timeStr = pe.start_time || '';
+      const tip = `${pe.title}${timeStr ? ' ' + timeStr : ''}${pe.location ? ' @ ' + pe.location : ''}`;
+      return `<div class="day-event" style="background:${pe.color_hex || '#FCAF17'};color:#1A2540;" title="${tip}"><span>${pe.title}</span>${timeStr ? `<span style="font-weight:400;opacity:0.75;font-size:11px;">${timeStr}</span>` : ''}</div>`;
+    }).join('');
+
+    const asgHtml = slotAsgs.map(a =>
+      `<div class="day-event clickable" style="background:${a.course_color};" onclick="openTaskView(${a.id})" title="${a.title} — click to view"><span>${a.title}</span><span style="font-weight:400;opacity:0.8;font-size:11px;">${a.course_code || ''}</span></div>`
+    ).join('');
+
+    html += `<div class="day-slot${slotShifts.length ? ' shift-slot' : ''}" ${slotStyle}>
       <div class="day-time">${label}</div>
-      <div class="day-events">${slotAsgs.map(a => `
-        <div class="day-event" style="background:${a.course_color};" onclick="openTaskView(${a.id})"
-             title="Click to edit">${a.title}</div>
-      `).join('')}${shiftLabelHtml}</div>
+      <div class="day-events">${asgHtml}${shiftHtml}${personalHtml}</div>
     </div>`;
   });
 
-  if (!dayAsgs.length && !dayShifts.length) html += `<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px;font-weight:600;">Nothing due today 🎉</div>`;
+  if (!dayAsgs.length && !dayShifts.length && !dayPersonal.length) {
+    html += `<div style="text-align:center;padding:32px;color:var(--muted);font-size:13px;font-weight:600;">Nothing scheduled today 🎉</div>`;
+  }
   dv.innerHTML = html;
+
+  // Scroll to current hour (min 7am)
+  const scrollHour = Math.max(new Date().getHours() - 1, 7);
+  const slots = dv.querySelectorAll('.day-slot');
+  if (slots[scrollHour]) slots[scrollHour].scrollIntoView({block:'start'});
 }
 
 /* Calendar nav */
@@ -1876,6 +1963,85 @@ function updateStats() {
 }
 
 /* ═════════════════════════════════════════════
+   HELPERS
+═════════════════════════════════════════════ */
+function formatTime12(t) {
+  if (!t) return '';
+  const [h, m] = t.split(':').map(Number);
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const h12 = h % 12 || 12;
+  return `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
+}
+
+/* ═════════════════════════════════════════════
+   SIDEBAR: PERSONAL EVENTS (THIS WEEK)
+═════════════════════════════════════════════ */
+function renderSidebarPersonalEvents() {
+  const el = $('sidebarPersonalEvents');
+  if (!el) return;
+  const todayStr = new Date().toISOString().slice(0,10);
+  const weekEndDate = new Date(); weekEndDate.setDate(weekEndDate.getDate() + 6);
+  const weekEndStr = weekEndDate.toISOString().slice(0,10);
+  const events = state.personalEvents
+    .filter(e => e.event_date >= todayStr && e.event_date <= weekEndStr)
+    .sort((a,b) => a.event_date.localeCompare(b.event_date) || (a.start_time||'').localeCompare(b.start_time||''));
+  const countEl = $('sidebarPersonalEventsCount');
+  if (countEl) countEl.textContent = events.length ? `${events.length} this week` : '';
+  if (!events.length) {
+    el.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px 0;">No events this week.</div>';
+    return;
+  }
+  const DAY = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  el.innerHTML = events.map(e => {
+    const d = new Date(e.event_date + 'T00:00:00');
+    const dateStr = `${DAY[d.getDay()]}, ${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
+    const timeStr = e.start_time ? ` · ${formatTime12(e.start_time)}` : '';
+    const loc = e.location ? `<br>📍 ${e.location}` : '';
+    const recur = e.recurrence_label ? ` · 🔁 ${e.recurrence_label}` : '';
+    return `<div class="sb-event-item">
+      <div class="sb-event-dot" style="background:${e.color_hex || '#FCAF17'};"></div>
+      <div class="sb-event-info">
+        <div class="sb-event-title">${e.title}</div>
+        <div class="sb-event-meta">📅 ${dateStr}${timeStr}${recur}${loc}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ═════════════════════════════════════════════
+   SIDEBAR: WORK SHIFTS (THIS WEEK)
+═════════════════════════════════════════════ */
+function renderSidebarWorkShifts() {
+  const el = $('sidebarWorkShifts');
+  if (!el) return;
+  const todayStr = new Date().toISOString().slice(0,10);
+  const weekEndDate = new Date(); weekEndDate.setDate(weekEndDate.getDate() + 6);
+  const weekEndStr = weekEndDate.toISOString().slice(0,10);
+  const shifts = state.workShifts
+    .filter(s => s.shift_date >= todayStr && s.shift_date <= weekEndStr)
+    .sort((a,b) => a.shift_date.localeCompare(b.shift_date) || a.start_time.localeCompare(b.start_time));
+  const countEl = $('sidebarWorkShiftsCount');
+  if (countEl) countEl.textContent = shifts.length ? `${shifts.length} this week` : '';
+  if (!shifts.length) {
+    el.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px 0;">No shifts this week.</div>';
+    return;
+  }
+  const DAY = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  el.innerHTML = shifts.map(s => {
+    const d = new Date(s.shift_date + 'T00:00:00');
+    const dateStr = `${DAY[d.getDay()]}, ${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
+    const loc = s.location ? `<br>📍 ${s.location}` : '';
+    return `<div class="sb-event-item">
+      <div class="sb-event-dot" style="background:${s.color_hex};"></div>
+      <div class="sb-event-info">
+        <div class="sb-event-title">${s.title}</div>
+        <div class="sb-event-meta">📅 ${dateStr} · ${formatTime12(s.start_time)}–${formatTime12(s.end_time)}${loc}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ═════════════════════════════════════════════
    INIT
 ═════════════════════════════════════════════ */
 populateCourseModalSemDropdown();
@@ -1885,6 +2051,8 @@ renderCourses();
 renderTagChips();
 renderAsgTagSelector();
 renderTasks();
+renderSidebarPersonalEvents();
+renderSidebarWorkShifts();
 updateStats();
 
 // Default to week view

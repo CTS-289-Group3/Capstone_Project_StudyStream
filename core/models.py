@@ -15,6 +15,7 @@ class PersonalEvent(models.Model):
     start_time = models.TimeField(null=True, blank=True)
     end_time = models.TimeField(null=True, blank=True)
     location = models.CharField(max_length=200, blank=True)
+    color_hex = models.CharField(max_length=7, default='#FCAF17')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

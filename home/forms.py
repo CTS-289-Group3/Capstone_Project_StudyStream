@@ -36,11 +36,12 @@ class PersonalEventForm(forms.ModelForm):
 
     class Meta:
         model = PersonalEvent
-        fields = ["title", "description", "event_date", "start_time", "end_time", "location"]
+        fields = ["title", "description", "event_date", "start_time", "end_time", "location", "color_hex"]
         widgets = {
             "event_date": forms.DateInput(attrs={"type": "date"}),
             "start_time": forms.TimeInput(attrs={"type": "time"}),
             "end_time": forms.TimeInput(attrs={"type": "time"}),
+            "color_hex": forms.HiddenInput(),
         }
 
     def clean(self):

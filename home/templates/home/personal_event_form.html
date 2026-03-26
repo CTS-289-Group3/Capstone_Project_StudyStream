@@ -200,6 +200,19 @@
             text-decoration: underline;
         }
 
+        .color-swatch {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: border-color 0.15s, transform 0.15s;
+        }
+        .color-swatch.active {
+            border-color: var(--blue-dark);
+            transform: scale(1.18);
+        }
+
         @media (max-width: 680px) {
             .ss-grid {
                 grid-template-columns: 1fr;
@@ -297,6 +310,12 @@
                     </div>
                 </div>
 
+                <div class="ss-field ss-field-full">
+                    <label>Event Color</label>
+                    <div id="peColorPicker" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;"></div>
+                    {{ form.color_hex }}
+                </div>
+
                 <div class="ss-actions">
                     <button type="submit" class="btn btn-primary">Save Event</button>
                     <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancel</a>
@@ -349,6 +368,27 @@
 
             updateRecurringVisibility();
             updatePatternFields();
+
+            // Color picker
+            const PE_COLORS = ['#ef4444','#f97316','#f59e0b','#FCAF17','#10b981','#06b6d4','#3b82f6','#8b5cf6','#ec4899','#6b7280'];
+            const colorContainer = document.getElementById('peColorPicker');
+            const colorInput = document.getElementById('id_color_hex');
+            const currentColor = (colorInput && colorInput.value) ? colorInput.value : '#FCAF17';
+
+            if (colorContainer && colorInput) {
+                PE_COLORS.forEach(function(hex) {
+                    const swatch = document.createElement('div');
+                    swatch.className = 'color-swatch' + (hex.toLowerCase() === currentColor.toLowerCase() ? ' active' : '');
+                    swatch.style.background = hex;
+                    swatch.title = hex;
+                    swatch.addEventListener('click', function() {
+                        colorContainer.querySelectorAll('.color-swatch').forEach(function(s) { s.classList.remove('active'); });
+                        swatch.classList.add('active');
+                        colorInput.value = hex;
+                    });
+                    colorContainer.appendChild(swatch);
+                });
+            }
         });
     </script>
 </body>
