@@ -11,7 +11,8 @@ from django.http import JsonResponse
 from django.utils import timezone
 from django.db.models import Q
 
-from .models import Semester, Course, Assignment, AssignmentSubtask, Tag, TimeBlock
+from .forms import ProfileForm
+from .models import Assignment, AssignmentSubtask, Course, Profile, Semester, Tag, TimeBlock
 
 
 # ─────────────────────────────────────────────────────────────
@@ -71,6 +72,21 @@ def home(request):
 @login_required(login_url='/accounts/login/')
 def dashboard_view(request):
     return redirect('/home/')
+
+
+@never_cache
+@login_required(login_url='/accounts/login/')
+def profile_view(request):
+    profile, created = Profile.objects.get_or_create(user=request.user)
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Profile updated successfully.')
+            return redirect('/accounts/profile/')
+    else:
+        form = ProfileForm(instance=profile)
+    return render(request, 'accounts/profile.html', {'form': form, 'profile': profile})
 
 
 # ─────────────────────────────────────────────────────────────
