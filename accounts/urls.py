@@ -10,6 +10,7 @@ urlpatterns = [
     path('dashboard/', views.dashboard_view, name='dashboard'),
     path('logout/', views.logout_view, name='logout'),
     path('profile/', views.profile_view, name='profile'),
+    path('settings/', views.settings_view, name='settings'),
 
     # Semesters
     path('api/semesters/', views.semester_list_json, name='semester_list_json'),

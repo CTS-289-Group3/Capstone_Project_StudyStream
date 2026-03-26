@@ -78,6 +78,11 @@ def dashboard_view(request):
 @login_required(login_url='/accounts/login/')
 def profile_view(request):
     profile, created = Profile.objects.get_or_create(user=request.user)
+    if created:
+        profile.display_name = request.user.username
+        profile.avatar_text = request.user.username[:1].upper()
+        profile.save(update_fields=['display_name', 'avatar_text'])
+
     if request.method == 'POST':
         form = ProfileForm(request.POST, instance=profile)
         if form.is_valid():
@@ -87,6 +92,18 @@ def profile_view(request):
     else:
         form = ProfileForm(instance=profile)
     return render(request, 'accounts/profile.html', {'form': form, 'profile': profile})
+
+
+@never_cache
+@login_required(login_url='/accounts/login/')
+def settings_view(request):
+    profile, created = Profile.objects.get_or_create(user=request.user)
+    if created:
+        profile.display_name = request.user.username
+        profile.avatar_text = request.user.username[:1].upper()
+        profile.save(update_fields=['display_name', 'avatar_text'])
+
+    return render(request, 'accounts/settings.html', {'profile': profile})
 
 
 # ─────────────────────────────────────────────────────────────

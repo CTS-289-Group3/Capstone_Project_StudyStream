@@ -1,0 +1,42 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}Settings - StudyStream{% endblock %}
+
+{% block nav_actions %}
+  <a class="ss-btn ss-btn-ghost" href="{% url 'dashboard' %}">Dashboard</a>
+  <a class="ss-btn ss-btn-solid" href="{% url 'logout' %}">Sign out</a>
+{% endblock %}
+
+{% block content %}
+<section style="position:relative;z-index:1;max-width:900px;margin:0 auto;padding:32px 24px 48px;">
+  <div class="glass" style="padding:28px;border-radius:24px;display:grid;gap:20px;">
+    <div>
+      <h1 style="font-family:'Montserrat',sans-serif;font-size:28px;font-weight:800;line-height:1.1;">Account Settings</h1>
+      <p style="margin-top:8px;color:var(--text2);font-size:15px;">Manage how your account appears across StudyStream.</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;">
+      <div class="glass" style="padding:18px;">
+        <div style="font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;">Display Name</div>
+        <div style="margin-top:6px;font-size:20px;font-weight:800;">{% if profile.display_name %}{{ profile.display_name }}{% else %}{{ request.user.username }}{% endif %}</div>
+      </div>
+      <div class="glass" style="padding:18px;">
+        <div style="font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;">Avatar Letter</div>
+        <div style="margin-top:6px;font-size:20px;font-weight:800;">{% if profile.avatar_text %}{{ profile.avatar_text|slice:':1'|upper }}{% else %}{{ request.user.username|slice:':1'|upper }}{% endif %}</div>
+      </div>
+      <div class="glass" style="padding:18px;">
+        <div style="font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;">Email</div>
+        <div style="margin-top:6px;font-size:20px;font-weight:800;word-break:break-word;">{{ request.user.email }}</div>
+      </div>
+    </div>
+
+    <div class="glass" style="padding:22px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-size:18px;font-weight:800;">Profile Appearance</div>
+        <p style="margin-top:6px;color:var(--text2);font-size:14px;">Edit your avatar letter, display name, bio, major, and year.</p>
+      </div>
+      <a class="ss-btn ss-btn-solid" href="{% url 'profile' %}">Edit Profile</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

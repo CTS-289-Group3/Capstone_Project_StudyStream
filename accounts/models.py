@@ -220,6 +220,8 @@ class TimeBlock(models.Model):
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    display_name = models.CharField(max_length=50, blank=True)
+    avatar_text = models.CharField(max_length=2, blank=True)
     bio = models.TextField(blank=True)
     major = models.CharField(max_length=100, blank=True)
     year = models.CharField(max_length=20, blank=True)

@@ -299,9 +299,9 @@
     <div class="ss-profile-wrapper">
 
       <div class="ss-profile-header">
-        <div class="ss-avatar">{{ request.user.username|first|upper }}</div>
+        <div class="ss-avatar">{% if profile.avatar_text %}{{ profile.avatar_text|slice:':1'|upper }}{% elif profile.display_name %}{{ profile.display_name|slice:':1'|upper }}{% else %}{{ request.user.username|slice:':1'|upper }}{% endif %}</div>
         <div class="ss-profile-header-text">
-          <h1>{{ request.user.username }}<span>'s Profile</span></h1>
+          <h1>{% if profile.display_name %}{{ profile.display_name }}{% else %}{{ request.user.username }}{% endif %}<span>'s Profile</span></h1>
           <p>{{ request.user.email }}</p>
         </div>
       </div>
@@ -315,6 +315,16 @@
               <div class="ss-success">{{ message }}</div>
             {% endfor %}
           {% endif %}
+
+          <div class="ss-field">
+            <label for="id_display_name">Display Name</label>
+            <input type="text" id="id_display_name" name="display_name" maxlength="50" placeholder="e.g. tessaB" value="{{ form.display_name.value|default:'' }}">
+          </div>
+
+          <div class="ss-field">
+            <label for="id_avatar_text">Avatar Letter</label>
+            <input type="text" id="id_avatar_text" name="avatar_text" maxlength="2" placeholder="e.g. T" value="{{ form.avatar_text.value|default:'' }}">
+          </div>
 
           <div class="ss-field">
             <label for="id_bio">Bio</label>

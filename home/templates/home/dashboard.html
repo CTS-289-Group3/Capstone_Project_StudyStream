@@ -72,7 +72,7 @@
         .ss-nav-right {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 16px;
         }
         .ss-nav-greeting {
             font-size: 13px;
@@ -81,6 +81,33 @@
         .ss-nav-greeting strong {
             color: var(--yellow);
             font-weight: 700;
+        }
+        .ss-user-menu {
+            position: relative;
+        }
+        .ss-user-trigger {
+            border: 1px solid rgba(255,255,255,0.18);
+            background: rgba(255,255,255,0.12);
+            border-radius: 999px;
+            min-height: 44px;
+            padding: 4px 8px 4px 4px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            gap: 10px;
+            color: #fff;
+            transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+        }
+        .ss-user-trigger:hover,
+        .ss-user-trigger:focus-visible,
+        .ss-user-menu.is-open .ss-user-trigger {
+            background: rgba(255,255,255,0.18);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+            outline: none;
+        }
+        .ss-user-trigger:hover,
+        .ss-user-trigger:focus-visible {
+            transform: translateY(-1px);
         }
         .ss-nav-avatar {
             width: 36px;
@@ -94,15 +121,80 @@
             font-weight: 800;
             font-size: 15px;
             color: var(--blue-dark);
-            cursor: pointer;
-            text-decoration: none;
-            transition: transform 0.15s ease, box-shadow 0.2s ease;
+            flex-shrink: 0;
         }
-        .ss-nav-avatar:hover,
-        .ss-nav-avatar:focus-visible {
-            transform: translateY(-1px);
+        .ss-user-name {
+            font-family: 'Nunito', sans-serif;
+            font-size: 15px;
+            font-weight: 800;
+            color: #fff;
+            white-space: nowrap;
+        }
+        .ss-user-caret {
+            color: rgba(255,255,255,0.78);
+            font-size: 11px;
+            transition: transform 0.18s ease;
+        }
+        .ss-user-menu.is-open .ss-user-caret {
+            transform: rotate(180deg);
+        }
+        .ss-user-dropdown {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 10px);
+            min-width: 220px;
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: 0 18px 40px rgba(3,78,162,0.16);
+            padding: 10px;
+            display: none;
+            z-index: 120;
+        }
+        .ss-user-menu.is-open .ss-user-dropdown {
+            display: block;
+        }
+        .ss-user-dropdown-header {
+            padding: 10px 12px 12px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 6px;
+        }
+        .ss-user-dropdown-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+        }
+        .ss-user-dropdown-name {
+            margin-top: 4px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 17px;
+            font-weight: 900;
+            color: var(--text);
+        }
+        .ss-user-dropdown-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            text-decoration: none;
+            color: var(--text);
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            transition: background 0.18s ease, color 0.18s ease;
+        }
+        .ss-user-dropdown-link:hover,
+        .ss-user-dropdown-link:focus-visible {
+            background: #f4f7fb;
+            color: var(--blue-dark);
             box-shadow: 0 4px 10px rgba(252, 175, 23, 0.4);
             outline: none;
+        }
+        .ss-user-dropdown-link span:last-child {
+            color: var(--text-muted);
         }
         .ss-nav-logout {
             font-size: 13px;
@@ -534,6 +626,7 @@
             .ss-stats { grid-template-columns: 1fr; }
             .ss-lists { grid-template-columns: 1fr; }
             .ss-nav-greeting { display: none; }
+            .ss-user-name { display: none; }
             .ss-card-header {
                 flex-wrap: wrap;
                 gap: 10px;
@@ -553,9 +646,24 @@
             </div>
         </div>
         <div class="ss-nav-right">
-            <span class="ss-nav-greeting">Welcome back, <strong>{{ user.username }}</strong> 👋</span>
-            <a href="{% url 'profile' %}" class="ss-nav-avatar" aria-label="Open profile">{{ user.username|first|upper }}</a>
-            <a href="/accounts/logout/" class="ss-nav-logout">Sign out</a>
+            <span class="ss-nav-greeting">Welcome back, <strong>{{ profile_display_name }}</strong> 👋</span>
+            <div class="ss-user-menu" id="userMenu">
+                <button type="button" class="ss-user-trigger" id="userMenuTrigger" aria-haspopup="true" aria-expanded="false">
+                    <span class="ss-nav-avatar">{{ profile_avatar_text }}</span>
+                    <span class="ss-user-name">{{ profile_display_name }}</span>
+                    <span class="ss-user-caret">▼</span>
+                </button>
+                <div class="ss-user-dropdown" id="userMenuDropdown">
+                    <div class="ss-user-dropdown-header">
+                        <div class="ss-user-dropdown-label">Signed in as</div>
+                        <div class="ss-user-dropdown-name">{{ profile_display_name }}</div>
+                    </div>
+                    <a href="{% url 'profile' %}" class="ss-user-dropdown-link"><span>Edit Profile</span><span>›</span></a>
+                    <a href="{% url 'settings' %}" class="ss-user-dropdown-link"><span>Settings</span><span>›</span></a>
+                    <a href="{% url 'logout' %}" class="ss-user-dropdown-link"><span>Sign out</span><span>›</span></a>
+                </div>
+            </div>
+            <a href="{% url 'logout' %}" class="ss-nav-logout">Sign out</a>
         </div>
     </nav>
 
@@ -563,7 +671,7 @@
     <div class="ss-banner">
         <div class="ss-banner-content">
             <div class="ss-banner-eyebrow">School · Life · Work</div>
-            <div class="ss-banner-title">Your Dashboard, <span>{{ user.username }}</span></div>
+            <div class="ss-banner-title">Your Dashboard, <span>{{ profile_display_name }}</span></div>
             <div class="ss-banner-sub">Stay organized. Stay ahead.</div>
         </div>
         <div class="ss-banner-wave">
@@ -691,6 +799,34 @@
     <!-- ── FullCalendar Init ──────────────────────────────────────── -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            const userMenu = document.getElementById('userMenu');
+            const userMenuTrigger = document.getElementById('userMenuTrigger');
+
+            if (userMenu && userMenuTrigger) {
+                const closeUserMenu = function () {
+                    userMenu.classList.remove('is-open');
+                    userMenuTrigger.setAttribute('aria-expanded', 'false');
+                };
+
+                userMenuTrigger.addEventListener('click', function (event) {
+                    event.stopPropagation();
+                    const isOpen = userMenu.classList.toggle('is-open');
+                    userMenuTrigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                });
+
+                document.addEventListener('click', function (event) {
+                    if (!userMenu.contains(event.target)) {
+                        closeUserMenu();
+                    }
+                });
+
+                document.addEventListener('keydown', function (event) {
+                    if (event.key === 'Escape') {
+                        closeUserMenu();
+                    }
+                });
+            }
+
             const calendarEl = document.getElementById('calendar');
             const events = JSON.parse(document.getElementById('calendar-events-data').textContent);
             const calendar = new FullCalendar.Calendar(calendarEl, {

@@ -29,6 +29,7 @@ class WorkShift(models.Model):
     end_time = models.TimeField()
     location = models.CharField(max_length=200, blank=True)
     notes = models.TextField(blank=True)
+    color_hex = models.CharField(max_length=7, default='#10b981')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

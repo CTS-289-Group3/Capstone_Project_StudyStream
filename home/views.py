@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
-from accounts.models import Assignment, Course, Semester, Tag
+from accounts.models import Assignment, Course, Profile, Semester, Tag
 from core.models import (
     PersonalEvent,
     RecurringPersonalEvent,
@@ -209,6 +209,9 @@ def _get_work_shift_quick_options(user):
 
 def home_view(request):
     user = request.user
+    profile = Profile.objects.filter(user=user).first()
+    profile_display_name = (profile.display_name if profile and profile.display_name else user.username)
+    profile_avatar_text = (profile.avatar_text[:1].upper() if profile and profile.avatar_text else profile_display_name[:1].upper())
     now = timezone.now()
     week_end = now + timedelta(days=7)
 
@@ -271,12 +274,27 @@ def home_view(request):
     ).count()
     active_courses = Course.objects.filter(user=user, semester__is_active=True).count()
 
+    work_shifts_data = []
+    for shift in WorkShift.objects.filter(user=user).order_by('shift_date', 'start_time'):
+        work_shifts_data.append({
+            'id': shift.id,
+            'title': shift.job_title or 'Work Shift',
+            'shift_date': shift.shift_date.isoformat(),
+            'start_time': shift.start_time.strftime('%H:%M'),
+            'end_time': shift.end_time.strftime('%H:%M'),
+            'location': shift.location,
+            'color_hex': shift.color_hex or '#10b981',
+        })
+
     context = {
         'user': user,
+        'profile_display_name': profile_display_name,
+        'profile_avatar_text': profile_avatar_text,
         'semesters_json': json.dumps(semesters),
         'courses_json': json.dumps(courses),
         'assignments_json': json.dumps(assignments_data),
         'tags_json': json.dumps(tags),
+        'work_shifts_json': json.dumps(work_shifts_data),
         'active_sem_id': active_sem.id if active_sem else None,
         'stats': {
             'due_this_week': due_this_week,
@@ -338,6 +356,7 @@ def dashboard(request):
             "title": f"Work: {shift.job_title}" if shift.job_title else "Work Shift",
             "start": f"{shift.shift_date}T{shift.start_time}",
             "end": f"{shift.shift_date}T{shift.end_time}",
+            "color": shift.color_hex or "#10b981",
             "classNames": ["work-event"],
         })
 

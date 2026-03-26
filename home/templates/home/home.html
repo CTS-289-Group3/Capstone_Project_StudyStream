@@ -9,11 +9,22 @@
 {% endblock %}
 
 {% block nav_actions %}
-  <div class="ss-user-chip">
-    <div class="ss-avatar">{{ user.username|slice:":1"|upper }}</div>
-    {{ user.username }}
-  </div>
-  <a class="ss-btn ss-btn-ghost" href="{% url 'logout' %}" style="padding:8px 14px;font-size:12px;">Sign out</a>
+  <details class="ss-user-menu">
+    <summary class="ss-user-chip">
+      <div class="ss-avatar">{{ profile_avatar_text }}</div>
+      <span class="ss-user-chip-name">{{ profile_display_name }}</span>
+      <span class="ss-user-chip-caret">▼</span>
+    </summary>
+    <div class="ss-user-dropdown">
+      <div class="ss-user-dropdown-header">
+        <div class="ss-user-dropdown-label">Signed in as</div>
+        <div class="ss-user-dropdown-name">{{ profile_display_name }}</div>
+      </div>
+      <a class="ss-user-dropdown-link" href="{% url 'profile' %}">Edit Profile</a>
+      <a class="ss-user-dropdown-link" href="{% url 'settings' %}">Settings</a>
+      <a class="ss-user-dropdown-link ss-user-dropdown-link-danger" href="{% url 'logout' %}">Sign out</a>
+    </div>
+  </details>
 {% endblock %}
 
 {% block extra_head %}
@@ -32,6 +43,85 @@
 }
 @keyframes dashIn { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
 
+.ss-user-menu {
+  position: relative;
+}
+.ss-user-menu summary {
+  list-style: none;
+}
+.ss-user-menu summary::-webkit-details-marker {
+  display: none;
+}
+.ss-user-chip {
+  cursor: pointer;
+  user-select: none;
+  padding-right: 12px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+.ss-user-chip:hover,
+.ss-user-menu[open] .ss-user-chip {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(3,78,162,0.14);
+}
+.ss-user-chip-name {
+  white-space: nowrap;
+}
+.ss-user-chip-caret {
+  font-size: 11px;
+  color: var(--text2);
+  transition: transform 0.18s ease;
+}
+.ss-user-menu[open] .ss-user-chip-caret {
+  transform: rotate(180deg);
+}
+.ss-user-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 220px;
+  background: var(--bg2);
+  border: 1px solid var(--card-border);
+  border-radius: 18px;
+  box-shadow: var(--shadow-lg);
+  padding: 10px;
+  z-index: 250;
+}
+.ss-user-dropdown-header {
+  padding: 10px 12px 12px;
+  border-bottom: 1px solid var(--card-border);
+  margin-bottom: 6px;
+}
+.ss-user-dropdown-label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text2);
+}
+.ss-user-dropdown-name {
+  margin-top: 4px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--text);
+}
+.ss-user-dropdown-link {
+  display: block;
+  padding: 11px 12px;
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+.ss-user-dropdown-link:hover {
+  background: var(--input-bg);
+  color: var(--ss-blue-light);
+}
+.ss-user-dropdown-link-danger:hover {
+  color: #f87171;
+}
+
 .dash-header {
   grid-column: 1/-1;
   display: flex;
@@ -48,6 +138,51 @@
 .dash-greeting em { font-style:normal; color:var(--ss-yellow); }
 .dash-date { font-size:13px; color:var(--text2); font-weight:600; margin-top:3px; }
 .dash-header-actions { display:flex; gap:10px; flex-wrap:wrap; }
+
+.ss-create-menu {
+  position: relative;
+}
+.ss-create-menu summary {
+  list-style: none;
+}
+.ss-create-menu summary::-webkit-details-marker {
+  display: none;
+}
+.ss-create-trigger {
+  min-height: 42px;
+}
+.ss-create-caret {
+  font-size: 11px;
+  transition: transform 0.18s ease;
+}
+.ss-create-menu[open] .ss-create-caret {
+  transform: rotate(180deg);
+}
+.ss-create-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  min-width: 230px;
+  background: var(--bg2);
+  border: 1px solid var(--card-border);
+  border-radius: 18px;
+  box-shadow: var(--shadow-lg);
+  padding: 10px;
+  z-index: 240;
+}
+.ss-create-dropdown-link {
+  display: block;
+  padding: 11px 12px;
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+.ss-create-dropdown-link:hover {
+  background: var(--input-bg);
+  color: var(--ss-blue-light);
+}
 
 /* STATS */
 .dash-stats {
@@ -187,6 +322,7 @@
 .day-time { font-size:11px;font-weight:700;color:var(--muted);width:48px;flex-shrink:0;padding-top:2px; }
 .day-events { flex:1;display:flex;flex-direction:column;gap:4px; }
 .day-event { border-radius:8px;padding:5px 10px;font-size:12px;font-weight:700;color:#fff; }
+.day-slot.shift-slot { padding:4px 0; }
 
 /* ── TASKS ── */
 .tasks-card { background:var(--card);backdrop-filter:blur(20px);border:1px solid var(--card-border);border-radius:20px;padding:18px;box-shadow:var(--shadow); }
@@ -335,6 +471,7 @@ body.modal-open { overflow:hidden; }
   .dash-wrap { padding:14px 12px 36px; gap:12px; }
   .dash-stats { grid-template-columns:1fr 1fr; }
   .form-row { grid-template-columns:1fr; }
+  .ss-user-chip-name { display:none; }
 }
 </style>
 {% endblock %}
@@ -351,6 +488,7 @@ body.modal-open { overflow:hidden; }
     courses:     {{ courses_json|safe }},
     assignments: {{ assignments_json|safe }},
     tags:        {{ tags_json|safe }},
+    workShifts:  {{ work_shifts_json|safe }},
     activeSemId: {{ active_sem_id|default:"null" }},
     csrfToken:   '{{ csrf_token }}',
     urls: {
@@ -380,13 +518,18 @@ body.modal-open { overflow:hidden; }
   <!-- HEADER -->
   <div class="dash-header">
     <div>
-      <div class="dash-greeting">Good <span id="greetWord">morning</span>, <em>{{ user.username }}</em> 👋</div>
+      <div class="dash-greeting">Good <span id="greetWord">morning</span>, <em>{{ profile_display_name }}</em> 👋</div>
       <div class="dash-date" id="dashDate"></div>
     </div>
     <div class="dash-header-actions">
-      <button class="ss-btn ss-btn-ghost" onclick="openModal('semesterModal')" style="font-size:12px;padding:8px 15px;">+ Semester</button>
-      <button class="ss-btn ss-btn-ghost" onclick="openModal('courseModal')" style="font-size:12px;padding:8px 15px;">+ Course</button>
-      <button class="ss-btn ss-btn-solid" onclick="openModal('assignmentModal')" style="font-size:13px;padding:9px 18px;">+ Add Task</button>
+      <details class="ss-create-menu">
+        <summary class="ss-btn ss-btn-solid ss-create-trigger" style="font-size:13px;padding:9px 18px;">+ Add <span class="ss-create-caret">▼</span></summary>
+        <div class="ss-create-dropdown">
+          <a class="ss-create-dropdown-link" href="javascript:void(0)" onclick="openModal('assignmentModal'); this.closest('details').removeAttribute('open');">Course Task</a>
+          <a class="ss-create-dropdown-link" href="{% url 'add_work_shift' %}">Work Shift</a>
+          <a class="ss-create-dropdown-link" href="{% url 'add_personal_event' %}">Personal Event</a>
+        </div>
+      </details>
     </div>
   </div>
 
@@ -429,14 +572,12 @@ body.modal-open { overflow:hidden; }
     <div class="g-card">
       <div class="g-card-title">🗓 Semesters</div>
       <div id="semesterList"></div>
-      <div class="add-new-link" onclick="openModal('semesterModal')">＋ Add semester</div>
     </div>
 
     <!-- My Courses -->
     <div class="g-card">
       <div class="g-card-title">🎓 My Courses</div>
       <div id="courseList"></div>
-      <div class="add-new-link" onclick="openModal('courseModal')">＋ Add course</div>
     </div>
 
     <!-- Tags -->
@@ -477,7 +618,14 @@ body.modal-open { overflow:hidden; }
     <div class="tasks-card">
       <div class="tasks-header">
         <div class="g-card-title" style="margin-bottom:0;">📌 Assignments</div>
-        <button class="ss-btn ss-btn-solid" onclick="openModal('assignmentModal')" style="font-size:12px;padding:7px 14px;">+ Add Task</button>
+        <details class="ss-create-menu">
+          <summary class="ss-btn ss-btn-solid ss-create-trigger" style="font-size:12px;padding:7px 14px;">+ Add <span class="ss-create-caret">▼</span></summary>
+          <div class="ss-create-dropdown">
+            <a class="ss-create-dropdown-link" href="javascript:void(0)" onclick="openModal('assignmentModal'); this.closest('details').removeAttribute('open');">Course Task</a>
+            <a class="ss-create-dropdown-link" href="{% url 'add_work_shift' %}">Work Shift</a>
+            <a class="ss-create-dropdown-link" href="{% url 'add_personal_event' %}">Personal Event</a>
+          </div>
+        </details>
       </div>
       <div class="filter-row">
         <div class="filter-chip active" data-filter="all" onclick="setFilter('all',this)">All</div>
@@ -774,6 +922,7 @@ let state = {
   courses:     SS_DATA.courses,
   assignments: SS_DATA.assignments,
   tags:        SS_DATA.tags,
+  workShifts:  SS_DATA.workShifts,
 };
 let activeFilter = 'all';
 
@@ -1467,6 +1616,10 @@ function getAssignmentsByDate(dateStr) {
   return state.assignments.filter(a => a.due_date && a.due_date.startsWith(dateStr));
 }
 
+function getWorkShiftsByDate(dateStr) {
+  return state.workShifts.filter(s => s.shift_date === dateStr);
+}
+
 /* ── WEEK ── */
 function addCell(grid, txt, cls='week-time-label') {
   const el = document.createElement('div');
@@ -1555,6 +1708,20 @@ function renderWeekCal() {
         }
       });
 
+      // Show work shifts starting in this hour
+      const shifts = getWorkShiftsByDate(dateStr);
+      shifts.forEach(s => {
+        const sh = parseInt(s.start_time.split(':')[0], 10);
+        if (sh === h) {
+          const ev = document.createElement('div');
+          ev.className = 'cal-event';
+          ev.style.cssText = `background:${s.color_hex};top:2px;height:22px;`;
+          ev.textContent = s.title;
+          ev.title = `${s.title} — ${s.start_time}–${s.end_time}${s.location ? ' @ ' + s.location : ''}`;
+          cell.appendChild(ev);
+        }
+      });
+
       grid.appendChild(cell);
     }
   });
@@ -1608,6 +1775,12 @@ function renderMonthCal() {
       html += `<div class="month-event" style="background:${a.course_color};cursor:pointer;" title="${a.title}" onclick="event.stopPropagation();openTaskView(${a.id})">${a.title}</div>`;
     });
     if (asgs.length > 2) html += `<div class="month-more">+${asgs.length-2} more</div>`;
+
+    const shifts = getWorkShiftsByDate(dateStr);
+    shifts.forEach(s => {
+      html += `<div class="month-event" style="background:${s.color_hex};" title="${s.title} ${s.start_time}–${s.end_time}">${s.title}</div>`;
+    });
+
     cell.innerHTML = html;
     grid.appendChild(cell);
   }
@@ -1624,6 +1797,7 @@ function renderDayCal() {
 
   const dateStr = target.toISOString().slice(0,10);
   const dayAsgs = getAssignmentsByDate(dateStr);
+  const dayShifts = getWorkShiftsByDate(dateStr);
 
   const hours = Array.from({length:24}, (_,i) => i); // full 24h
   let html = `<div class="day-header-row">${target.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})}</div>`;
@@ -1631,16 +1805,41 @@ function renderDayCal() {
   hours.forEach(h => {
     const label = h < 12 ? `${h}:00 AM` : h === 12 ? '12:00 PM' : `${h-12}:00 PM`;
     const slotAsgs = dayAsgs.filter(a => parseLocalDate(a.due_date).getHours() === h);
-    html += `<div class="day-slot">
+
+    // A shift covers hour h if startHour <= h and (endHour > h, or endHour === h with endMinute > 0)
+    const slotShifts = dayShifts.filter(s => {
+      const sh = parseInt(s.start_time.split(':')[0], 10);
+      const eh = parseInt(s.end_time.split(':')[0], 10);
+      const em = parseInt(s.end_time.split(':')[1], 10);
+      return sh <= h && (eh > h || (eh === h && em > 0));
+    });
+
+    // Build slot-level background/border from any covering shift
+    let slotBg = '';
+    let slotBorder = '';
+    if (slotShifts.length > 0) {
+      const hex = slotShifts[0].color_hex;
+      slotBg = `background:${hex}22;`;
+      slotBorder = `border-left:3px solid ${hex};`;
+    }
+    const slotClass = slotShifts.length > 0 ? ' shift-slot' : '';
+
+    const startShifts = slotShifts.filter(s => parseInt(s.start_time.split(':')[0], 10) === h);
+    const shiftLabelHtml = startShifts.map(s => {
+      const tip = `${s.title} ${s.start_time}–${s.end_time}${s.location ? ' @ ' + s.location : ''}`;
+      return `<div class="day-event" style="background:${s.color_hex};" title="${tip}">${s.title} <span style="font-weight:400;opacity:0.85;">${s.start_time}–${s.end_time}</span></div>`;
+    }).join('');
+
+    html += `<div class="day-slot${slotClass}" style="${slotBg}${slotBorder}">
       <div class="day-time">${label}</div>
       <div class="day-events">${slotAsgs.map(a => `
         <div class="day-event" style="background:${a.course_color};" onclick="openTaskView(${a.id})"
              title="Click to edit">${a.title}</div>
-      `).join('')}</div>
+      `).join('')}${shiftLabelHtml}</div>
     </div>`;
   });
 
-  if (!dayAsgs.length) html += `<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px;font-weight:600;">Nothing due today 🎉</div>`;
+  if (!dayAsgs.length && !dayShifts.length) html += `<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px;font-weight:600;">Nothing due today 🎉</div>`;
   dv.innerHTML = html;
 }
 

@@ -101,11 +101,12 @@ class PersonalEventForm(forms.ModelForm):
 class WorkShiftForm(forms.ModelForm):
     class Meta:
         model = WorkShift
-        fields = ["job_title", "shift_date", "start_time", "end_time", "location", "notes"]
+        fields = ["job_title", "shift_date", "start_time", "end_time", "location", "notes", "color_hex"]
         widgets = {
             "shift_date": forms.DateInput(attrs={"type": "date"}),
             "start_time": forms.TimeInput(attrs={"type": "time"}),
             "end_time": forms.TimeInput(attrs={"type": "time"}),
+            "color_hex": forms.HiddenInput(),
         }
 
 
