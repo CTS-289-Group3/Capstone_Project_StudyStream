@@ -1,535 +1,294 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}StudyStream{% endblock %}</title>
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
-    /* ─────────────────────────────────────────
-       CSS CUSTOM PROPERTIES  (light + dark)
-    ───────────────────────────────────────── */
     :root {
-      --ss-yellow:       #FCAF17;
-      --ss-yellow-light: #FFDD00;
-      --ss-blue:         #007DC5;
-      --ss-blue-deep:    #034EA2;
-      --ss-blue-light:   #53B7E8;
-      --ss-ink:          #231F20;
-      --ss-green:        #00B04C;
-
-      /* Semantic tokens — light mode */
-      --bg-page:         #f0f4fc;
-      --bg-card:         rgba(255,255,255,0.65);
-      --bg-card-solid:   #ffffff;
-      --bg-nav:          rgba(255,255,255,0.72);
-      --border-card:     rgba(255,255,255,0.85);
-      --border-subtle:   rgba(3,78,162,0.10);
-      --text-primary:    #1a2538;
-      --text-secondary:  #4f6380;
-      --text-muted:      #8a9bb5;
-      --shadow-card:     0 8px 32px rgba(3,78,162,0.10), 0 2px 8px rgba(3,78,162,0.06);
-      --shadow-nav:      0 4px 24px rgba(3,78,162,0.08);
-      --shadow-glow:     0 0 0 3px rgba(0,125,197,0.18);
-      --glass-blur:      blur(18px);
-      --glass-bg:        rgba(255,255,255,0.62);
-      --glass-border:    rgba(255,255,255,0.80);
-      --input-bg:        rgba(240,246,255,0.80);
-      --input-border:    rgba(3,78,162,0.14);
-      --scrollbar-thumb: rgba(0,125,197,0.30);
+      --ss-yellow:      #FCAF17;
+      --ss-yellow2:     #FFDD00;
+      --ss-blue:        #007DC5;
+      --ss-blue-deep:   #034EA2;
+      --ss-blue-light:  #53B7E8;
+      --ss-green:       #00B04C;
+      --ss-ink:         #231F20;
     }
-
     [data-theme="dark"] {
-      --bg-page:         #0d1117;
-      --bg-card:         rgba(22,30,46,0.80);
-      --bg-card-solid:   #161e2e;
-      --bg-nav:          rgba(13,17,23,0.82);
-      --border-card:     rgba(255,255,255,0.07);
-      --border-subtle:   rgba(83,183,232,0.12);
-      --text-primary:    #e8edf5;
-      --text-secondary:  #8fa3bf;
-      --text-muted:      #4f6380;
-      --shadow-card:     0 8px 32px rgba(0,0,0,0.40), 0 2px 8px rgba(0,0,0,0.30);
-      --shadow-nav:      0 4px 24px rgba(0,0,0,0.40);
-      --shadow-glow:     0 0 0 3px rgba(83,183,232,0.20);
-      --glass-blur:      blur(18px);
-      --glass-bg:        rgba(22,30,46,0.72);
-      --glass-border:    rgba(255,255,255,0.06);
-      --input-bg:        rgba(255,255,255,0.05);
-      --input-border:    rgba(83,183,232,0.18);
-      --scrollbar-thumb: rgba(83,183,232,0.30);
+      --bg:             #080d14;
+      --bg2:            #0d1520;
+      --card:           rgba(15,24,40,0.82);
+      --card-border:    rgba(83,183,232,0.10);
+      --nav-bg:         rgba(10,16,28,0.82);
+      --nav-border:     rgba(83,183,232,0.18);
+      --text:           #e4eaf5;
+      --text2:          #8fa8c8;
+      --muted:          #4a6080;
+      --input-bg:       rgba(255,255,255,0.04);
+      --input-border:   rgba(83,183,232,0.18);
+      --glow:           0 0 0 3px rgba(83,183,232,0.20);
+      --shadow:         0 8px 32px rgba(0,0,0,0.45);
+      --shadow-lg:      0 20px 60px rgba(0,0,0,0.55);
+      --scrollbar:      rgba(83,183,232,0.25);
     }
-
-    /* ─────────────────────────────────────────
-       RESET & BASE
-    ───────────────────────────────────────── */
+    [data-theme="light"] {
+      --bg:             #f0f5fc;
+      --bg2:            #e6eef8;
+      --card:           rgba(255,255,255,0.72);
+      --card-border:    rgba(3,78,162,0.10);
+      --nav-bg:         rgba(235,242,255,0.88);
+      --nav-border:     rgba(3,78,162,0.16);
+      --text:           #1a2538;
+      --text2:          #4f6380;
+      --muted:          #8a9bb5;
+      --input-bg:       rgba(240,246,255,0.80);
+      --input-border:   rgba(3,78,162,0.14);
+      --glow:           0 0 0 3px rgba(0,125,197,0.18);
+      --shadow:         0 8px 32px rgba(3,78,162,0.10);
+      --shadow-lg:      0 20px 60px rgba(3,78,162,0.14);
+      --scrollbar:      rgba(0,125,197,0.25);
+    }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html {
-      scroll-behavior: smooth;
-      scrollbar-width: thin;
-      scrollbar-color: var(--scrollbar-thumb) transparent;
-    }
-
+    html { scroll-behavior: smooth; scrollbar-width: thin; scrollbar-color: var(--scrollbar) transparent; }
     body {
-      font-family: 'Nunito', Arial, sans-serif;
-      background: var(--bg-page);
-      color: var(--text-primary);
+      font-family: 'Nunito', sans-serif;
+      background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      transition: background 0.35s ease, color 0.35s ease;
+      transition: background 0.3s ease, color 0.3s ease;
       -webkit-font-smoothing: antialiased;
     }
-
-    /* Dark-mode page background mesh */
     [data-theme="dark"] body::before {
       content: '';
-      position: fixed;
-      inset: 0;
+      position: fixed; inset: 0;
       background:
-        radial-gradient(ellipse 60% 40% at 20% 10%, rgba(3,78,162,0.18) 0%, transparent 60%),
-        radial-gradient(ellipse 50% 50% at 80% 80%, rgba(0,125,197,0.10) 0%, transparent 55%);
-      pointer-events: none;
-      z-index: 0;
+        radial-gradient(ellipse 70% 50% at 15% 0%, rgba(3,78,162,0.22) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 60% at 85% 90%, rgba(0,125,197,0.12) 0%, transparent 55%);
+      pointer-events: none; z-index: 0;
     }
-
-    /* Light-mode page background */
     [data-theme="light"] body::before {
       content: '';
-      position: fixed;
-      inset: 0;
+      position: fixed; inset: 0;
       background:
-        radial-gradient(ellipse 60% 40% at 10% 5%, rgba(252,175,23,0.10) 0%, transparent 55%),
-        radial-gradient(ellipse 50% 50% at 85% 85%, rgba(0,125,197,0.08) 0%, transparent 55%);
-      pointer-events: none;
-      z-index: 0;
+        radial-gradient(ellipse 60% 40% at 10% 5%, rgba(252,175,23,0.08) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 50% at 85% 85%, rgba(0,125,197,0.06) 0%, transparent 55%);
+      pointer-events: none; z-index: 0;
     }
-
     a { text-decoration: none; color: inherit; }
 
-    /* ─────────────────────────────────────────
-       GLASSMORPHIC NAV
-    ───────────────────────────────────────── */
-    .ss-nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 32px;
-      height: 68px;
-      background: var(--bg-nav);
-      backdrop-filter: var(--glass-blur);
-      -webkit-backdrop-filter: var(--glass-blur);
-      border-bottom: 1px solid var(--glass-border);
-      box-shadow: var(--shadow-nav);
-      transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
-      animation: slideDown 0.5s cubic-bezier(0.22,1,0.36,1) both;
+    /* ── Glass Pill Nav ── */
+    .ss-nav-outer {
+      position: sticky; top: 0; z-index: 200;
+      padding: 10px 24px;
+      animation: navDown 0.5s cubic-bezier(0.22,1,0.36,1) both;
     }
-
-    @keyframes slideDown {
+    @keyframes navDown {
       from { transform: translateY(-100%); opacity: 0; }
       to   { transform: translateY(0);     opacity: 1; }
     }
-
-    .ss-logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
-    }
-
-    .ss-logo img {
-      height: 44px;
-      width: auto;
-      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
-    }
-
-    .ss-logo:hover img { transform: scale(1.06) rotate(-2deg); }
-
-    .ss-nav-links {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .ss-nav-links a {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text-secondary);
-      padding: 8px 14px;
-      border-radius: 10px;
-      transition: color 0.2s, background 0.2s;
-    }
-
-    .ss-nav-links a:hover {
-      color: var(--ss-blue);
-      background: rgba(0,125,197,0.08);
-    }
-
-    .ss-nav-links a.active {
-      color: var(--ss-blue-deep);
-      background: rgba(0,125,197,0.10);
-    }
-
-    .ss-nav-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    /* Dark mode toggle */
-    .ss-theme-toggle {
-      position: relative;
-      width: 52px;
-      height: 28px;
-      cursor: pointer;
-    }
-
-    .ss-theme-toggle input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-      position: absolute;
-    }
-
-    .ss-toggle-track {
-      position: absolute;
-      inset: 0;
+    .ss-nav {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 0 20px 0 16px;
+      height: 56px;
+      background: var(--nav-bg);
+      backdrop-filter: blur(40px) saturate(220%);
+      -webkit-backdrop-filter: blur(40px) saturate(220%);
+      border: 1px solid var(--nav-border);
       border-radius: 999px;
-      background: rgba(0,125,197,0.15);
-      border: 1.5px solid var(--input-border);
-      transition: background 0.3s ease, border-color 0.3s ease;
-      display: flex;
-      align-items: center;
-      padding: 3px;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -1px 0 rgba(0,0,0,0.08);
+      max-width: 1380px;
+      margin: 0 auto;
+      transition: background 0.3s, border-color 0.3s;
     }
-
-    .ss-toggle-track::after {
-      content: '☀️';
-      font-size: 13px;
-      position: absolute;
-      left: 4px;
-      transition: opacity 0.2s;
+    [data-theme="dark"] .ss-nav {
+      box-shadow: 0 4px 32px rgba(0,0,0,0.50), inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -1px 0 rgba(0,0,0,0.15);
     }
-
-    .ss-toggle-track::before {
-      content: '🌙';
-      font-size: 13px;
-      position: absolute;
-      right: 4px;
-      opacity: 0.4;
-      transition: opacity 0.2s;
+    .ss-logo-link {
+      display: flex; align-items: center;
+      text-decoration: none; flex-shrink: 0;
     }
-
-    .ss-toggle-thumb {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--ss-blue), var(--ss-blue-deep));
-      box-shadow: 0 2px 6px rgba(3,78,162,0.35);
+    .ss-logo-link img {
+      height: 34px; width: auto;
       transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
-      position: relative;
-      z-index: 1;
     }
+    .ss-logo-link:hover img { transform: scale(1.10) rotate(-3deg); }
+    .nav-logo-dark  { display: block; }
+    .nav-logo-light { display: none; }
+    [data-theme="light"] .nav-logo-dark  { display: none; }
+    [data-theme="light"] .nav-logo-light { display: block; }
+    .ss-nav-right { display: flex; align-items: center; gap: 10px; }
 
-    [data-theme="dark"] .ss-toggle-thumb { transform: translateX(24px); }
-    [data-theme="dark"] .ss-toggle-track { background: rgba(83,183,232,0.15); }
-    [data-theme="dark"] .ss-toggle-track::after { opacity: 0.4; }
-    [data-theme="dark"] .ss-toggle-track::before { opacity: 1; }
+    /* Toggle */
+    .ss-toggle { position: relative; width: 50px; height: 26px; cursor: pointer; flex-shrink: 0; }
+    .ss-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .ss-toggle-track {
+      position: absolute; inset: 0; border-radius: 999px;
+      background: var(--input-bg); border: 1.5px solid var(--input-border);
+      transition: all 0.3s ease;
+    }
+    .ss-toggle-track .sun { position: absolute; left: 4px; top: 50%; transform: translateY(-50%); font-size: 11px; transition: opacity 0.2s; }
+    .ss-toggle-track .moon { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); font-size: 11px; transition: opacity 0.2s; }
+    [data-theme="dark"]  .ss-toggle-track .sun  { opacity: 0.35; }
+    [data-theme="dark"]  .ss-toggle-track .moon { opacity: 1; }
+    [data-theme="light"] .ss-toggle-track .sun  { opacity: 1; }
+    [data-theme="light"] .ss-toggle-track .moon { opacity: 0.35; }
+    .ss-toggle-thumb {
+      position: absolute; top: 2px; left: 2px;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--ss-blue), var(--ss-blue-deep));
+      box-shadow: 0 2px 8px rgba(3,78,162,0.40);
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1); z-index: 1;
+    }
+    [data-theme="dark"]  .ss-toggle-thumb { transform: translateX(24px); }
+    [data-theme="light"] .ss-toggle-thumb { transform: translateX(0); }
 
-    /* Nav buttons */
+    /* Buttons */
     .ss-btn {
       font-family: 'Nunito', sans-serif;
-      font-size: 13px;
-      font-weight: 800;
-      padding: 9px 18px;
-      border-radius: 999px;
-      cursor: pointer;
-      border: none;
-      transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+      font-size: 13px; font-weight: 800;
+      padding: 8px 18px; border-radius: 999px;
+      cursor: pointer; border: none;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+      display: inline-flex; align-items: center; gap: 6px;
       text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
     }
-
-    .ss-btn:hover { transform: translateY(-2px); opacity: 0.92; }
+    .ss-btn:hover  { transform: translateY(-2px); }
     .ss-btn:active { transform: translateY(0); }
+    .ss-btn-ghost  { background: transparent; border: 1.8px solid var(--ss-blue); color: var(--ss-blue); }
+    .ss-btn-solid  { background: linear-gradient(135deg, var(--ss-blue), var(--ss-blue-deep)); color: #fff; box-shadow: 0 6px 20px rgba(3,78,162,0.30); }
+    .ss-btn-solid:hover { box-shadow: 0 10px 28px rgba(3,78,162,0.42); }
+    .ss-btn-yellow { background: linear-gradient(135deg, var(--ss-yellow), #e8950e); color: #1a1000; box-shadow: 0 6px 20px rgba(252,175,23,0.30); font-weight: 900; }
 
-    .ss-btn-ghost {
-      background: transparent;
-      border: 1.8px solid var(--ss-blue);
-      color: var(--ss-blue);
-    }
-
-    .ss-btn-solid {
-      background: linear-gradient(135deg, var(--ss-blue) 0%, var(--ss-blue-deep) 100%);
-      color: #fff;
-      box-shadow: 0 6px 18px rgba(3,78,162,0.25);
-    }
-
-    .ss-btn-solid:hover {
-      box-shadow: 0 10px 28px rgba(3,78,162,0.35);
-    }
-
-    /* User chip (shown when logged in) */
     .ss-user-chip {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      border-radius: 999px;
-      padding: 5px 14px 5px 5px;
-      backdrop-filter: blur(8px);
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--text-primary);
-      transition: background 0.2s;
+      display: flex; align-items: center; gap: 8px;
+      background: var(--card); border: 1px solid var(--card-border);
+      border-radius: 999px; padding: 5px 14px 5px 5px;
+      backdrop-filter: blur(8px); font-size: 13px; font-weight: 700; color: var(--text);
     }
-
-    .ss-user-chip:hover { background: var(--input-bg); }
-
     .ss-avatar {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
+      width: 28px; height: 28px; border-radius: 50%;
       background: linear-gradient(135deg, var(--ss-yellow), var(--ss-blue));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      font-weight: 800;
-      color: #fff;
-      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 900; color: #fff; flex-shrink: 0;
     }
 
-    /* ─────────────────────────────────────────
-       MAIN CONTENT AREA
-    ───────────────────────────────────────── */
-    .ss-content {
-      flex: 1;
-      position: relative;
-      z-index: 1;
-    }
+    .ss-content { flex: 1; position: relative; z-index: 1; }
 
-    /* ─────────────────────────────────────────
-       GLASSMORPHIC CARD UTILITY
-    ───────────────────────────────────────── */
-    .glass-card {
-      background: var(--glass-bg);
-      backdrop-filter: var(--glass-blur);
-      -webkit-backdrop-filter: var(--glass-blur);
-      border: 1px solid var(--glass-border);
-      border-radius: 20px;
-      box-shadow: var(--shadow-card);
-      transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
-    }
-
-    .glass-card:hover {
-      box-shadow: 0 12px 40px rgba(3,78,162,0.14), 0 4px 12px rgba(3,78,162,0.08);
-      transform: translateY(-2px);
-      transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.25s ease;
-    }
-
-    /* ─────────────────────────────────────────
-       WAVE SVG UTILITY
-    ───────────────────────────────────────── */
-    .ss-wave {
-      width: 100%;
-      display: block;
-      margin-top: -2px;
-    }
-
-    /* ─────────────────────────────────────────
-       FOOTER
-    ───────────────────────────────────────── */
+    /* ── Glass Pill Footer ── */
+    .ss-footer-outer { position: relative; z-index: 1; padding: 8px 24px 16px; }
     .ss-footer {
-      position: relative;
-      z-index: 1;
-      background: var(--bg-card);
-      backdrop-filter: var(--glass-blur);
-      -webkit-backdrop-filter: var(--glass-blur);
-      border-top: 1px solid var(--glass-border);
-      padding: 20px 32px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 14px;
-      transition: background 0.35s ease;
+      background: var(--nav-bg);
+      backdrop-filter: blur(40px) saturate(220%);
+      -webkit-backdrop-filter: blur(40px) saturate(220%);
+      border: 1px solid var(--nav-border);
+      border-radius: 999px;
+      box-shadow: 0 -2px 24px rgba(0,0,0,0.14), inset 0 1px 0 rgba(255,255,255,0.10);
+      padding: 10px 26px;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 10px;
+      max-width: 1380px; margin: 0 auto;
+      transition: background 0.3s;
     }
-
-    .ss-footer-brand {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 16px;
-      font-weight: 900;
-      letter-spacing: 0.02em;
-    }
-
-    .ss-footer-brand .study { color: var(--ss-yellow); }
-    .ss-footer-brand .stream { color: var(--ss-blue); }
-
-    .ss-footer-copy {
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-
-    .ss-footer-links {
-      display: flex;
-      gap: 16px;
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-
+    .ss-footer-logo { height: 28px; width: auto; opacity: 0.75; transition: opacity 0.2s; }
+    .ss-footer-logo:hover { opacity: 1; }
+    .footer-logo-dark  { display: block; }
+    .footer-logo-light { display: none; }
+    [data-theme="light"] .footer-logo-dark  { display: none; }
+    [data-theme="light"] .footer-logo-light { display: block; }
+    .ss-footer-copy, .ss-footer-links { font-size: 12px; color: var(--muted); }
+    .ss-footer-links { display: flex; gap: 16px; }
     .ss-footer-links a:hover { color: var(--ss-blue); }
 
-    /* ─────────────────────────────────────────
-       MESSAGES / ALERTS
-    ───────────────────────────────────────── */
-    .ss-alert {
-      padding: 12px 16px;
-      border-radius: 12px;
-      font-size: 13px;
-      font-weight: 600;
-      border: 1px solid;
-      animation: fadeIn 0.3s ease;
+    /* Alerts */
+    .ss-alert { padding: 12px 16px; border-radius: 12px; font-size: 13px; font-weight: 600; border: 1px solid; animation: alertIn 0.3s ease; }
+    @keyframes alertIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+    .ss-alert-error   { background: rgba(220,38,38,0.10); border-color: rgba(220,38,38,0.25); color: #f87171; }
+    .ss-alert-success { background: rgba(0,176,76,0.10);  border-color: rgba(0,176,76,0.25);  color: #4ade80; }
+
+    .glass {
+      background: var(--card); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border); border-radius: 20px;
+      box-shadow: var(--shadow); transition: background 0.3s, border-color 0.3s;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-6px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .ss-alert-error {
-      background: rgba(220,38,38,0.08);
-      border-color: rgba(220,38,38,0.20);
-      color: #dc2626;
-    }
-
-    .ss-alert-success {
-      background: rgba(0,176,76,0.08);
-      border-color: rgba(0,176,76,0.20);
-      color: #00803a;
-    }
-
-    /* ─────────────────────────────────────────
-       RESPONSIVE NAV
-    ───────────────────────────────────────── */
     @media (max-width: 768px) {
-      .ss-nav {
-        padding: 0 18px;
-        flex-wrap: wrap;
-        height: auto;
-        padding-top: 12px;
-        padding-bottom: 12px;
-        gap: 10px;
-      }
-
-      .ss-nav-links { display: none; }
-
-      .ss-nav-right { gap: 8px; }
-
-      .ss-footer {
-        flex-direction: column;
-        text-align: center;
-        gap: 8px;
-      }
+      .ss-nav-outer { padding: 8px 12px; }
+      .ss-nav { height: 50px; padding: 0 14px 0 10px; }
+      .ss-footer-outer { padding: 6px 12px 12px; }
+      .ss-footer { flex-direction: column; text-align: center; border-radius: 24px; padding: 12px 20px; }
     }
   </style>
   {% block extra_head %}{% endblock %}
 </head>
 <body>
 
-  <!-- ── NAVIGATION ── -->
+<div class="ss-nav-outer">
   <nav class="ss-nav">
-    <a class="ss-logo" href="{% url 'home' %}">
-      <img src="{% static 'accounts/images/logo2.png' %}" alt="StudyStream">
+    <a class="ss-logo-link" href="{% url 'home' %}">
+      <img class="nav-logo-dark"  src="{% static 'accounts/images/logo_icon.svg' %}" alt="StudyStream">
+      <img class="nav-logo-light" src="{% static 'accounts/images/logo_icon.svg' %}" alt="StudyStream">
     </a>
-
-    <div class="ss-nav-links">
-      {% block nav_links %}
-        <a href="{% url 'home' %}">Home</a>
-        <a href="#features">Features</a>
-      {% endblock %}
-    </div>
-
     <div class="ss-nav-right">
-      <!-- Dark mode toggle -->
-      <label class="ss-theme-toggle" aria-label="Toggle dark mode" title="Toggle dark/light mode">
+      <label class="ss-toggle" title="Toggle theme" aria-label="Toggle theme">
         <input type="checkbox" id="themeToggle">
         <span class="ss-toggle-track">
+          <span class="sun">☀️</span>
+          <span class="moon">🌙</span>
           <span class="ss-toggle-thumb"></span>
         </span>
       </label>
-
       {% block nav_actions %}
         <a class="ss-btn ss-btn-ghost" href="{% url 'login' %}">Sign in</a>
-        <a class="ss-btn ss-btn-solid" href="{% url 'register' %}">Get started</a>
+        <a class="ss-btn ss-btn-solid" href="{% url 'register' %}">Get started free</a>
       {% endblock %}
     </div>
   </nav>
+</div>
 
-  <!-- ── FLASH MESSAGES ── -->
-  {% if messages %}
-    <div style="position:relative;z-index:1;padding:12px 32px 0;display:flex;flex-direction:column;gap:8px;">
-      {% for message in messages %}
-        <div class="ss-alert {% if 'success' in message.tags %}ss-alert-success{% else %}ss-alert-error{% endif %}">
-          {{ message }}
-        </div>
-      {% endfor %}
-    </div>
-  {% endif %}
+{% if messages %}
+  <div style="position:relative;z-index:1;padding:8px 36px 0;display:flex;flex-direction:column;gap:8px;">
+    {% for message in messages %}
+      <div class="ss-alert {% if 'success' in message.tags %}ss-alert-success{% else %}ss-alert-error{% endif %}">{{ message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
 
-  <!-- ── PAGE CONTENT ── -->
-  <main class="ss-content">
-    {% block content %}{% endblock %}
-  </main>
+<main class="ss-content">{% block content %}{% endblock %}</main>
 
-  <!-- ── FOOTER ── -->
+<div class="ss-footer-outer">
   <footer class="ss-footer">
-    <div class="ss-footer-brand">
-      <span class="study">STUDY</span><span class="stream">STREAM</span>
-    </div>
+    <a href="{% url 'home' %}" style="display:flex;align-items:center;">
+      <img class="ss-footer-logo footer-logo-dark"  src="{% static 'accounts/images/logo_icon.svg' %}" alt="StudyStream">
+      <img class="ss-footer-logo footer-logo-light" src="{% static 'accounts/images/logo_icon.svg' %}" alt="StudyStream">
+    </a>
     <div class="ss-footer-copy">© 2025 StudyStream. All rights reserved.</div>
     <div class="ss-footer-links">
-      <a href="#">Privacy</a>
-      <a href="#">Terms</a>
-      <a href="#">Contact</a>
+      <a href="#">Privacy</a><a href="#">Terms</a><a href="#">Contact</a>
     </div>
   </footer>
+</div>
 
-  <!-- ── DARK MODE SCRIPT ── -->
-  <script>
-    (function() {
-      const toggle = document.getElementById('themeToggle');
-      const html   = document.documentElement;
-      const saved  = localStorage.getItem('ss-theme');
+<script>
+(function(){
+  var html=document.documentElement, toggle=document.getElementById('themeToggle');
+  var theme=localStorage.getItem('ss-theme')||'dark';
+  html.setAttribute('data-theme',theme);
+  if(toggle) toggle.checked=(theme==='light');
+  if(toggle) toggle.addEventListener('change',function(){
+    var next=this.checked?'light':'dark';
+    html.setAttribute('data-theme',next);
+    localStorage.setItem('ss-theme',next);
+  });
+})();
+</script>
 
-      // Apply saved or system preference instantly (no flash)
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const theme = saved || (prefersDark ? 'dark' : 'light');
-      html.setAttribute('data-theme', theme);
-      if (toggle) toggle.checked = (theme === 'dark');
-
-      if (toggle) {
-        toggle.addEventListener('change', function() {
-          const next = this.checked ? 'dark' : 'light';
-          html.setAttribute('data-theme', next);
-          localStorage.setItem('ss-theme', next);
-        });
-      }
-    })();
-  </script>
-
-  {% block extra_scripts %}{% endblock %}
+{% block extra_scripts %}{% endblock %}
 </body>
 </html>
