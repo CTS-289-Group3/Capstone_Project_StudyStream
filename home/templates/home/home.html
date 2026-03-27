@@ -266,6 +266,19 @@
 /* MAIN */
 .dash-main { display:flex; flex-direction:column; gap:18px; }
 
+.calendar-layout {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 320px;
+  gap:16px;
+  align-items:start;
+}
+
+.calendar-side-rail {
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+
 /* ── CALENDAR ── */
 .calendar-card { background:var(--card); backdrop-filter:blur(20px); border:1px solid var(--card-border); border-radius:20px; padding:18px; box-shadow:var(--shadow); overflow:visible; }
 .calendar-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:8px; }
@@ -298,7 +311,7 @@
 #weekGrid.active {
   display:grid;
   grid-template-columns: 52px repeat(7,1fr);
-  grid-auto-rows: 28px;
+  grid-auto-rows: 52px;
   gap:1px;
   overflow-x:auto;
   max-height:520px;
@@ -306,13 +319,15 @@
 }
 .week-day-header:hover,.week-day-date:hover { color:var(--ss-blue-light) !important; }
 .week-day-header { font-size:10px;font-weight:800;color:var(--text2);text-align:center;padding:4px 2px;letter-spacing:.05em;position:sticky;top:0;background:var(--card);z-index:2; }
-.week-day-date { font-size:11px;font-weight:900;text-align:center;padding:3px 2px;color:var(--text2);position:sticky;top:28px;background:var(--card);z-index:2; }
+.week-day-date { font-size:11px;font-weight:900;text-align:center;padding:3px 2px;color:var(--text2);position:sticky;top:52px;background:var(--card);z-index:2; }
 .week-day-header.today-col,.week-day-date.today-col { color:var(--ss-blue); }
 .today-badge { display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--ss-blue);color:#fff;font-size:11px;font-weight:900; }
-.week-time-label { font-size:10px;font-weight:700;color:var(--muted);text-align:right;padding:0 6px 0 0;line-height:28px; }
+.week-time-label { font-size:10px;font-weight:700;color:var(--muted);text-align:right;padding:6px 6px 0 0;line-height:1; }
 .week-cell { background:var(--input-bg);border-radius:5px;position:relative;cursor:pointer;transition:background .12s; }
 .week-cell:hover { background:var(--card-border); }
-.cal-event { position:absolute;left:2px;right:2px;border-radius:5px;padding:2px 5px;font-size:9px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;z-index:1;cursor:pointer; }
+.cal-event { position:absolute;left:2px;right:2px;top:2px;bottom:2px;border-radius:5px;padding:3px 5px;font-size:9px;font-weight:700;overflow:hidden;z-index:1;cursor:pointer;display:flex;flex-direction:column;justify-content:center;gap:1px; }
+.cal-event-title { font-size:9px;font-weight:700;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+.cal-event-detail { font-size:8px;font-weight:500;opacity:0.88;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
 
 /* Day view */
 #dayView { display:none; }
@@ -321,7 +336,9 @@
 .day-slot { display:flex; min-height:52px; border-bottom:1px solid var(--card-border); }
 .day-time { font-size:11px;font-weight:700;color:var(--muted);width:56px;flex-shrink:0;padding:8px 10px 0 0;text-align:right;border-right:1px solid var(--card-border); }
 .day-events { flex:1;padding:5px 8px;display:flex;flex-direction:column;gap:4px; }
-.day-event { border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;color:#fff;display:flex;align-items:center;gap:6px;width:100%;box-sizing:border-box;cursor:default; }
+.day-event { border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;color:#fff;display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;box-sizing:border-box;cursor:default; }
+.day-event-title { font-size:12px;font-weight:700;line-height:1.3; }
+.day-event-detail { font-size:11px;font-weight:400;opacity:0.87;line-height:1.3; }
 .day-event.clickable { cursor:pointer; }
 .day-slot.shift-slot { background:transparent; }
 
@@ -475,6 +492,7 @@ body.modal-open { overflow:hidden; }
 @media(max-width:1024px) {
   .dash-wrap { grid-template-columns:1fr; }
   .dash-stats { grid-template-columns:repeat(2,1fr); }
+  .calendar-layout { grid-template-columns:1fr; }
 }
 @media(max-width:600px) {
   .dash-wrap { padding:14px 12px 36px; gap:12px; }
@@ -606,24 +624,17 @@ body.modal-open { overflow:hidden; }
       </div>
     </div>
 
-    <!-- Personal Events (this week) -->
+    <!-- Upcoming Events -->
     <div class="g-card">
       <div class="g-card-title">
-        📋 Personal Events
-        <span id="sidebarPersonalEventsCount" style="margin-left:auto;font-size:9px;font-weight:800;padding:2px 7px;border-radius:999px;background:rgba(252,175,23,.18);color:#b07d00;letter-spacing:.05em;"></span>
+        📅 Upcoming Events
+        <span id="sidebarUpcomingCount" style="margin-left:auto;font-size:9px;font-weight:800;padding:2px 7px;border-radius:999px;background:rgba(99,102,241,.15);color:#4338ca;letter-spacing:.05em;"></span>
       </div>
-      <div id="sidebarPersonalEvents"></div>
-      <a href="{% url 'add_personal_event' %}" class="add-new-link">＋ Add personal event</a>
-    </div>
-
-    <!-- Work Shifts (this week) -->
-    <div class="g-card">
-      <div class="g-card-title">
-        💼 Work Shifts
-        <span id="sidebarWorkShiftsCount" style="margin-left:auto;font-size:9px;font-weight:800;padding:2px 7px;border-radius:999px;background:rgba(16,185,129,.15);color:#047857;letter-spacing:.05em;"></span>
+      <div id="sidebarUpcoming"></div>
+      <div style="display:flex;gap:8px;margin-top:6px;">
+        <a href="{% url 'add_personal_event' %}" class="add-new-link" style="flex:1;text-align:center;">＋ Personal event</a>
+        <a href="{% url 'add_work_shift' %}" class="add-new-link" style="flex:1;text-align:center;">＋ Work shift</a>
       </div>
-      <div id="sidebarWorkShifts"></div>
-      <a href="{% url 'add_work_shift' %}" class="add-new-link">＋ Add work shift</a>
     </div>
 
   </aside>
@@ -1640,10 +1651,11 @@ function openTaskView(id) {
 ═════════════════════════════════════════════ */
 let calView = 'week';
 let calOffset = 0; // weeks or months offset from today
+let suppressDayAutoScroll = false;
 
-function switchCalView(v) {
+function switchCalView(v, keepOffset = false) {
   calView = v;
-  calOffset = 0;
+  if (!keepOffset) calOffset = 0;
   document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
   document.querySelector(`.view-tab[data-view="${v}"]`).classList.add('active');
   ['monthGrid','weekGrid','dayView'].forEach(id => $(id).classList.remove('active'));
@@ -1667,6 +1679,18 @@ function getWorkShiftsByDate(dateStr) {
 
 function getPersonalEventsByDate(dateStr) {
   return state.personalEvents.filter(e => e.event_date === dateStr);
+}
+
+function startOfLocalDay(date) {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function dayOffsetFromToday(targetDate) {
+  const todayStart = startOfLocalDay(new Date());
+  const targetStart = startOfLocalDay(targetDate);
+  return Math.round((targetStart - todayStart) / 86400000);
 }
 
 /* ── WEEK ── */
@@ -1708,8 +1732,12 @@ function renderWeekCal() {
     el.textContent = days[i];
     el.title = 'Click to view day';
     el.style.cursor = 'pointer';
-    const dayOffset = Math.round((d - today) / 86400000);
-    el.onclick = () => { calOffset = dayOffset; switchCalView('day'); };
+    const dayOffset = dayOffsetFromToday(d);
+    el.onclick = () => {
+      calOffset = dayOffset;
+      suppressDayAutoScroll = true;
+      switchCalView('day', true);
+    };
     grid.appendChild(el);
   }
 
@@ -1724,8 +1752,12 @@ function renderWeekCal() {
     else el.textContent = d.getDate();
     el.title = 'Click to view day';
     el.style.cursor = 'pointer';
-    const dayOffset = Math.round((d - today) / 86400000);
-    el.onclick = () => { calOffset = dayOffset; switchCalView('day'); };
+    const dayOffset = dayOffsetFromToday(d);
+    el.onclick = () => {
+      calOffset = dayOffset;
+      suppressDayAutoScroll = true;
+      switchCalView('day', true);
+    };
     grid.appendChild(el);
   }
 
@@ -1742,48 +1774,79 @@ function renderWeekCal() {
       const cell = document.createElement('div');
       cell.className = 'week-cell';
 
-      // Show assignments due on this day (at any hour)
       const asgs = getAssignmentsByDate(dateStr);
-      asgs.forEach(a => {
-        const dh = parseLocalDate(a.due_date).getHours();
-        if (dh === h) {
-          const ev = document.createElement('div');
-          ev.className = 'cal-event';
-          ev.style.cssText = `background:${a.course_color};top:2px;height:22px;`;
-          ev.textContent = a.title;
-          ev.title = `${a.title} — Due ${parseLocalDate(a.due_date).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})}`;
-          ev.onclick = () => openTaskView(a.id);
-          cell.appendChild(ev);
-        }
+      const slotAsgs = asgs.filter(a => parseLocalDate(a.due_date).getHours() === h);
+
+      const pevents = getPersonalEventsByDate(dateStr);
+      const slotPersonal = pevents.filter(pe => {
+        const ph = pe.start_time ? parseInt(pe.start_time.split(':')[0], 10) : 0;
+        return ph === h;
       });
 
-      // Show work shifts starting in this hour
+      // Highlight full shift duration across all covered hour blocks.
       const shifts = getWorkShiftsByDate(dateStr);
+      const slotShifts = shifts.filter(s => {
+        const sh = parseInt(s.start_time.split(':')[0], 10);
+        const eh = parseInt(s.end_time.split(':')[0], 10);
+        const em = parseInt(s.end_time.split(':')[1], 10);
+        return sh <= h && (eh > h || (eh === h && em > 0));
+      });
+      if (slotShifts.length) {
+        const baseHex = slotShifts[0].color_hex;
+        cell.style.background = baseHex;
+        cell.style.borderLeft = `3px solid ${baseHex}`;
+      } else if (slotAsgs.length && slotPersonal.length) {
+        const asgHex = slotAsgs[0].course_color || '#007DC5';
+        const personalHex = slotPersonal[0].color_hex || '#FCAF17';
+        cell.style.background = `linear-gradient(135deg, ${asgHex}, ${personalHex})`;
+        cell.style.borderLeft = `3px solid ${asgHex}`;
+      } else if (slotAsgs.length) {
+        const asgHex = slotAsgs[0].course_color || '#007DC5';
+        cell.style.background = asgHex;
+        cell.style.borderLeft = `3px solid ${asgHex}`;
+      } else if (slotPersonal.length) {
+        const personalHex = slotPersonal[0].color_hex || '#FCAF17';
+        cell.style.background = personalHex;
+        cell.style.borderLeft = `3px solid ${personalHex}`;
+      }
+
+      // Show assignments due on this day (at any hour)
+      slotAsgs.forEach(a => {
+        const ev = document.createElement('div');
+        ev.className = 'cal-event';
+        ev.style.cssText = `background:${a.course_color};`;
+        const dueTime = parseLocalDate(a.due_date).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+        const asgDetail = `Due ${dueTime}${a.course_code ? ' · ' + a.course_code : ''}`;
+        ev.innerHTML = `<div class="cal-event-title">${a.title}</div><div class="cal-event-detail">${asgDetail}</div>`;
+        ev.title = `${a.title} — ${asgDetail}`;
+        ev.onclick = () => openTaskView(a.id);
+        cell.appendChild(ev);
+      });
+
+      // Show work shift label at start hour
       shifts.forEach(s => {
         const sh = parseInt(s.start_time.split(':')[0], 10);
         if (sh === h) {
           const ev = document.createElement('div');
           ev.className = 'cal-event';
-          ev.style.cssText = `background:${s.color_hex};top:2px;height:22px;`;
-          ev.textContent = s.title;
-          ev.title = `${s.title} — ${s.start_time}–${s.end_time}${s.location ? ' @ ' + s.location : ''}`;
+          ev.style.cssText = `background:${s.color_hex};`;
+          const shiftDetail = `${formatTime12(s.start_time)}–${formatTime12(s.end_time)}${s.location ? ' · ' + s.location : ''}`;
+          ev.innerHTML = `<div class="cal-event-title">${s.title}</div><div class="cal-event-detail">${shiftDetail}</div>`;
+          ev.title = `${s.title} — ${shiftDetail}`;
           cell.appendChild(ev);
         }
       });
 
       // Show personal events starting in this hour (or all-day at hour 0)
-      const pevents = getPersonalEventsByDate(dateStr);
-      pevents.forEach(pe => {
-        const ph = pe.start_time ? parseInt(pe.start_time.split(':')[0], 10) : 0;
-        if (ph === h) {
-          const ev = document.createElement('div');
-          ev.className = 'cal-event';
-          ev.style.cssText = `background:${pe.color_hex || '#FCAF17'};color:#1A2540;top:2px;height:22px;`;
-          ev.textContent = pe.title;
-          const timeStr = pe.start_time ? ` — ${pe.start_time}` : '';
-          ev.title = `${pe.title}${timeStr}${pe.location ? ' @ ' + pe.location : ''}`;
-          cell.appendChild(ev);
-        }
+      slotPersonal.forEach(pe => {
+        const ev = document.createElement('div');
+        ev.className = 'cal-event';
+        ev.style.cssText = `background:${pe.color_hex || '#FCAF17'};color:#1A2540;`;
+        const peTime = pe.start_time ? formatTime12(pe.start_time) : '';
+        const peDetail = [peTime, pe.location].filter(Boolean).join(' · ');
+        ev.innerHTML = `<div class="cal-event-title">${pe.title}</div>${peDetail ? '<div class="cal-event-detail">' + peDetail + '</div>' : ''}`;
+        ev.title = `${pe.title}${peDetail ? ' — ' + peDetail : ''}`;
+        cell.appendChild(ev);
       });
 
       grid.appendChild(cell);
@@ -1792,8 +1855,8 @@ function renderWeekCal() {
 
   // Scroll to current hour (or 7am if before 7) so user sees relevant time
   const scrollHour = Math.max(new Date().getHours() - 1, 7);
-  // Each row is 28px, plus 2 header rows (56px)
-  grid.scrollTop = scrollHour * 28;
+  // Each row is 52px, plus 2 header rows (104px)
+  grid.scrollTop = scrollHour * 52;
 }
 
 /* ── MONTH ── */
@@ -1832,7 +1895,11 @@ function renderMonthCal() {
 
     const cell = document.createElement('div');
     cell.className = 'month-cell' + (isToday ? ' today' : '');
-    cell.onclick = () => { calOffset = Math.round((date - today) / 86400000); switchCalView('day'); };
+    cell.onclick = () => {
+      calOffset = dayOffsetFromToday(date);
+      suppressDayAutoScroll = true;
+      switchCalView('day', true);
+    };
 
     let html = `<div class="month-date">${d}</div>`;
     asgs.slice(0,2).forEach(a => {
@@ -1858,9 +1925,9 @@ function renderMonthCal() {
 /* ── DAY ── */
 function renderDayCal() {
   const dv    = $('dayView');
-  const today = new Date();
-  const target = new Date(today);
-  target.setDate(today.getDate() + calOffset);
+  const todayStart = startOfLocalDay(new Date());
+  const target = new Date(todayStart);
+  target.setDate(todayStart.getDate() + calOffset);
 
   $('calLabel').textContent = target.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
 
@@ -1899,19 +1966,23 @@ function renderDayCal() {
     // Shift label pill only at the start hour
     const startShifts = slotShifts.filter(s => parseInt(s.start_time.split(':')[0], 10) === h);
     const shiftHtml = startShifts.map(s => {
-      const tip = `${s.title} ${s.start_time}–${s.end_time}${s.location ? ' @ ' + s.location : ''}`;
-      return `<div class="day-event" style="background:${s.color_hex};" title="${tip}"><span>${s.title}</span><span style="font-weight:400;opacity:0.8;font-size:11px;">${s.start_time}–${s.end_time}</span></div>`;
+      const shiftDetail = `${formatTime12(s.start_time)}–${formatTime12(s.end_time)}${s.location ? ' · ' + s.location : ''}`;
+      const tip = `${s.title} — ${shiftDetail}`;
+      return `<div class="day-event" style="background:${s.color_hex};" title="${tip}"><div class="day-event-title">${s.title}</div><div class="day-event-detail">${shiftDetail}</div></div>`;
     }).join('');
 
     const personalHtml = slotPersonal.map(pe => {
-      const timeStr = pe.start_time || '';
-      const tip = `${pe.title}${timeStr ? ' ' + timeStr : ''}${pe.location ? ' @ ' + pe.location : ''}`;
-      return `<div class="day-event" style="background:${pe.color_hex || '#FCAF17'};color:#1A2540;" title="${tip}"><span>${pe.title}</span>${timeStr ? `<span style="font-weight:400;opacity:0.75;font-size:11px;">${timeStr}</span>` : ''}</div>`;
+      const peTime = pe.start_time ? formatTime12(pe.start_time) : '';
+      const peDetail = [peTime, pe.location].filter(Boolean).join(' · ');
+      const tip = `${pe.title}${peDetail ? ' — ' + peDetail : ''}`;
+      return `<div class="day-event" style="background:${pe.color_hex || '#FCAF17'};color:#1A2540;" title="${tip}"><div class="day-event-title">${pe.title}</div>${peDetail ? '<div class="day-event-detail" style="color:#1A2540;">' + peDetail + '</div>' : ''}</div>`;
     }).join('');
 
-    const asgHtml = slotAsgs.map(a =>
-      `<div class="day-event clickable" style="background:${a.course_color};" onclick="openTaskView(${a.id})" title="${a.title} — click to view"><span>${a.title}</span><span style="font-weight:400;opacity:0.8;font-size:11px;">${a.course_code || ''}</span></div>`
-    ).join('');
+    const asgHtml = slotAsgs.map(a => {
+      const dueTime = parseLocalDate(a.due_date).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+      const asgDetail = `Due ${dueTime}${a.course_code ? ' · ' + a.course_code : ''}`;
+      return `<div class="day-event clickable" style="background:${a.course_color};" onclick="openTaskView(${a.id})" title="${a.title} — click to view"><div class="day-event-title">${a.title}</div><div class="day-event-detail">${asgDetail}</div></div>`;
+    }).join('');
 
     html += `<div class="day-slot${slotShifts.length ? ' shift-slot' : ''}" ${slotStyle}>
       <div class="day-time">${label}</div>
@@ -1924,10 +1995,26 @@ function renderDayCal() {
   }
   dv.innerHTML = html;
 
-  // Scroll to current hour (min 7am)
-  const scrollHour = Math.max(new Date().getHours() - 1, 7);
+  // Auto-scroll to the most relevant part of the day.
+  // Prefer the first scheduled item; otherwise use current hour for today, or 7 AM for other days.
+  const eventHours = [];
+  dayAsgs.forEach(a => eventHours.push(parseLocalDate(a.due_date).getHours()));
+  dayShifts.forEach(s => eventHours.push(parseInt(s.start_time.split(':')[0], 10)));
+  dayPersonal.forEach(pe => eventHours.push(pe.start_time ? parseInt(pe.start_time.split(':')[0], 10) : 0));
+
+  const earliestEventHour = eventHours.length ? Math.min(...eventHours) : null;
+  const isTodayView = localDateStr(target) === localDateStr(new Date());
+  const preferredHour = earliestEventHour !== null
+    ? Math.max(earliestEventHour - 1, 0)
+    : (isTodayView ? Math.max(new Date().getHours() - 1, 7) : 7);
+
+  if (suppressDayAutoScroll) {
+    suppressDayAutoScroll = false;
+    return;
+  }
+
   const slots = dv.querySelectorAll('.day-slot');
-  if (slots[scrollHour]) slots[scrollHour].scrollIntoView({block:'start'});
+  if (slots[preferredHour]) slots[preferredHour].scrollIntoView({block:'start'});
 }
 
 /* Calendar nav */
@@ -1973,72 +2060,67 @@ function formatTime12(t) {
   return `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
 }
 
-/* ═════════════════════════════════════════════
-   SIDEBAR: PERSONAL EVENTS (THIS WEEK)
-═════════════════════════════════════════════ */
-function renderSidebarPersonalEvents() {
-  const el = $('sidebarPersonalEvents');
-  if (!el) return;
-  const todayStr = new Date().toISOString().slice(0,10);
-  const weekEndDate = new Date(); weekEndDate.setDate(weekEndDate.getDate() + 6);
-  const weekEndStr = weekEndDate.toISOString().slice(0,10);
-  const events = state.personalEvents
-    .filter(e => e.event_date >= todayStr && e.event_date <= weekEndStr)
-    .sort((a,b) => a.event_date.localeCompare(b.event_date) || (a.start_time||'').localeCompare(b.start_time||''));
-  const countEl = $('sidebarPersonalEventsCount');
-  if (countEl) countEl.textContent = events.length ? `${events.length} this week` : '';
-  if (!events.length) {
-    el.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px 0;">No events this week.</div>';
-    return;
-  }
-  const DAY = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  el.innerHTML = events.map(e => {
-    const d = new Date(e.event_date + 'T00:00:00');
-    const dateStr = `${DAY[d.getDay()]}, ${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
-    const timeStr = e.start_time ? ` · ${formatTime12(e.start_time)}` : '';
-    const loc = e.location ? `<br>📍 ${e.location}` : '';
-    const recur = e.recurrence_label ? ` · 🔁 ${e.recurrence_label}` : '';
-    return `<div class="sb-event-item">
-      <div class="sb-event-dot" style="background:${e.color_hex || '#FCAF17'};"></div>
-      <div class="sb-event-info">
-        <div class="sb-event-title">${e.title}</div>
-        <div class="sb-event-meta">📅 ${dateStr}${timeStr}${recur}${loc}</div>
-      </div>
-    </div>`;
-  }).join('');
+function localDateTime(dateStr, timeStr = null, useEndOfDayIfNoTime = false) {
+  if (timeStr) return new Date(`${dateStr}T${timeStr}:00`);
+  return new Date(`${dateStr}T${useEndOfDayIfNoTime ? '23:59:59' : '00:00:00'}`);
 }
 
 /* ═════════════════════════════════════════════
-   SIDEBAR: WORK SHIFTS (THIS WEEK)
+   SIDEBAR: UPCOMING EVENTS (COMBINED)
 ═════════════════════════════════════════════ */
-function renderSidebarWorkShifts() {
-  const el = $('sidebarWorkShifts');
+function renderSidebarUpcoming() {
+  const el = $('sidebarUpcoming');
   if (!el) return;
-  const todayStr = new Date().toISOString().slice(0,10);
-  const weekEndDate = new Date(); weekEndDate.setDate(weekEndDate.getDate() + 6);
-  const weekEndStr = weekEndDate.toISOString().slice(0,10);
-  const shifts = state.workShifts
-    .filter(s => s.shift_date >= todayStr && s.shift_date <= weekEndStr)
-    .sort((a,b) => a.shift_date.localeCompare(b.shift_date) || a.start_time.localeCompare(b.start_time));
-  const countEl = $('sidebarWorkShiftsCount');
-  if (countEl) countEl.textContent = shifts.length ? `${shifts.length} this week` : '';
-  if (!shifts.length) {
-    el.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px 0;">No shifts this week.</div>';
+  const now = new Date();
+  const DAY = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+  const eventItems = state.personalEvents
+    .filter(e => localDateTime(e.event_date, e.start_time, true) >= now)
+    .map(e => {
+      const d = new Date(e.event_date + 'T00:00:00');
+      const dateStr = `${DAY[d.getDay()]}, ${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
+      const timeStr = e.start_time ? ` · ${formatTime12(e.start_time)}` : '';
+      const recur = e.recurrence_label ? ` 🔁` : '';
+      const sub = e.location ? `<br>📍 ${e.location}` : '';
+      return {
+        dt: localDateTime(e.event_date, e.start_time, true),
+        color: e.color_hex || '#FCAF17',
+        title: e.title,
+        meta: `📅 ${dateStr}${timeStr}${recur}${sub}`,
+      };
+    });
+
+  const shiftItems = state.workShifts
+    .filter(s => localDateTime(s.shift_date, s.end_time) >= now)
+    .map(s => {
+      const d = new Date(s.shift_date + 'T00:00:00');
+      const dateStr = `${DAY[d.getDay()]}, ${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
+      const sub = s.location ? `<br>📍 ${s.location}` : '';
+      return {
+        dt: localDateTime(s.shift_date, s.start_time),
+        color: s.color_hex || '#10B981',
+        title: s.title,
+        meta: `📅 ${dateStr} · ${formatTime12(s.start_time)}–${formatTime12(s.end_time)}${sub}`,
+      };
+    });
+
+  const combined = [...eventItems, ...shiftItems]
+    .sort((a, b) => a.dt - b.dt)
+    .slice(0, 6);
+
+  const countEl = $('sidebarUpcomingCount');
+  if (countEl) countEl.textContent = combined.length ? `${combined.length} upcoming` : '';
+  if (!combined.length) {
+    el.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px 0;">No upcoming events.</div>';
     return;
   }
-  const DAY = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  el.innerHTML = shifts.map(s => {
-    const d = new Date(s.shift_date + 'T00:00:00');
-    const dateStr = `${DAY[d.getDay()]}, ${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
-    const loc = s.location ? `<br>📍 ${s.location}` : '';
-    return `<div class="sb-event-item">
-      <div class="sb-event-dot" style="background:${s.color_hex};"></div>
-      <div class="sb-event-info">
-        <div class="sb-event-title">${s.title}</div>
-        <div class="sb-event-meta">📅 ${dateStr} · ${formatTime12(s.start_time)}–${formatTime12(s.end_time)}${loc}</div>
-      </div>
-    </div>`;
-  }).join('');
+  el.innerHTML = combined.map(item => `<div class="sb-event-item">
+    <div class="sb-event-dot" style="background:${item.color};"></div>
+    <div class="sb-event-info">
+      <div class="sb-event-title">${item.title}</div>
+      <div class="sb-event-meta">${item.meta}</div>
+    </div>
+  </div>`).join('');
 }
 
 /* ═════════════════════════════════════════════
@@ -2051,8 +2133,7 @@ renderCourses();
 renderTagChips();
 renderAsgTagSelector();
 renderTasks();
-renderSidebarPersonalEvents();
-renderSidebarWorkShifts();
+renderSidebarUpcoming();
 updateStats();
 
 // Default to week view
