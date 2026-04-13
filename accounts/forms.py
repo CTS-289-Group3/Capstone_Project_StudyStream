@@ -4,4 +4,4 @@ from .models import Profile
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ['bio', 'major', 'year']
+        fields = ['display_name', 'avatar_text', 'bio', 'major', 'year']

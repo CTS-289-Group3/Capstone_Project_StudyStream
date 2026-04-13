@@ -1,539 +1,273 @@
+{% extends "accounts/base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sign In — StudyStream</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
-
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --ss-yellow: #FCAF17;
-      --ss-yellow-bright: #FFDD00;
-      --ss-blue: #007DC5;
-      --ss-blue-deep: #034EA2;
-      --ss-ink: #231F20;
-      --ss-soft: #f6f8fc;
-      --ss-line: #dfe7f2;
-      --ss-text: #445064;
-      --ss-white: #ffffff;
-    }
-
-    body {
-      font-family: 'Nunito', Arial, sans-serif;
-      background: #ffffff;
-      color: var(--ss-ink);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    a { text-decoration: none; }
-
-    /* ── NAV ── */
-    .ss-nav {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 18px 38px;
-      background: rgba(255,255,255,0.96);
-      border-bottom: 1px solid #edf1f7;
-      position: sticky;
-      top: 0;
-      z-index: 20;
-      backdrop-filter: blur(10px);
-    }
-
-    .ss-logo img {
-      height: 48px;
-      width: auto;
-      display: block;
-    }
-
-    .ss-nav-links {
-      display: flex;
-      align-items: center;
-      gap: 28px;
-      font-size: 15px;
-      font-weight: 700;
-    }
-
-    .ss-nav-links a {
-      color: var(--ss-blue-deep);
-      transition: 0.2s ease;
-    }
-    .ss-nav-links a:hover { color: var(--ss-yellow); }
-
-    .ss-nav-actions { display: flex; gap: 12px; align-items: center; }
-
-    .ss-btn-ghost,
-    .ss-btn-solid {
-      font-family: 'Nunito', sans-serif;
-      font-size: 14px;
-      padding: 10px 18px;
-      border-radius: 999px;
-      cursor: pointer;
-      font-weight: 700;
-    }
-
-    .ss-btn-ghost {
-      border: 1.8px solid var(--ss-blue);
-      color: var(--ss-blue);
-      background: transparent;
-    }
-
-    .ss-btn-solid {
-      border: none;
-      color: #fff;
-      background: linear-gradient(135deg, var(--ss-blue), var(--ss-blue-deep));
-      box-shadow: 0 10px 22px rgba(3,78,162,0.18);
-    }
-
-    /* ── MAIN CONTENT ── */
-    .ss-main {
-      flex: 1;
-      background:
-        radial-gradient(circle at top left, rgba(255,221,0,0.18), transparent 28%),
-        radial-gradient(circle at bottom right, rgba(0,125,197,0.14), transparent 26%),
-        linear-gradient(160deg, #ffffff 0%, #f5f9ff 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 60px 38px;
-    }
-
-    .ss-login-wrapper {
-      max-width: 980px;
-      width: 100%;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0;
-      background: #fff;
-      border-radius: 28px;
-      border: 1px solid var(--ss-line);
-      box-shadow:
-        0 30px 60px rgba(3,78,162,0.10),
-        0 8px 18px rgba(0,125,197,0.06);
-      overflow: hidden;
-    }
-
-    /* Left panel — logo showcase */
-    .ss-login-left {
-      background:
-        radial-gradient(circle at 30% 30%, rgba(255,221,0,0.28), transparent 55%),
-        radial-gradient(circle at 80% 80%, rgba(0,125,197,0.22), transparent 50%),
-        linear-gradient(150deg, #eaf4fc 0%, #f0f6ff 100%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 52px 40px;
-      gap: 24px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    /* subtle decorative circles */
-    .ss-login-left::before,
-    .ss-login-left::after {
-      content: '';
-      position: absolute;
-      border-radius: 50%;
-      opacity: 0.13;
-    }
-    .ss-login-left::before {
-      width: 260px; height: 260px;
-      background: var(--ss-yellow);
-      top: -80px; left: -80px;
-    }
-    .ss-login-left::after {
-      width: 180px; height: 180px;
-      background: var(--ss-blue);
-      bottom: -60px; right: -50px;
-    }
-
-    .ss-login-left img {
-      width: 100%;
-      max-width: 280px;
-      height: auto;
-      display: block;
-      position: relative;
-      z-index: 1;
-      filter: drop-shadow(0 16px 28px rgba(3,78,162,0.14));
-    }
-
-    .ss-login-tagline {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 17px;
-      font-weight: 800;
-      color: var(--ss-blue-deep);
-      text-align: center;
-      position: relative;
-      z-index: 1;
-    }
-
-    .ss-login-tagline span { color: var(--ss-yellow); }
-
-    /* Right panel — form */
-    .ss-login-right {
-      padding: 52px 44px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-
-    .ss-login-eyebrow {
-      display: inline-block;
-      font-size: 11px;
-      font-weight: 800;
-      color: var(--ss-blue-deep);
-      background: rgba(0,125,197,0.08);
-      border: 1px solid rgba(0,125,197,0.12);
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      padding: 6px 12px;
-      border-radius: 999px;
-      margin-bottom: 16px;
-    }
-
-    .ss-login-heading {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 32px;
-      font-weight: 800;
-      color: var(--ss-blue-deep);
-      margin-bottom: 6px;
-      line-height: 1.15;
-    }
-
-    .ss-login-heading .gold { color: var(--ss-yellow); }
-
-    .ss-login-sub {
-      font-size: 14px;
-      color: #66758a;
-      margin-bottom: 30px;
-    }
-
-    /* Form */
-    .ss-form { display: flex; flex-direction: column; gap: 16px; }
-
-    .ss-field { display: flex; flex-direction: column; gap: 6px; }
-
-    .ss-field label {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--ss-text);
-    }
-
-    .ss-field input {
-      font-family: 'Nunito', sans-serif;
-      font-size: 14px;
-      padding: 12px 16px;
-      border: 1.8px solid var(--ss-line);
-      border-radius: 12px;
-      background: var(--ss-soft);
-      color: var(--ss-ink);
-      outline: none;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .ss-field input:focus {
-      border-color: var(--ss-blue);
-      box-shadow: 0 0 0 3px rgba(0,125,197,0.12);
-      background: #fff;
-    }
-
-    .ss-form-row {
-      display: flex;
-      justify-content: flex-end;
-    }
-
-    .ss-forgot {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--ss-blue);
-    }
-    .ss-forgot:hover { color: var(--ss-blue-deep); }
-
-    .ss-submit {
-      font-family: 'Nunito', sans-serif;
-      font-size: 15px;
-      font-weight: 800;
-      padding: 14px;
-      border: none;
-      border-radius: 999px;
-      color: #fff;
-      background: linear-gradient(135deg, var(--ss-blue), var(--ss-blue-deep));
-      cursor: pointer;
-      box-shadow: 0 10px 24px rgba(3,78,162,0.22);
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-      margin-top: 4px;
-    }
-
-    .ss-submit:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 14px 28px rgba(3,78,162,0.28);
-    }
-
-    .ss-divider {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: #b0bac8;
-      font-size: 12px;
-      margin: 4px 0;
-    }
-
-    .ss-divider::before,
-    .ss-divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--ss-line);
-    }
-
-    .ss-register-cta {
-      text-align: center;
-      font-size: 13px;
-      color: #66758a;
-      margin-top: 4px;
-    }
-
-    .ss-register-cta a {
-      font-weight: 800;
-      color: var(--ss-blue);
-    }
-
-    .ss-register-cta a:hover { color: var(--ss-blue-deep); }
-
-    /* Django form errors */
-    .ss-errors {
-      background: #fff2f2;
-      border: 1.5px solid #f5c0c0;
-      border-radius: 10px;
-      padding: 10px 14px;
-      font-size: 13px;
-      color: #c0392b;
-    }
-
-    .ss-success {
-      background: #f1fff3;
-      border: 1.5px solid #b8e3bf;
-      border-radius: 10px;
-      padding: 10px 14px;
-      font-size: 13px;
-      color: #1f7a33;
-    }
-
-    /* ── WAVE ── */
-    .ss-wave {
-      width: 100%;
-      display: block;
-      margin-top: -1px;
-    }
-
-    /* ── TAGLINE BAND ── */
-    .ss-band {
-      background: linear-gradient(135deg, var(--ss-yellow), var(--ss-yellow-bright));
-      padding: 20px 32px;
-      text-align: center;
-    }
-
-    .ss-band-text {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 20px;
-      font-weight: 800;
-      color: var(--ss-ink);
-    }
-
-    .ss-band-text span { color: var(--ss-blue-deep); }
-
-    /* ── FOOTER ── */
-    .ss-footer {
-      background: #1d2735;
-      padding: 22px 38px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 18px;
-      flex-wrap: wrap;
-    }
-
-    .ss-footer-logo {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 18px;
-      font-weight: 800;
-    }
-
-    .ss-footer-logo span:first-child { color: var(--ss-yellow); }
-    .ss-footer-logo span:last-child { color: #56b4f0; }
-
-    .ss-footer-copy,
-    .ss-footer-links {
-      font-size: 12px;
-      color: rgba(255,255,255,0.62);
-    }
-
-    .ss-footer-links { display: flex; gap: 16px; }
-
-    /* ── RESPONSIVE ── */
-    @media (max-width: 800px) {
-      .ss-login-wrapper {
-        grid-template-columns: 1fr;
-      }
-
-      .ss-login-left {
-        padding: 36px 28px;
-      }
-
-      .ss-login-left img { max-width: 200px; }
-
-      .ss-login-right { padding: 36px 28px; }
-
-      .ss-login-heading { font-size: 26px; }
-    }
-
-    @media (max-width: 520px) {
-      .ss-nav {
-        flex-wrap: wrap;
-        gap: 14px;
-        padding: 16px 20px;
-      }
-
-      .ss-nav-actions { width: 100%; justify-content: center; }
-
-      .ss-main { padding: 32px 16px; }
-
-      .ss-footer { padding: 18px 20px; }
-
-      .ss-logo img { height: 40px; }
-    }
-  </style>
-</head>
-<body>
-
-  <!-- NAV -->
-  <div class="ss-nav">
-    <div class="ss-logo">
-      <img src="{% static 'accounts/images/logo2.png' %}" alt="StudyStream logo">
-    </div>
-
-    <div class="ss-nav-links">
-      <a href="{% url 'home' %}">Home</a>
-    </div>
-
-    <div class="ss-nav-actions">
-      <a class="ss-btn-ghost" href="{% url 'login' %}">Sign in</a>
-      <a class="ss-btn-solid" href="{% url 'register' %}">Get started</a>
-    </div>
-  </div>
-
-  <!-- MAIN -->
-  <main class="ss-main">
-    <div class="ss-login-wrapper">
-
-      <!-- LEFT: Logo panel -->
-      <div class="ss-login-left">
-        <img src="{% static 'accounts/images/logo.png' %}" alt="StudyStream logo">
-        <div class="ss-login-tagline">
-          Less stress.<br><span>More progress.</span>
-        </div>
+
+{% block title %}Sign In — StudyStream{% endblock %}
+
+{% block extra_head %}
+<style>
+  .auth-wrap {
+    flex: 1;
+    display: flex; align-items: center; justify-content: center;
+    padding: 48px 24px 64px;
+    min-height: calc(100vh - 76px);
+  }
+
+  .auth-card {
+    width: 100%; max-width: 940px;
+    display: grid; grid-template-columns: 1fr 1fr;
+    border-radius: 28px; overflow: hidden;
+    background: var(--card);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--card-border);
+    box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,0.05);
+    animation: cardIn 0.55s cubic-bezier(0.22,1,0.36,1) both;
+  }
+
+  @keyframes cardIn {
+    from { opacity:0; transform:translateY(28px) scale(0.97); }
+    to   { opacity:1; transform:translateY(0) scale(1); }
+  }
+
+  /* left panel */
+  .auth-left {
+    position: relative; overflow: hidden;
+    background:
+      radial-gradient(circle at 25% 25%, rgba(252,175,23,0.15), transparent 55%),
+      radial-gradient(circle at 80% 80%, rgba(0,125,197,0.18), transparent 55%),
+      linear-gradient(150deg, #0a1628 0%, #0d1f38 100%);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 52px 36px; gap: 22px;
+  }
+
+  [data-theme="light"] .auth-left {
+    background:
+      radial-gradient(circle at 25% 25%, rgba(252,175,23,0.18), transparent 55%),
+      radial-gradient(circle at 80% 80%, rgba(0,125,197,0.14), transparent 55%),
+      linear-gradient(150deg, #dceeff 0%, #e8f4fc 100%);
+  }
+
+  .auth-left::before {
+    content: ''; position: absolute;
+    width: 280px; height: 280px; border-radius: 50%;
+    background: var(--ss-yellow); opacity: 0.08;
+    top: -80px; left: -80px;
+    animation: blobA 8s ease-in-out infinite;
+  }
+
+  .auth-left::after {
+    content: ''; position: absolute;
+    width: 200px; height: 200px; border-radius: 50%;
+    background: var(--ss-blue); opacity: 0.09;
+    bottom: -60px; right: -50px;
+    animation: blobB 10s ease-in-out infinite;
+  }
+
+  @keyframes blobA { 0%,100%{transform:translate(0,0) scale(1);} 50%{transform:translate(12px,10px) scale(1.05);} }
+  @keyframes blobB { 0%,100%{transform:translate(0,0) scale(1);} 50%{transform:translate(-10px,-8px) scale(1.06);} }
+
+  /* theme-aware auth panel logo */
+  .logo-for-dark  { display: block; }
+  .logo-for-light { display: none;  }
+  [data-theme="light"] .logo-for-dark  { display: none; }
+  [data-theme="light"] .logo-for-light { display: block; }
+
+  .auth-logo {
+    width: 100%; max-width: 220px; height: auto;
+    position: relative; z-index: 1;
+    filter: drop-shadow(0 14px 28px rgba(3,78,162,0.30));
+    animation: logoFloat 6s ease-in-out infinite;
+  }
+
+  @keyframes logoFloat { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} }
+
+  .auth-tagline {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 16px; font-weight: 800;
+    color: var(--ss-blue-light);
+    text-align: center; position: relative; z-index: 1; line-height: 1.4;
+  }
+
+  [data-theme="light"] .auth-tagline { color: var(--ss-blue-deep); }
+  .auth-tagline .y { color: var(--ss-yellow); }
+
+  /* right panel */
+  .auth-right {
+    padding: 52px 44px;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+
+  .auth-eyebrow {
+    display: inline-block;
+    font-size: 11px; font-weight: 800;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ss-blue); background: rgba(0,125,197,0.10);
+    border: 1px solid rgba(0,125,197,0.16);
+    border-radius: 999px; padding: 5px 12px;
+    margin-bottom: 14px; width: fit-content;
+  }
+
+  .auth-heading {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 30px; font-weight: 900;
+    color: var(--text); line-height: 1.15; margin-bottom: 6px;
+  }
+
+  .auth-heading .y { color: var(--ss-yellow); }
+
+  .auth-sub { font-size: 14px; color: var(--muted); margin-bottom: 28px; }
+
+  .auth-form { display: flex; flex-direction: column; gap: 14px; }
+
+  .auth-field { display: flex; flex-direction: column; gap: 5px; }
+
+  .auth-field label {
+    font-size: 11px; font-weight: 800;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--text2);
+  }
+
+  .auth-field input {
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px; font-weight: 600;
+    padding: 12px 16px; border-radius: 12px;
+    border: 1.8px solid var(--input-border);
+    background: var(--input-bg);
+    color: var(--text); outline: none;
+    transition: border-color 0.22s, box-shadow 0.22s, background 0.22s;
+  }
+
+  .auth-field input:focus {
+    border-color: var(--ss-blue);
+    box-shadow: var(--glow);
+    background: var(--card);
+  }
+
+  .auth-field input.is-err { border-color: #ef4444; }
+  .auth-field-err { font-size: 11px; font-weight: 700; color: #f87171; }
+
+  .auth-forgot {
+    text-align: right; font-size: 12px;
+    font-weight: 700; color: var(--ss-blue);
+    transition: color 0.18s;
+  }
+
+  .auth-forgot:hover { color: var(--ss-blue-light); }
+
+  .auth-submit {
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px; font-weight: 900;
+    padding: 14px; border: none; border-radius: 999px;
+    color: #fff;
+    background: linear-gradient(135deg, var(--ss-blue), var(--ss-blue-deep));
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(3,78,162,0.30);
+    transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.18s;
+    margin-top: 4px;
+  }
+
+  .auth-submit:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(3,78,162,0.42); }
+  .auth-submit:active { transform: translateY(0); }
+
+  .auth-div {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 11px; color: var(--muted);
+  }
+
+  .auth-div::before, .auth-div::after {
+    content: ''; flex: 1; height: 1px; background: var(--card-border);
+  }
+
+  .auth-cta { text-align: center; font-size: 13px; color: var(--muted); }
+  .auth-cta a { font-weight: 800; color: var(--ss-blue); }
+  .auth-cta a:hover { color: var(--ss-blue-light); }
+
+  .auth-wave { width: 100%; display: block; margin-top: -2px; }
+
+  .auth-band {
+    background: linear-gradient(135deg, var(--ss-yellow), var(--ss-yellow2));
+    padding: 18px 36px; text-align: center;
+  }
+
+  .auth-band-text {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 18px; font-weight: 900; color: var(--ss-ink);
+  }
+
+  .auth-band-text span { color: var(--ss-blue-deep); }
+
+  @media (max-width: 800px) {
+    .auth-card { grid-template-columns: 1fr; }
+    .auth-left { padding: 32px 24px; }
+    /* theme-aware auth panel logo */
+  .logo-for-dark  { display: block; }
+  .logo-for-light { display: none;  }
+  [data-theme="light"] .logo-for-dark  { display: none; }
+  [data-theme="light"] .logo-for-light { display: block; }
+
+  .auth-logo { max-width: 160px; }
+    .auth-right { padding: 32px 24px; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-card">
+
+    <div class="auth-left">
+      <!-- color logo in dark mode, blue in light mode -->
+      <!-- Use SVG horizontal logo in brand panel — single logo works on both themes -->
+      <img class="auth-logo" src="{% static 'accounts/images/logo_horizontal_v1.svg' %}" alt="StudyStream" style="max-width:200px;">
+      <div class="auth-tagline">
+        Less stress.<br><span class="y">More progress.</span>
       </div>
+    </div>
 
-      <!-- RIGHT: Login form -->
-      <div class="ss-login-right">
-        <h1 class="ss-login-heading">
-          Sign in to<br><span class="gold">StudyStream.</span>
-        </h1>
-        <p class="ss-login-sub">Pick up right where you left off.</p>
+    <div class="auth-right">
+      <span class="auth-eyebrow">Welcome back</span>
+      <h1 class="auth-heading">Sign in to<br><span class="y">StudyStream.</span></h1>
+      <p class="auth-sub">Pick up right where you left off.</p>
 
-        <!-- Django form — swap the inner fields for {{ form.as_p }} or manual fields -->
-        <form method="post" class="ss-form">
-          {% csrf_token %}
-
-          {% if messages %}
-            {% for message in messages %}
-              {% if 'success' in message.tags %}
-                <div class="ss-success">{{ message }}</div>
-              {% else %}
-                <div class="ss-errors">{{ message }}</div>
-              {% endif %}
-            {% endfor %}
-          {% endif %}
-
-          {% if form.errors %}
-            <div class="ss-errors">
-              Your username or password didn't match. Please try again.
-            </div>
-          {% endif %}
-
-          <div class="ss-field">
-            <label for="id_username">Username</label>
-            <input
-              type="text"
-              id="id_username"
-              name="username"
-              placeholder="Enter your username"
-              autocomplete="username"
-              required
-            >
-          </div>
-
-          <div class="ss-field">
-            <label for="id_password">Password</label>
-            <input
-              type="password"
-              id="id_password"
-              name="password"
-              placeholder="Enter your password"
-              autocomplete="current-password"
-              required
-            >
-          </div>
+      <form method="post" class="auth-form">
+        {% csrf_token %}
 
           <div class="ss-form-row">
             <a class="ss-forgot" href="{% url 'password_reset' %}">Forgot password?</a>
           </div>
+        {% endif %}
 
-          <button type="submit" class="ss-submit">Sign in →</button>
+        <div class="auth-field">
+          <label for="id_username">Username</label>
+          <input type="text" id="id_username" name="username"
+                 placeholder="Enter your username" autocomplete="username" required>
+        </div>
 
-          <div class="ss-divider">or</div>
+        <div class="auth-field">
+          <label for="id_password">Password</label>
+          <input type="password" id="id_password" name="password"
+                 placeholder="Enter your password" autocomplete="current-password" required>
+        </div>
 
-          <div class="ss-register-cta">
-            Don't have an account? <a href="{% url 'register' %}">Create one free</a>
-          </div>
-        </form>
+        <a class="auth-forgot" href="#">Forgot password?</a>
 
-      </div>
+        <button type="submit" class="auth-submit">Sign in →</button>
+        <div class="auth-div">or</div>
+        <div class="auth-cta">
+          Don't have an account? <a href="{% url 'register' %}">Create one free</a>
+        </div>
+      </form>
     </div>
-  </main>
 
-  <!-- WAVE DIVIDER -->
-  <svg class="ss-wave" viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
-    <path d="M0,34 C280,68 1040,0 1440,34 L1440,60 L0,60 Z" fill="#FCAF17" opacity="0.9"/>
-    <path d="M0,44 C380,10 1080,56 1440,38 L1440,60 L0,60 Z" fill="#FFDD00" opacity="0.55"/>
-  </svg>
-
-  <!-- TAGLINE BAND -->
-  <div class="ss-band">
-    <div class="ss-band-text">Less stress. <span>More progress.</span></div>
   </div>
+</div>
 
-  <!-- FOOTER -->
-  <footer class="ss-footer">
-    <div class="ss-footer-logo"><span>STUDY</span><span>STREAM</span></div>
-    <div class="ss-footer-copy">© 2025 StudyStream. All rights reserved.</div>
-    <div class="ss-footer-links">
-      <span>Privacy</span>
-      <span>Terms</span>
-      <span>Contact</span>
-    </div>
-  </footer>
-
-</body>
-</html>
+<svg class="auth-wave" viewBox="0 0 1440 52" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+  <path d="M0,28 C300,56 1100,0 1440,28 L1440,52 L0,52 Z" fill="#FCAF17" opacity="0.80"/>
+  <path d="M0,38 C400,8 1080,50 1440,34 L1440,52 L0,52 Z" fill="#FFDD00" opacity="0.45"/>
+</svg>
+<div class="auth-band">
+  <div class="auth-band-text">Less stress. <span>More progress.</span></div>
+</div>
+{% endblock %}

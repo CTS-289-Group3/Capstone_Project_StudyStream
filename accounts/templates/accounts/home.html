@@ -1,489 +1,808 @@
+{% extends "accounts/base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>StudyStream — Stay organized, stay ahead.</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+{% block title %}StudyStream — Your Academic Command Center{% endblock %}
 
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+{% block nav_actions %}
+  <a class="ss-btn ss-btn-ghost" href="{% url 'login' %}">Sign in</a>
+{% endblock %}
 
-    :root {
-      --ss-yellow: #FCAF17;
-      --ss-yellow-bright: #FFDD00;
-      --ss-blue: #007DC5;
-      --ss-blue-deep: #034EA2;
-      --ss-ink: #231F20;
-      --ss-soft: #f6f8fc;
-      --ss-line: #dfe7f2;
-      --ss-text: #445064;
-      --ss-white: #ffffff;
-    }
+{% block extra_head %}
+<style>
+/* ═══════════════════════════════════════════════════════
+   LANDING PAGE — FULL REDESIGN
+═══════════════════════════════════════════════════════ */
 
-    body {
-      font-family: 'Nunito', Arial, sans-serif;
-      background: #ffffff;
-      color: var(--ss-ink);
-    }
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(24px); }
+  to   { opacity:1; transform:translateY(0); }
+}
 
-    a { text-decoration: none; }
+/* ═══ HERO ═══════════════════════════════════════════ */
+.hero {
+  min-height: calc(100vh - 76px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 32px 36px 80px;
+  position: relative; overflow: hidden;
+}
+.hero-blob {
+  position: absolute; border-radius: 50%;
+  filter: blur(90px); pointer-events: none;
+}
+.hero-blob-1 {
+  width: 640px; height: 640px;
+  background: radial-gradient(circle, rgba(3,78,162,0.28) 0%, transparent 70%);
+  top: -180px; left: -140px;
+  animation: blobDrift 14s ease-in-out infinite;
+}
+.hero-blob-2 {
+  width: 480px; height: 480px;
+  background: radial-gradient(circle, rgba(252,175,23,0.14) 0%, transparent 70%);
+  bottom: -100px; right: -80px;
+  animation: blobDrift 10s ease-in-out infinite; animation-delay: -5s;
+}
+.hero-blob-3 {
+  width: 320px; height: 320px;
+  background: radial-gradient(circle, rgba(0,125,197,0.10) 0%, transparent 70%);
+  top: 45%; left: 48%;
+  animation: blobDrift 17s ease-in-out infinite; animation-delay: -9s;
+}
 
-    /* NAV */
-    .ss-nav {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 18px 38px;
-      background: rgba(255,255,255,0.96);
-      border-bottom: 1px solid #edf1f7;
-      position: sticky;
-      top: 0;
-      z-index: 20;
-      backdrop-filter: blur(10px);
-    }
+/* Hero logo switching */
+.hero-logo-dark  { display: block; }
+.hero-logo-light { display: none; }
+[data-theme="light"] .hero-logo-dark  { display: none; }
+[data-theme="light"] .hero-logo-light { display: block; }
 
-    .ss-logo {
-      display: flex;
-      align-items: center;
-    }
+@keyframes blobDrift {
+  0%,100% { transform: translate(0,0) scale(1); }
+  33%      { transform: translate(24px,-18px) scale(1.06); }
+  66%      { transform: translate(-18px,24px) scale(0.95); }
+}
 
-    .ss-logo img {
-      height: 48px;
-      width: auto;
-      display: block;
-    }
+.hero-inner {
+  max-width: 1200px; width: 100%;
+  display: grid; grid-template-columns: 1fr 1fr;
+  align-items: center; gap: 72px;
+  position: relative; z-index: 1;
+}
+.hero-text { max-width: 580px; }
 
-    .ss-nav-links {
-      display: flex;
-      align-items: center;
-      gap: 28px;
-      font-size: 15px;
-      font-weight: 700;
-    }
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(252,175,23,0.10);
+  border: 1px solid rgba(252,175,23,0.25);
+  border-radius: 999px; padding: 7px 16px;
+  font-size: 11px; font-weight: 800; color: var(--ss-yellow);
+  letter-spacing: 0.11em; text-transform: uppercase;
+  margin-bottom: 26px;
+  animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) 0.1s both;
+}
+.eyebrow-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--ss-yellow);
+  animation: dotBlink 2.2s ease-in-out infinite;
+}
+@keyframes dotBlink {
+  0%,100% { opacity:1; transform:scale(1); }
+  50%      { opacity:0.4; transform:scale(1.6); }
+}
 
-    .ss-nav-links a {
-      color: var(--ss-blue-deep);
-      transition: 0.2s ease;
-    }
+.hero-headline {
+  font-family: 'Montserrat', sans-serif;
+  font-size: clamp(36px, 5.2vw, 66px);
+  font-weight: 900; line-height: 1.07; color: var(--text);
+  margin-bottom: 24px;
+  animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) 0.2s both;
+}
+.hl-y { color: var(--ss-yellow); }
+.hl-b { color: var(--ss-blue-light); }
 
-    .ss-nav-links a:hover {
-      color: var(--ss-yellow);
-    }
+.hero-sub {
+  font-size: 17px; line-height: 1.78; color: var(--text2);
+  margin-bottom: 40px; max-width: 490px;
+  animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) 0.30s both;
+}
 
-    .ss-nav-actions {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-    }
+.hero-cta-row {
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) 0.40s both;
+}
+.btn-primary {
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px; font-weight: 900;
+  padding: 15px 32px; border-radius: 999px;
+  background: linear-gradient(135deg, var(--ss-yellow), #f59e0b);
+  color: var(--ss-ink);
+  box-shadow: 0 10px 32px rgba(252,175,23,0.38);
+  border: none; cursor: pointer; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 8px;
+  transition: transform 0.22s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.22s;
+}
+.btn-primary:hover { transform: translateY(-3px); box-shadow: 0 18px 40px rgba(252,175,23,0.50); }
 
-    .ss-btn-ghost,
-    .ss-btn-solid {
-      font-family: 'Nunito', sans-serif;
-    }
+.hero-sign-in-link {
+  font-size: 14px; font-weight: 700; color: var(--text2);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+}
+.hero-sign-in-link:hover { color: var(--ss-blue-light); border-bottom-color: var(--ss-blue-light); }
 
-    .ss-btn-ghost {
-      font-size: 14px;
-      padding: 10px 18px;
-      border: 1.8px solid var(--ss-blue);
-      border-radius: 999px;
-      color: var(--ss-blue);
-      background: transparent;
-      cursor: pointer;
-      font-weight: 700;
-    }
+.hero-stats {
+  display: flex; gap: 28px; margin-top: 48px;
+  animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) 0.50s both;
+}
+.hstat-div { width:1px; background:var(--card-border); }
+.hstat-val {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 28px; font-weight: 900; color: var(--text); line-height: 1;
+}
+.hstat-lbl { font-size: 11px; font-weight: 700; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
 
-    .ss-btn-solid {
-      font-size: 14px;
-      padding: 10px 18px;
-      border: none;
-      border-radius: 999px;
-      color: #fff;
-      background: linear-gradient(135deg, var(--ss-blue), var(--ss-blue-deep));
-      cursor: pointer;
-      font-weight: 700;
-      box-shadow: 0 10px 22px rgba(3,78,162,0.18);
-    }
+/* Right mockup */
+.hero-visual { display: flex; justify-content: center; align-items: center; animation: fadeUp 0.7s cubic-bezier(0.22,1,0.36,1) 0.15s both; }
+.mockup-stack { position: relative; width: 100%; max-width: 440px; }
+.mockup-glow {
+  position: absolute; inset: -60px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(3,78,162,0.22) 0%, transparent 70%);
+  animation: glowPulse 5s ease-in-out infinite; pointer-events: none;
+}
+@keyframes glowPulse { 0%,100%{opacity:0.5;transform:scale(1);} 50%{opacity:1;transform:scale(1.12);} }
+.mockup-card {
+  position: relative; z-index: 2;
+  background: var(--card); backdrop-filter: blur(28px);
+  border: 1px solid var(--card-border); border-radius: 28px;
+  padding: 28px 24px;
+  box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,0.06);
+  animation: cardFloat 7s ease-in-out infinite;
+}
+@keyframes cardFloat { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} }
+.mockup-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.mockup-logo img { height: 28px; width: auto; }
+.logo-for-dark  { display: block; }
+.logo-for-light { display: none; }
+[data-theme="light"] .logo-for-dark  { display: none; }
+[data-theme="light"] .logo-for-light { display: block; }
+.mockup-week-badge {
+  font-size: 11px; font-weight: 800; color: var(--ss-yellow);
+  background: rgba(252,175,23,0.10); border: 1px solid rgba(252,175,23,0.20);
+  border-radius: 999px; padding: 4px 10px;
+}
+.mockup-assignments { display: flex; flex-direction: column; gap: 9px; }
+.ma-row {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(255,255,255,0.03); border: 1px solid var(--card-border);
+  border-radius: 12px; padding: 10px 12px; transition: background 0.2s;
+}
+.ma-row:hover { background: rgba(83,183,232,0.06); }
+.ma-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.ma-title { font-size: 13px; font-weight: 700; color: var(--text); flex: 1; }
+.ma-due   { font-size: 11px; font-weight: 600; color: var(--muted); }
+.ma-status { font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.06em; }
+.ma-done   { background: rgba(0,176,76,0.15); color: #4ade80; }
+.ma-prog   { background: rgba(252,175,23,0.15); color: var(--ss-yellow); }
+.ma-todo   { background: rgba(83,183,232,0.12); color: var(--ss-blue-light); }
+.ma-work   { background: rgba(139,92,246,0.15); color: #a78bfa; }
+.mockup-alert {
+  display: flex; align-items: center; gap: 9px; margin-top: 12px;
+  background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.20);
+  border-radius: 12px; padding: 10px 14px;
+}
+.alert-text { font-size: 12px; font-weight: 700; color: #f87171; }
 
-    /* HERO */
-    .ss-hero {
-      position: relative;
-      overflow: hidden;
-      background:
-        radial-gradient(circle at top left, rgba(255,221,0,0.22), transparent 28%),
-        radial-gradient(circle at bottom right, rgba(0,125,197,0.18), transparent 26%),
-        linear-gradient(160deg, #ffffff 0%, #f5f9ff 100%);
-      padding: 76px 38px 90px;
-    }
+.fchip {
+  position: absolute;
+  background: var(--card); backdrop-filter: blur(16px);
+  border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 9px 14px; font-size: 12px; font-weight: 700; color: var(--text);
+  box-shadow: var(--shadow); white-space: nowrap; z-index: 3;
+  display: flex; align-items: center; gap: 6px;
+}
+.fchip-1 { top: -18px; left: -28px; animation: fca 5.5s ease-in-out infinite; }
+.fchip-2 { bottom: 20px; right: -34px; animation: fcb 7s ease-in-out infinite; }
+.fchip-3 { bottom: -18px; left: 8px; animation: fcc 6s ease-in-out infinite; }
+@keyframes fca { 0%,100%{transform:translateY(0) rotate(-1.5deg);} 50%{transform:translateY(-9px) rotate(1deg);} }
+@keyframes fcb { 0%,100%{transform:translateY(0) rotate(1deg);} 50%{transform:translateY(9px) rotate(-1.5deg);} }
+@keyframes fcc { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-6px);} }
 
-    .ss-hero-inner {
-      max-width: 1220px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: 0.95fr 1.05fr;
-      align-items: center;
-      gap: 42px;
-    }
 
-    .ss-hero-text {
-      max-width: 560px;
-    }
+/* ═══ TICKER ═════════════════════════════════════════ */
+.ticker-wrap {
+  position: relative; z-index: 2;
+  border-top: 1px solid var(--card-border);
+  border-bottom: 1px solid var(--card-border);
+  background: var(--card); backdrop-filter: blur(16px);
+  padding: 14px 0; overflow: hidden;
+}
+.ticker-wrap::before, .ticker-wrap::after {
+  content: ''; position: absolute; top:0; bottom:0; width:120px; z-index:10; pointer-events:none;
+}
+.ticker-wrap::before { left:0; background: linear-gradient(to right, var(--bg), transparent); }
+.ticker-wrap::after  { right:0; background: linear-gradient(to left, var(--bg), transparent); }
+.ticker-track {
+  display: flex; width: max-content;
+  animation: tickerScroll 38s linear infinite;
+}
+.ticker-track:hover { animation-play-state: paused; }
+@keyframes tickerScroll { from{transform:translateX(0);} to{transform:translateX(-50%);} }
+.ticker-item {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 0 32px; font-size: 13px; font-weight: 700; color: var(--text2);
+  white-space: nowrap; flex-shrink: 0;
+}
+.ticker-icon { font-size: 15px; }
+.ticker-sep  { display: inline-flex; align-items: center; padding: 0 8px; color: var(--ss-yellow); font-size: 18px; flex-shrink: 0; }
+.ticker-item.hi  { color: var(--ss-blue-light); }
+.ticker-item.hi2 { color: var(--ss-yellow); }
 
-    .ss-hero-eyebrow {
-      display: inline-block;
-      font-size: 12px;
-      font-weight: 800;
-      color: var(--ss-blue-deep);
-      background: rgba(0,125,197,0.08);
-      border: 1px solid rgba(0,125,197,0.12);
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      padding: 8px 12px;
-      border-radius: 999px;
-      margin-bottom: 18px;
-    }
 
-    .ss-hero-headline {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 60px;
-      line-height: 1.08;
-      font-weight: 800;
-      color: var(--ss-blue-deep);
-      margin-bottom: 18px;
-    }
+/* ═══ SECTION HEADER ════════════════════════════════ */
+.sec-header { text-align: center; max-width: 680px; margin: 0 auto 56px; }
+.sec-label  { display: inline-flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ss-yellow); margin-bottom: 14px; }
+.sec-label-line { width: 28px; height: 2px; background: var(--ss-yellow); border-radius: 2px; }
+.sec-title { font-family: 'Montserrat', sans-serif; font-size: clamp(26px, 3.5vw, 42px); font-weight: 900; line-height: 1.12; color: var(--text); margin-bottom: 14px; }
+.sec-title .y { color: var(--ss-yellow); }
+.sec-title .b { color: var(--ss-blue-light); }
+.sec-body  { font-size: 16px; line-height: 1.70; color: var(--text2); }
 
-    .ss-hero-headline .gold {
-      color: var(--ss-yellow);
-    }
 
-    .ss-hero-sub {
-      font-size: 18px;
-      color: var(--ss-text);
-      line-height: 1.7;
-      max-width: 520px;
-      margin-bottom: 0;
-    }
+/* ═══ FEATURE TILES ══════════════════════════════════ */
+.features-section { padding: 100px 36px; max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
+.features-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 18px; }
+.feat-tile-big { grid-column: span 2; }
+.feat-tile {
+  background: var(--card); backdrop-filter: blur(20px);
+  border: 1px solid var(--card-border); border-radius: 24px;
+  padding: 32px 28px; box-shadow: var(--shadow);
+  position: relative; overflow: hidden;
+  transition: transform 0.28s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.28s, border-color 0.28s;
+}
+.feat-tile::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 70% 60% at 15% 0%, rgba(83,183,232,0.06) 0%, transparent 60%);
+  pointer-events: none;
+}
+.feat-tile:hover { transform: translateY(-6px); box-shadow: 0 24px 64px rgba(3,78,162,0.20); border-color: rgba(83,183,232,0.24); }
+.feat-icon-wrap { width: 52px; height: 52px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 18px; }
+.fi-yellow { background: linear-gradient(135deg, rgba(252,175,23,0.22), rgba(252,175,23,0.08)); }
+.fi-blue   { background: linear-gradient(135deg, rgba(0,125,197,0.22), rgba(83,183,232,0.08)); }
+.fi-green  { background: linear-gradient(135deg, rgba(0,176,76,0.22),  rgba(0,176,76,0.08));  }
+.fi-purple { background: linear-gradient(135deg, rgba(139,92,246,0.22),rgba(139,92,246,0.08)); }
+.fi-red    { background: linear-gradient(135deg, rgba(239,68,68,0.22), rgba(239,68,68,0.08));  }
+.fi-teal   { background: linear-gradient(135deg, rgba(20,184,166,0.22),rgba(20,184,166,0.08)); }
+.feat-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 800; letter-spacing: 0.09em; text-transform: uppercase; border-radius: 999px; padding: 3px 10px; margin-bottom: 10px; }
+.ft-school   { background:rgba(252,175,23,0.12);   color:var(--ss-yellow); }
+.ft-work     { background:rgba(139,92,246,0.14);   color:#a78bfa; }
+.ft-personal { background:rgba(20,184,166,0.12);   color:#2dd4bf; }
+.ft-all      { background:rgba(83,183,232,0.12);   color:var(--ss-blue-light); }
+.feat-title { font-family: 'Montserrat', sans-serif; font-size: 18px; font-weight: 900; color: var(--text); margin-bottom: 10px; line-height: 1.2; }
+.feat-tile-big .feat-title { font-size: 22px; }
+.feat-body { font-size: 13px; line-height: 1.62; color: var(--text2); }
+.feat-tile:not(.feat-tile-big) .feat-title { font-size: 15px; }
+.feat-tile:not(.feat-tile-big) .feat-icon-wrap { width:40px; height:40px; font-size:20px; margin-bottom:12px; }
+.feat-tile:not(.feat-tile-big) { padding: 24px 20px; }
 
-    /* HERO VISUAL */
-    .ss-hero-visual {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+.feat-progress { margin-top: 18px; display: flex; flex-direction: column; gap: 7px; }
+.fp-row { display: flex; align-items: center; gap: 8px; }
+.fp-label { font-size: 11px; font-weight: 700; color: var(--text2); width: 120px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fp-bar { flex: 1; height: 6px; background: var(--input-bg); border-radius: 999px; overflow: hidden; }
+.fp-fill { height: 100%; border-radius: 999px; }
+.fp-pct { font-size: 11px; font-weight: 800; color: var(--text2); width: 32px; text-align: right; }
 
-    .ss-logo-card {
-      width: 100%;
-      max-width: 470px;
-      background: rgba(255,255,255,0.86);
-      border: 1px solid rgba(0,125,197,0.12);
-      border-radius: 30px;
-      padding: 36px 26px;
-      box-shadow:
-        0 24px 50px rgba(3,78,162,0.12),
-        0 8px 18px rgba(0,125,197,0.08);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 560px;
-    }
+.feat-density { margin-top: 16px; display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; }
+.fd-week { border-radius: 8px; padding: 8px 6px; text-align: center; display: flex; flex-direction: column; gap: 3px; }
+.fd-week .fd-lbl { font-size: 10px; font-weight: 700; color: var(--muted); }
+.fd-week .fd-bar { height: 28px; border-radius: 6px; }
+.fd-week .fd-pct { font-size: 10px; font-weight: 800; }
+.fd-green  { background: rgba(0,176,76,0.10); }
+.fd-green .fd-bar { background: rgba(0,176,76,0.50); }
+.fd-green .fd-pct { color: #4ade80; }
+.fd-yellow { background: rgba(252,175,23,0.10); }
+.fd-yellow .fd-bar { background: rgba(252,175,23,0.55); }
+.fd-yellow .fd-pct { color: var(--ss-yellow); }
+.fd-red    { background: rgba(239,68,68,0.10); }
+.fd-red .fd-bar { background: rgba(239,68,68,0.55); }
+.fd-red .fd-pct { color: #f87171; }
 
-    .ss-logo-card img {
-      width: 100%;
-      max-width: 340px;
-      height: auto;
-      display: block;
-    }
 
-    /* WAVE */
-    .ss-wave {
-      width: 100%;
-      display: block;
-      margin-top: -1px;
-    }
+/* ═══ WHO TILES ══════════════════════════════════════ */
+.who-section { padding: 0 36px 100px; max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
+.who-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+.who-tile {
+  background: var(--card); border: 1px solid var(--card-border); border-radius: 24px;
+  padding: 36px 28px; box-shadow: var(--shadow); position: relative; overflow: hidden;
+  transition: transform 0.28s cubic-bezier(0.34,1.56,0.64,1), border-color 0.28s;
+}
+.who-tile::after { content: ''; position: absolute; bottom:0; left:0; right:0; height:3px; border-radius:0 0 24px 24px; }
+.who-tile.student::after  { background: linear-gradient(90deg, var(--ss-yellow), #f59e0b); }
+.who-tile.worker::after   { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+.who-tile.personal::after { background: linear-gradient(90deg, #14b8a6, #2dd4bf); }
+.who-tile:hover { transform: translateY(-5px); border-color: rgba(83,183,232,0.22); }
+.who-emoji { font-size: 42px; margin-bottom: 16px; display: block; }
+.who-title { font-family: 'Montserrat', sans-serif; font-size: 20px; font-weight: 900; color: var(--text); margin-bottom: 12px; }
+.who-body  { font-size: 14px; line-height: 1.72; color: var(--text2); margin-bottom: 20px; }
+.who-list  { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.who-list li { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; font-weight: 600; color: var(--text2); }
+.who-check { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
 
-    /* FEATURES */
-    .ss-features {
-      padding: 70px 38px 80px;
-      background: var(--ss-soft);
-    }
 
-    .ss-features-inner {
-      max-width: 1180px;
-      margin: 0 auto;
-    }
+/* ═══ HOW IT WORKS ═══════════════════════════════════ */
+.how-section { padding: 0 36px 100px; max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
+.how-steps { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; position: relative; }
+.how-steps::before {
+  content: ''; position: absolute; top:32px; left:12.5%; right:12.5%; height:2px;
+  background: linear-gradient(90deg, var(--ss-yellow), var(--ss-blue), var(--ss-blue-light), #8b5cf6);
+  opacity: 0.35; z-index: 0;
+}
+.how-step {
+  background: var(--card); border: 1px solid var(--card-border); border-radius: 20px;
+  padding: 28px 20px 24px; text-align: center; box-shadow: var(--shadow);
+  position: relative; z-index: 1;
+  transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+.how-step:hover { transform: translateY(-5px); }
+.step-num { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Montserrat', sans-serif; font-size: 18px; font-weight: 900; margin: 0 auto 16px; }
+.sn1 { background:linear-gradient(135deg,rgba(252,175,23,0.30),rgba(252,175,23,0.10)); color:var(--ss-yellow); border:1.5px solid rgba(252,175,23,0.35); }
+.sn2 { background:linear-gradient(135deg,rgba(0,125,197,0.30),rgba(0,125,197,0.10)); color:var(--ss-blue); border:1.5px solid rgba(0,125,197,0.35); }
+.sn3 { background:linear-gradient(135deg,rgba(83,183,232,0.28),rgba(83,183,232,0.08)); color:var(--ss-blue-light); border:1.5px solid rgba(83,183,232,0.32); }
+.sn4 { background:linear-gradient(135deg,rgba(139,92,246,0.28),rgba(139,92,246,0.08)); color:#a78bfa; border:1.5px solid rgba(139,92,246,0.32); }
+.step-title { font-family:'Montserrat',sans-serif; font-size:15px; font-weight:900; color:var(--text); margin-bottom:8px; }
+.step-body  { font-size:13px; line-height:1.65; color:var(--text2); }
 
-    .ss-section-title {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 34px;
-      font-weight: 800;
-      color: var(--ss-blue-deep);
-      text-align: center;
-      margin-bottom: 10px;
-    }
 
-    .ss-section-sub {
-      font-size: 16px;
-      color: #66758a;
-      text-align: center;
-      margin-bottom: 40px;
-    }
+/* ═══ BOTTOM CTA ════════════════════════════════════ */
+.cta-band {
+  position: relative; z-index: 1;
+  background: linear-gradient(135deg, var(--ss-blue-deep) 0%, #020d22 100%);
+  border-top: 1px solid rgba(83,183,232,0.10);
+  padding: 80px 36px; text-align: center; overflow: hidden;
+}
+.cta-band::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 70% 90% at 50% 50%, rgba(0,125,197,0.20) 0%, transparent 70%);
+  pointer-events: none;
+}
+.cta-band-eyebrow { font-size:11px; font-weight:800; letter-spacing:0.12em; text-transform:uppercase; color:var(--ss-yellow); margin-bottom:16px; position:relative; z-index:1; display:block; }
+.cta-band-title { font-family:'Montserrat',sans-serif; font-size:clamp(28px,4vw,48px); font-weight:900; color:#fff; margin-bottom:14px; position:relative; z-index:1; line-height:1.1; }
+.cta-band-title .y { color: var(--ss-yellow); }
+.cta-band-sub { font-size:16px; color:rgba(255,255,255,0.55); margin-bottom:36px; position:relative; z-index:1; }
+.cta-band-inner { display:flex; align-items:center; justify-content:center; gap:16px; flex-wrap:wrap; position:relative; z-index:1; }
+.cta-signin-link { font-size:14px; font-weight:700; color:rgba(255,255,255,0.55); text-decoration:none; border-bottom:1px solid rgba(255,255,255,0.20); padding-bottom:1px; transition:color 0.2s, border-color 0.2s; }
+.cta-signin-link:hover { color:rgba(255,255,255,0.85); border-bottom-color:rgba(255,255,255,0.50); }
+.trust-row { display:flex; align-items:center; justify-content:center; gap:24px; flex-wrap:wrap; margin-top:40px; position:relative; z-index:1; }
+.trust-item { display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:rgba(255,255,255,0.40); }
+.trust-icon { font-size:14px; }
 
-    .ss-cards {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 18px;
-    }
 
-    .ss-card {
-      background: #fff;
-      border-radius: 22px;
-      padding: 24px;
-      border: 1px solid var(--ss-line);
-      box-shadow: 0 10px 30px rgba(3,78,162,0.04);
-    }
+/* ═══ RESPONSIVE ═════════════════════════════════════ */
+@media (max-width: 1000px) {
+  .hero-inner { grid-template-columns:1fr; text-align:center; gap:56px; }
+  .hero-text  { margin:0 auto; }
+  .hero-sub, .hero-stats { margin-left:auto; margin-right:auto; }
+  .hero-cta-row { justify-content:center; }
+  .hero-stats   { justify-content:center; }
+  .fchip { display:none; }
+  .features-grid { grid-template-columns:1fr 1fr; }
+  .feat-tile-big { grid-column:span 2; }
+  .feat-tile:not(.feat-tile-big) { padding: 20px 16px; }
+  .who-grid  { grid-template-columns:1fr; }
+  .how-steps { grid-template-columns:1fr 1fr; }
+  .how-steps::before { display:none; }
+}
+@media (max-width: 680px) {
+  .hero { padding:24px 20px 56px; min-height:auto; }
+  .features-section, .who-section, .how-section { padding:60px 20px; }
+  .features-grid { grid-template-columns:1fr; }
+  .feat-tile-big { grid-column:span 1; }
+  .how-steps { grid-template-columns:1fr; }
+  .cta-band { padding:60px 20px; }
+  .trust-row { gap:14px; }
+}
+</style>
+{% endblock %}
 
-    .ss-card-icon {
-      width: 52px;
-      height: 52px;
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 16px;
-      font-size: 22px;
-    }
+{% block content %}
 
-    .ss-card-icon.yellow { background: #FFF4CF; }
-    .ss-card-icon.blue { background: #E5F2FB; }
-    .ss-card-icon.green { background: #EAF7EE; }
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-blob hero-blob-1"></div>
+  <div class="hero-blob hero-blob-2"></div>
+  <div class="hero-blob hero-blob-3"></div>
 
-    .ss-card h3 {
-      font-size: 18px;
-      font-weight: 800;
-      color: var(--ss-ink);
-      margin-bottom: 8px;
-    }
+  <div class="hero-inner">
+    <div class="hero-text">
+      <div class="hero-eyebrow">
+        <span class="eyebrow-dot"></span>
+        School &middot; Work &middot; Life &mdash; one dashboard
+      </div>
 
-    .ss-card p {
-      font-size: 14px;
-      color: #66758a;
-      line-height: 1.7;
-    }
+      <!-- StudyStream Main Logo (horizontal v1) — large, commanding -->
+      <div class="hero-main-logo" style="margin-bottom:10px;animation:fadeUp 0.5s cubic-bezier(0.22,1,0.36,1) 0.15s both;">
+        <img src="{% static 'accounts/images/logo_horizontal_v1.svg' %}" alt="StudyStream"
+             style="width:min(480px,100%);height:auto;filter:drop-shadow(0 6px 28px rgba(252,175,23,0.40)) drop-shadow(0 0 70px rgba(3,78,162,0.28));display:block;">
+      </div>
+      <p class="hero-tagline" style="font-family:'Montserrat',sans-serif;font-size:clamp(16px,2.1vw,22px);font-weight:800;color:var(--text2);line-height:1.45;margin-bottom:22px;animation:fadeUp 0.5s cubic-bezier(0.22,1,0.36,1) 0.22s both;max-width:480px;">
+        Every class. Every deadline. Every <span style="color:var(--ss-yellow);">goal.</span>
+      </p>
 
-    /* TAGLINE BAND */
-    .ss-band {
-      background: linear-gradient(135deg, var(--ss-yellow), var(--ss-yellow-bright));
-      padding: 28px 32px;
-      text-align: center;
-    }
+      <p class="hero-sub">
+        Track classes, assignments, work shifts, and personal goals in one place &mdash; no more juggling five different apps.
+      </p>
 
-    .ss-band-text {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 24px;
-      font-weight: 800;
-      color: var(--ss-ink);
-    }
+      <div class="hero-cta-row">
+        <a href="{% url 'register' %}" class="btn-primary">Get started free &rarr;</a>
+        <a href="{% url 'login' %}" class="hero-sign-in-link">Already have an account?</a>
+      </div>
 
-    .ss-band-text span {
-      color: var(--ss-blue-deep);
-    }
-
-    /* FOOTER */
-    .ss-footer {
-      background: #1d2735;
-      padding: 22px 38px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 18px;
-      flex-wrap: wrap;
-    }
-
-    .ss-footer-logo {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 18px;
-      font-weight: 800;
-    }
-
-    .ss-footer-logo span:first-child { color: var(--ss-yellow); }
-    .ss-footer-logo span:last-child { color: #56b4f0; }
-
-    .ss-footer-copy,
-    .ss-footer-links {
-      font-size: 12px;
-      color: rgba(255,255,255,0.62);
-    }
-
-    .ss-footer-links {
-      display: flex;
-      gap: 16px;
-    }
-
-    /* RESPONSIVE */
-    @media (max-width: 980px) {
-      .ss-hero-inner {
-        grid-template-columns: 1fr;
-        text-align: center;
-      }
-
-      .ss-hero-text {
-        margin: 0 auto;
-      }
-
-      .ss-hero-sub {
-        margin-left: auto;
-        margin-right: auto;
-      }
-
-      .ss-logo-card {
-        min-height: auto;
-        padding: 28px 20px;
-      }
-
-      .ss-logo-card img {
-        max-width: 240px;
-      }
-
-      .ss-cards {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 720px) {
-      .ss-nav {
-        flex-wrap: wrap;
-        gap: 14px;
-        padding: 16px 20px;
-      }
-
-      .ss-nav-links {
-        order: 3;
-        width: 100%;
-        justify-content: center;
-      }
-
-      .ss-nav-actions {
-        width: 100%;
-        justify-content: center;
-      }
-
-      .ss-hero {
-        padding: 58px 20px 72px;
-      }
-
-      .ss-hero-headline {
-        font-size: 40px;
-      }
-
-      .ss-features,
-      .ss-footer {
-        padding-left: 20px;
-        padding-right: 20px;
-      }
-
-      .ss-logo img {
-        height: 40px;
-      }
-    }
-  </style>
-</head>
-<body>
-
-  <!-- NAV -->
-  <div class="ss-nav">
-    <div class="ss-logo">
-      <img src="{% static 'accounts/images/logo2.png' %}" alt="StudyStream logo">
+      <div class="hero-stats">
+        <div>
+          <div class="hstat-val">5+</div>
+          <div class="hstat-lbl">Classes tracked</div>
+        </div>
+        <div class="hstat-div"></div>
+        <div>
+          <div class="hstat-val">0</div>
+          <div class="hstat-lbl">Missed deadlines</div>
+        </div>
+        <div class="hstat-div"></div>
+        <div>
+          <div class="hstat-val">&infin;</div>
+          <div class="hstat-lbl">Less anxiety</div>
+        </div>
+      </div>
     </div>
 
-    <div class="ss-nav-links">
-      <a href="#features">Features</a>
-    </div>
-
-    <div class="ss-nav-actions">
-      <a class="ss-btn-ghost" href="{% url 'login' %}">Sign in</a>
-      <a class="ss-btn-solid" href="{% url 'register' %}">Get started</a>
+    <div class="hero-visual">
+      <div class="mockup-stack">
+        <div class="mockup-glow"></div>
+        <div class="mockup-card">
+          <div class="mockup-header">
+            <div class="mockup-logo">
+              <img src="{% static 'accounts/images/logo_wordmark.svg' %}" alt="StudyStream" style="height:18px;width:auto;opacity:0.9;">
+            </div>
+            <span class="mockup-week-badge">Week 7</span>
+          </div>
+          <div class="mockup-assignments">
+            <div class="ma-row">
+              <div class="ma-dot" style="background:#ef4444;"></div>
+              <div class="ma-title">BIO 201 Lab Report</div>
+              <div class="ma-due">Mon 11:59pm</div>
+              <div class="ma-status ma-prog">In progress</div>
+            </div>
+            <div class="ma-row">
+              <div class="ma-dot" style="background:#3b82f6;"></div>
+              <div class="ma-title">HIST 102 Essay</div>
+              <div class="ma-due">Wed 5pm</div>
+              <div class="ma-status ma-todo">Not started</div>
+            </div>
+            <div class="ma-row">
+              <div class="ma-dot" style="background:#8b5cf6;"></div>
+              <div class="ma-title">Work Shift &mdash; Java Caf&eacute;</div>
+              <div class="ma-due">Fri 4&ndash;9pm</div>
+              <div class="ma-status ma-work">Shift</div>
+            </div>
+            <div class="ma-row">
+              <div class="ma-dot" style="background:#10b981;"></div>
+              <div class="ma-title">CS 150 Problem Set</div>
+              <div class="ma-due">Fri 11:59pm</div>
+              <div class="ma-status ma-done">&#10003; Done</div>
+            </div>
+          </div>
+          <div class="mockup-alert">
+            <div style="font-size:16px;">&#9888;&#65039;</div>
+            <div class="alert-text">Week 8 overload detected &mdash; 3 exams + 1 lab within 48 hrs</div>
+          </div>
+        </div>
+        <div class="fchip fchip-1">&#10003; Step 3 of 5 complete</div>
+        <div class="fchip fchip-2">&#128197; 3 time blocks set</div>
+        <div class="fchip fchip-3">&#127942; 0 missed deadlines</div>
+      </div>
     </div>
   </div>
+</section>
 
-  <!-- HERO -->
-  <section class="ss-hero">
-    <div class="ss-hero-inner">
 
-      <div class="ss-hero-visual">
-        <div class="ss-logo-card">
-          <img src="{% static 'accounts/images/logo.png' %}" alt="StudyStream logo">
-        </div>
-      </div>
+<!-- SCROLLING TICKER -->
+<div class="ticker-wrap" aria-hidden="true">
+  <div class="ticker-track">
+    <span class="ticker-item"><span class="ticker-icon">&#128218;</span> Break big projects into manageable steps</span>
+    <span class="ticker-sep">&#9670;</span>
+    <span class="ticker-item hi"><span class="ticker-icon">&#9201;&#65039;</span> Schedule work sessions, not just deadlines</span>
+    <span class="ticker-sep">&#9670;</span>
+    <span class="ticker-item"><span class="ticker-icon">&#9888;&#65039;</span> Warns about overloaded weeks 2 weeks early</span>
+    <span class="ticker-sep">&#9670;</span>
+    <span class="ticker-item hi2"><span class="ticker-icon">&#128188;</span> Add work shifts alongside your classes</span>
+    <span class="ticker-sep">&#9670;</span>
+    <span class="ticker-item"><span class="ticker-icon">&#127919;</span> Track personal goals, not just school work</span>
+    <span class="ticker-sep">&#9670;</span>
+    <span class="ticker-item hi"><span class="ticker-icon">&#128101;</span> Group projects &mdash; shareable links, no sign-up needed</span>
+    <span class="ticker-sep">&#9670;</span>
+    <span class="ticker-item"><span class="ticker-icon">&#127912;</span> Color-coded classes for instant clarity</span>
+    <span class="ticker-sep">&#9670;</span>
+    <span class="ticker-item hi2"><span class="ticker-icon">&#128421;&#65039;</span> Syncs with physical e-ink display board</span>
+    <span class="ticker-sep">&#9670;</span>
+    <span class="ticker-item"><span class="ticker-icon">&#128276;</span> 15-min reminders before every time block</span>
+    <span class="ticker-sep">&#9670;</span>
+    <!-- duplicate for seamless loop -->
+    <span class="ticker-item"><span class="ticker-icon">&#128218;</span> Break big projects into manageable steps</span>
+    <span class="ticker-sep">&#9670;</span>
+    <span class="ticker-item hi"><span class="ticker-icon">&#9201;&#65039;</span> Schedule work sessions, not just deadlines</span>
+    <span class="ticker-sep">&#9670;</span>
+    <span class="ticker-item"><span class="ticker-icon">&#9888;&#65039;</span> Warns about overloaded weeks 2 weeks early</span>
+    <span class="ticker-sep">&#9670;</span>
+    <span class="ticker-item hi2"><span class="ticker-icon">&#128188;</span> Add work shifts alongside your classes</span>
+    <span class="ticker-sep">&#9670;</span>
+    <span class="ticker-item"><span class="ticker-icon">&#127919;</span> Track personal goals, not just school work</span>
+    <span class="ticker-sep">&#9670;</span>
+    <span class="ticker-item hi"><span class="ticker-icon">&#128101;</span> Group projects &mdash; shareable links, no sign-up needed</span>
+    <span class="ticker-sep">&#9670;</span>
+    <span class="ticker-item"><span class="ticker-icon">&#127912;</span> Color-coded classes for instant clarity</span>
+    <span class="ticker-sep">&#9670;</span>
+    <span class="ticker-item hi2"><span class="ticker-icon">&#128421;&#65039;</span> Syncs with physical e-ink display board</span>
+    <span class="ticker-sep">&#9670;</span>
+    <span class="ticker-item"><span class="ticker-icon">&#128276;</span> 15-min reminders before every time block</span>
+    <span class="ticker-sep">&#9670;</span>
+  </div>
+</div>
 
-      <div class="ss-hero-text">
-        <div class="ss-hero-eyebrow">School • Life • Work</div>
-        <h1 class="ss-hero-headline">
-          Stay organized. <br>
-          <span class="gold">Stay ahead.</span>
-        </h1>
-        <p class="ss-hero-sub">
-          StudyStream helps students manage classes, responsibilities, and real life without feeling buried under a mountain of tabs, deadlines, and mental sticky notes.
-        </p>
-      </div>
 
+<!-- FEATURE TILES -->
+<section class="features-section">
+  <div class="sec-header">
+    <div class="sec-label">
+      <span class="sec-label-line"></span>
+      What StudyStream does
+      <span class="sec-label-line"></span>
     </div>
-  </section>
-
-  <!-- WAVE DIVIDER -->
-  <svg class="ss-wave" viewBox="0 0 1440 70" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
-    <path d="M0,34 C280,78 1040,0 1440,34 L1440,70 L0,70 Z" fill="#f6f8fc"/>
-    <path d="M0,46 C380,10 1080,62 1440,44 L1440,70 L0,70 Z" fill="#007DC5" opacity="0.09"/>
-  </svg>
-
-  <!-- FEATURES -->
-  <section class="ss-features" id="features">
-    <div class="ss-features-inner">
-      <div class="ss-section-title">Everything you need to stay on track</div>
-      <div class="ss-section-sub">
-        One place to organize school, work, deadlines, and daily life without the clutter circus.
-      </div>
-
-      <div class="ss-cards">
-        <div class="ss-card">
-          <div class="ss-card-icon yellow">📋</div>
-          <h3>Task breakdown</h3>
-          <p>Turn overwhelming projects into smaller steps so students can actually begin instead of freeze at the starting line.</p>
-        </div>
-
-        <div class="ss-card">
-          <div class="ss-card-icon blue">🗓</div>
-          <h3>Time blocking</h3>
-          <p>Map out school, work, and life in a clearer way with focused planning blocks that make busy weeks easier to manage.</p>
-        </div>
-
-        <div class="ss-card">
-          <div class="ss-card-icon green">⚠️</div>
-          <h3>Conflict detection</h3>
-          <p>Spot overloaded weeks before they crash into you. StudyStream helps flag stress points earlier, not after the fire starts.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- TAGLINE BAND -->
-  <div class="ss-band">
-    <div class="ss-band-text">Less stress. <span>More progress.</span></div>
+    <h2 class="sec-title">Every part of your life,<br><span class="y">finally in one place.</span></h2>
+    <p class="sec-body">
+      Not just a to-do list. StudyStream understands student life &mdash; classes, jobs, personal goals,
+      and the weeks that try to break you.
+    </p>
   </div>
 
-  <!-- FOOTER -->
-  <footer class="ss-footer">
-    <div class="ss-footer-logo"><span>STUDY</span><span>STREAM</span></div>
-    <div class="ss-footer-copy">© 2025 StudyStream. All rights reserved.</div>
-    <div class="ss-footer-links">
-      <span>Privacy</span>
-      <span>Terms</span>
-      <span>Contact</span>
-    </div>
-  </footer>
+  <div class="features-grid">
 
-</body>
-</html>
+    <!-- BIG: Task breakdown -->
+    <div class="feat-tile feat-tile-big">
+      <span class="feat-tag ft-school">&#128218; Academic</span>
+      <div class="feat-icon-wrap fi-yellow">&#129513;</div>
+      <div class="feat-title">Break big projects into steps &mdash; before panic sets in</div>
+      <p class="feat-body">
+        Research papers, group projects, and final exams feel impossible until they're broken down.
+        StudyStream prompts you to split any large assignment into ordered subtasks, each with its own
+        mini-deadline and progress state. Your brain sees "Step 2 of 6" &mdash; not "50-page thesis due Friday."
+      </p>
+      <div class="feat-progress">
+        <div class="fp-row">
+          <div class="fp-label">Choose topic</div>
+          <div class="fp-bar"><div class="fp-fill" style="width:100%;background:#4ade80;"></div></div>
+          <div class="fp-pct" style="color:#4ade80;">&#10003;</div>
+        </div>
+        <div class="fp-row">
+          <div class="fp-label">Find 5 sources</div>
+          <div class="fp-bar"><div class="fp-fill" style="width:100%;background:#4ade80;"></div></div>
+          <div class="fp-pct" style="color:#4ade80;">&#10003;</div>
+        </div>
+        <div class="fp-row">
+          <div class="fp-label">Draft thesis</div>
+          <div class="fp-bar"><div class="fp-fill" style="width:65%;background:var(--ss-yellow);"></div></div>
+          <div class="fp-pct" style="color:var(--ss-yellow);">65%</div>
+        </div>
+        <div class="fp-row">
+          <div class="fp-label">Write body</div>
+          <div class="fp-bar"><div class="fp-fill" style="width:10%;background:var(--ss-blue-light);"></div></div>
+          <div class="fp-pct" style="color:var(--muted);">&mdash;</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Workload density -->
+    <div class="feat-tile">
+      <span class="feat-tag ft-all">&#128308; Smart alerts</span>
+      <div class="feat-icon-wrap fi-red">&#128202;</div>
+      <div class="feat-title">Sees Week 7 coming before you do</div>
+      <p class="feat-body">
+        The workload density algorithm scans your next 4 weeks and flags dangerous clusters
+        &mdash; 2 weeks before they hit, so you still have time to act.
+      </p>
+      <div class="feat-density">
+        <div class="fd-week fd-green">
+          <div class="fd-lbl">Wk 5</div>
+          <div class="fd-bar" style="height:18px;"></div>
+          <div class="fd-pct">42%</div>
+        </div>
+        <div class="fd-week fd-yellow">
+          <div class="fd-lbl">Wk 6</div>
+          <div class="fd-bar" style="height:22px;"></div>
+          <div class="fd-pct">71%</div>
+        </div>
+        <div class="fd-week fd-red">
+          <div class="fd-lbl">Wk 7</div>
+          <div class="fd-bar" style="height:28px;"></div>
+          <div class="fd-pct">96%</div>
+        </div>
+        <div class="fd-week fd-green">
+          <div class="fd-lbl">Wk 8</div>
+          <div class="fd-bar" style="height:14px;"></div>
+          <div class="fd-pct">38%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Work shifts -->
+    <div class="feat-tile">
+      <span class="feat-tag ft-work">&#128188; Work</span>
+      <div class="feat-icon-wrap fi-purple">&#127978;</div>
+      <div class="feat-title">Add your work shifts right alongside class</div>
+      <p class="feat-body">
+        Working 20 hours a week while taking 15 credit hours? Add your shifts to StudyStream
+        and the density algorithm factors your real available time &mdash; not an idealized schedule.
+      </p>
+    </div>
+
+    <!-- Personal goals -->
+    <div class="feat-tile">
+      <span class="feat-tag ft-personal">&#127807; Personal</span>
+      <div class="feat-icon-wrap fi-teal">&#127919;</div>
+      <div class="feat-title">Personal goals, not just homework</div>
+      <p class="feat-body">
+        Track gym goals, creative projects, club commitments, or anything that matters
+        to you &mdash; separate from school, color-coded your way.
+      </p>
+    </div>
+
+    <!-- Time blocking -->
+    <div class="feat-tile">
+      <span class="feat-tag ft-school">&#9201;&#65039; Time blocking</span>
+      <div class="feat-icon-wrap fi-blue">&#128197;</div>
+      <div class="feat-title">Schedule work sessions, not just due dates</div>
+      <p class="feat-body">
+        A deadline on Friday doesn't tell you when to start. Time blocking schedules
+        actual study sessions throughout the week &mdash; with 15-minute reminders so nothing slips.
+      </p>
+    </div>
+
+    <!-- Group projects -->
+    <div class="feat-tile">
+      <span class="feat-tag ft-all">&#128101; Collaboration</span>
+      <div class="feat-icon-wrap fi-green">&#128279;</div>
+      <div class="feat-title">Group projects without the chaos</div>
+      <p class="feat-body">
+        Share a link. Teammates see tasks, claim ownership, and mark progress &mdash; no account needed.
+        Includes an audit log so "I didn't know" isn't an excuse anymore.
+      </p>
+    </div>
+
+    <!-- Progress tracking -->
+    <div class="feat-tile">
+      <span class="feat-tag ft-school">&#127942; Progress</span>
+      <div class="feat-icon-wrap fi-yellow">&#128200;</div>
+      <div class="feat-title">See exactly how far you've come</div>
+      <p class="feat-body">
+        Completion rings, streaks, and per-course breakdowns give you a live picture of your semester.
+        Celebrate wins. Catch slips early. Stay motivated all the way to finals.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- WHO IS IT FOR -->
+<section class="who-section">
+  <div class="sec-header">
+    <div class="sec-label">
+      <span class="sec-label-line"></span>
+      Who it's built for
+      <span class="sec-label-line"></span>
+    </div>
+    <h2 class="sec-title">One app. <span class="b">Every version</span> of your life.</h2>
+    <p class="sec-body">
+      Whether you're juggling a double major, working nights, or just trying to keep
+      track of your own goals &mdash; StudyStream fits the life you actually live.
+    </p>
+  </div>
+
+  <div class="who-grid">
+    <div class="who-tile student">
+      <span class="who-emoji">&#127891;</span>
+      <div class="who-title">The Student</div>
+      <p class="who-body">5 classes, 3 group projects, and a midterm you forgot about. StudyStream is built around how academic semesters actually work.</p>
+      <ul class="who-list">
+        <li><span class="who-check">&#128993;</span> Organize by semester &rarr; course &rarr; assignment</li>
+        <li><span class="who-check">&#128993;</span> Color-coded classes (8 colors, matches physical board pins)</li>
+        <li><span class="who-check">&#128993;</span> Overload warnings before crisis weeks</li>
+        <li><span class="who-check">&#128993;</span> Step-by-step project breakdowns</li>
+        <li><span class="who-check">&#128993;</span> Group project sharing with no sign-up required</li>
+      </ul>
+    </div>
+
+    <div class="who-tile worker">
+      <span class="who-emoji">&#128188;</span>
+      <div class="who-title">The Working Student</div>
+      <p class="who-body">Classes from 9&ndash;1, work from 4&ndash;10. You don't have the luxury of planning like someone who studies full-time. StudyStream accounts for your real schedule.</p>
+      <ul class="who-list">
+        <li><span class="who-check">&#128994;</span> Add shifts with start/end time and location</li>
+        <li><span class="who-check">&#128994;</span> Density algorithm uses your actual free hours</li>
+        <li><span class="who-check">&#128994;</span> Time blocks only scheduled in genuinely free windows</li>
+        <li><span class="who-check">&#128994;</span> Separate work and school colors at a glance</li>
+        <li><span class="who-check">&#128994;</span> Realistic load warnings &mdash; not based on a 168hr week</li>
+      </ul>
+    </div>
+
+    <div class="who-tile personal">
+      <span class="who-emoji">&#127807;</span>
+      <div class="who-title">The Whole Person</div>
+      <p class="who-body">Not everything important has a professor or a punch card. Track gym goals, club commitments, creative projects, and personal milestones alongside everything else.</p>
+      <ul class="who-list">
+        <li><span class="who-check">&#129401;</span> Personal task categories (not just school)</li>
+        <li><span class="who-check">&#129401;</span> Tag anything with custom colors and labels</li>
+        <li><span class="who-check">&#129401;</span> Set your own milestones and check-in dates</li>
+        <li><span class="who-check">&#129401;</span> Subtask breakdowns for personal projects too</li>
+        <li><span class="who-check">&#129401;</span> Balance personal time in the workload view</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+
+<!-- HOW IT WORKS -->
+<section class="how-section">
+  <div class="sec-header">
+    <div class="sec-label">
+      <span class="sec-label-line"></span>
+      How it works
+      <span class="sec-label-line"></span>
+    </div>
+    <h2 class="sec-title">Up and running in <span class="y">under 5 minutes.</span></h2>
+  </div>
+  <div class="how-steps">
+    <div class="how-step">
+      <div class="step-num sn1">1</div>
+      <div class="step-title">Create your semester</div>
+      <p class="step-body">Set up Fall 2026, add your courses, and give each one a color. One semester = one workspace.</p>
+    </div>
+    <div class="how-step">
+      <div class="step-num sn2">2</div>
+      <div class="step-title">Add everything that fills your time</div>
+      <p class="step-body">Assignments, exams, work shifts, club meetings, personal goals &mdash; anything that competes for your hours.</p>
+    </div>
+    <div class="how-step">
+      <div class="step-num sn3">3</div>
+      <div class="step-title">Break big things down</div>
+      <p class="step-body">Got a 10-page paper due in 3 weeks? StudyStream walks you through splitting it into steps with mini-deadlines.</p>
+    </div>
+    <div class="how-step">
+      <div class="step-num sn4">4</div>
+      <div class="step-title">Stay ahead, not just on top</div>
+      <p class="step-body">The dashboard flags overloaded weeks, schedules study time, and keeps your progress visible at all times.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- BOTTOM CTA -->
+<div class="cta-band">
+  <span class="cta-band-eyebrow">Free to start &mdash; no credit card needed.</span>
+  <h2 class="cta-band-title">
+    Stop surviving your semester.<br>
+    Start <span class="y">streaming through it.</span>
+  </h2>
+  <p class="cta-band-sub">Join students who finally feel in control &mdash; of school, work, and life.</p>
+  <div class="cta-band-inner">
+    <a href="{% url 'register' %}" class="btn-primary" style="font-size:16px;padding:17px 38px;">
+      Create your free account &rarr;
+    </a>
+    <a href="{% url 'login' %}" class="cta-signin-link">Sign in instead</a>
+  </div>
+  <div class="trust-row">
+    <div class="trust-item"><span class="trust-icon">&#128274;</span> No credit card required</div>
+    <div class="trust-item"><span class="trust-icon">&#9889;</span> Set up in under 5 minutes</div>
+    <div class="trust-item"><span class="trust-icon">&#127891;</span> Built for student life</div>
+    <div class="trust-item"><span class="trust-icon">&#128188;</span> Works for working students too</div>
+  </div>
+</div>
+
+{% endblock %}
