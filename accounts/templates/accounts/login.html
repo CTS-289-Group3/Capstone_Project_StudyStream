@@ -233,9 +233,8 @@
       <form method="post" class="auth-form">
         {% csrf_token %}
 
-        {% if form.errors %}
-          <div class="ss-alert ss-alert-error">
-            Your username or password didn't match. Please try again.
+          <div class="ss-form-row">
+            <a class="ss-forgot" href="{% url 'password_reset' %}">Forgot password?</a>
           </div>
         {% endif %}
 
