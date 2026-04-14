@@ -25,10 +25,10 @@ python -m venv .venv
 .venv\Scripts\Activate.ps1
 ```
 
-### 2) Install Django
+### 2) Install Dependencies
 
 ```bash
-pip install django
+pip install django python-dotenv
 ```
 
 ### 3) Run Django setup commands

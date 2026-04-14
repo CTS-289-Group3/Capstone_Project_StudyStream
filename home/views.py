@@ -4,6 +4,7 @@ from datetime import date, time, timedelta
 
 from django.contrib.auth.decorators import login_required
 from django.core.serializers.json import DjangoJSONEncoder
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
@@ -71,7 +72,9 @@ def _generate_recurring_personal_occurrences(recurring_events, range_start, rang
 
                 occurrences.append(
                     {
+                        "recurring_id": recurring_event.id,
                         "title": recurring_event.title,
+                        "description": recurring_event.description,
                         "event_date": current_date,
                         "start_time": recurring_event.start_time,
                         "end_time": recurring_event.end_time,
@@ -97,7 +100,9 @@ def _generate_recurring_personal_occurrences(recurring_events, range_start, rang
                 ):
                     occurrences.append(
                         {
+                            "recurring_id": recurring_event.id,
                             "title": recurring_event.title,
+                            "description": recurring_event.description,
                             "event_date": candidate_date,
                             "start_time": recurring_event.start_time,
                             "end_time": recurring_event.end_time,
@@ -208,6 +213,7 @@ def _get_work_shift_quick_options(user):
     }
 
 
+@login_required(login_url='/accounts/login/')
 def home_view(request):
     user = request.user
     profile = Profile.objects.filter(user=user).first()
@@ -249,6 +255,7 @@ def home_view(request):
                 'course_name': assignment.course.course_name,
                 'course_color': assignment.course.color_hex,
                 'due_date': assignment.due_date.isoformat(),
+                'estimated_hours': float(assignment.estimated_hours) if assignment.estimated_hours is not None else None,
                 'status': assignment.status,
                 'priority': assignment.priority,
                 'completion_pct': assignment.completion_pct,
@@ -300,18 +307,24 @@ def home_view(request):
     personal_events_data = []
     for event in one_time_personal:
         personal_events_data.append({
+            'id': event.id,
             'title': event.title,
             'event_date': event.event_date.isoformat(),
             'start_time': event.start_time.strftime('%H:%M') if event.start_time else None,
+            'end_time': event.end_time.strftime('%H:%M') if event.end_time else None,
+            'description': event.description or '',
             'location': event.location or '',
             'recurrence_label': '',
             'color_hex': event.color_hex or '#FCAF17',
         })
     for occ in _generate_recurring_personal_occurrences(recurring_personal, today_local, today_local + timedelta(days=90)):
         personal_events_data.append({
+            'recurring_id': occ.get('recurring_id'),
             'title': occ['title'],
             'event_date': occ['event_date'].isoformat(),
             'start_time': occ['start_time'].strftime('%H:%M') if occ['start_time'] else None,
+            'end_time': occ['end_time'].strftime('%H:%M') if occ['end_time'] else None,
+            'description': occ.get('description', '') or '',
             'location': occ.get('location', '') or '',
             'recurrence_label': occ.get('recurrence_label', ''),
             'color_hex': '#FCAF17',
@@ -665,3 +678,85 @@ def delete_recurring_job_title(request, title_id):
     if request.method == "POST":
         recurring_job_title.delete()
     return redirect("recurring_job_title_list")
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# API ENDPOINTS FOR PERSONAL EVENT EDITING
+# ════════════════════════════════════════════════════════════════════════════
+
+@login_required
+def personal_event_edit(request, event_id):
+    """Edit a personal event via API. Returns JSON."""
+    personal_event = get_object_or_404(PersonalEvent, pk=event_id, user=request.user)
+    if request.method == 'POST':
+        personal_event.title = request.POST.get('title', personal_event.title).strip()
+        personal_event.description = request.POST.get('description', personal_event.description).strip()
+        personal_event.event_date = request.POST.get('event_date', personal_event.event_date)
+        personal_event.start_time = request.POST.get('start_time') or None
+        personal_event.end_time = request.POST.get('end_time') or None
+        personal_event.location = request.POST.get('location', '').strip()
+        personal_event.color_hex = request.POST.get('color_hex', personal_event.color_hex)
+        personal_event.save()
+        return JsonResponse({'success': True, 'id': personal_event.id})
+    # GET — return data for edit form
+    return JsonResponse({
+        'id': personal_event.id,
+        'title': personal_event.title,
+        'description': personal_event.description,
+        'event_date': personal_event.event_date.isoformat(),
+        'start_time': personal_event.start_time.isoformat() if personal_event.start_time else None,
+        'end_time': personal_event.end_time.isoformat() if personal_event.end_time else None,
+        'location': personal_event.location,
+        'color_hex': personal_event.color_hex,
+    })
+
+
+@login_required
+def personal_event_delete(request, event_id):
+    """Delete a personal event via API. Returns JSON."""
+    personal_event = get_object_or_404(PersonalEvent, pk=event_id, user=request.user)
+    if request.method == 'POST':
+        personal_event.delete()
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False, 'error': 'Method not allowed'}, status=405)
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# API ENDPOINTS FOR WORK SHIFT EDITING
+# ════════════════════════════════════════════════════════════════════════════
+
+@login_required
+def work_shift_edit(request, shift_id):
+    """Edit a work shift via API. Returns JSON."""
+    work_shift = get_object_or_404(WorkShift, pk=shift_id, user=request.user)
+    if request.method == 'POST':
+        work_shift.job_title = request.POST.get('job_title', work_shift.job_title).strip()
+        work_shift.shift_date = request.POST.get('shift_date', work_shift.shift_date)
+        work_shift.start_time = request.POST.get('start_time', work_shift.start_time)
+        work_shift.end_time = request.POST.get('end_time', work_shift.end_time)
+        work_shift.location = request.POST.get('location', '').strip()
+        work_shift.notes = request.POST.get('notes', '').strip()
+        work_shift.color_hex = request.POST.get('color_hex', work_shift.color_hex)
+        work_shift.save()
+        return JsonResponse({'success': True, 'id': work_shift.id})
+    # GET — return data for edit form
+    return JsonResponse({
+        'id': work_shift.id,
+        'job_title': work_shift.job_title,
+        'shift_date': work_shift.shift_date.isoformat(),
+        'start_time': work_shift.start_time.isoformat() if work_shift.start_time else None,
+        'end_time': work_shift.end_time.isoformat() if work_shift.end_time else None,
+        'location': work_shift.location,
+        'notes': work_shift.notes,
+        'color_hex': work_shift.color_hex,
+    })
+
+
+@login_required
+def work_shift_delete(request, shift_id):
+    """Delete a work shift via API. Returns JSON."""
+    work_shift = get_object_or_404(WorkShift, pk=shift_id, user=request.user)
+    if request.method == 'POST':
+        work_shift.delete()
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False, 'error': 'Method not allowed'}, status=405)
