@@ -233,11 +233,6 @@
       <form method="post" class="auth-form">
         {% csrf_token %}
 
-          <div class="ss-form-row">
-            <a class="ss-forgot" href="{% url 'password_reset' %}">Forgot password?</a>
-          </div>
-        {% endif %}
-
         <div class="auth-field">
           <label for="id_username">Username</label>
           <input type="text" id="id_username" name="username"
@@ -250,7 +245,7 @@
                  placeholder="Enter your password" autocomplete="current-password" required>
         </div>
 
-        <a class="auth-forgot" href="#">Forgot password?</a>
+        <a class="auth-forgot" href="{% url 'password_reset' %}">Forgot password?</a>
 
         <button type="submit" class="auth-submit">Sign in →</button>
         <div class="auth-div">or</div>

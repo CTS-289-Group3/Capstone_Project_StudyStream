@@ -128,7 +128,8 @@ CSRF_TRUSTED_ORIGINS = [
     'https://*.app.github.dev',
 ]
 
-SECRET_KEY = os.getenv('SECRET_KEY')
+# Use env var in normal setups; fall back to a dev-only key for local runs.
+SECRET_KEY = os.getenv('SECRET_KEY') or 'django-insecure-dev-only-change-me'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587

@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
@@ -8,11 +9,29 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST, require_http_methods
 from django.http import JsonResponse
+from django.utils.dateparse import parse_date, parse_datetime
 from django.utils import timezone
 from django.db.models import Q
 
 from .forms import ProfileForm
 from .models import Assignment, AssignmentSubtask, Course, Profile, Semester, Tag, TimeBlock
+
+
+def _parse_due_date_value(raw_value):
+    """Parse request due_date input and always return a timezone-aware datetime."""
+    if not raw_value:
+        return None
+
+    parsed_value = parse_datetime(raw_value)
+    if parsed_value is None:
+        parsed_date = parse_date(raw_value)
+        if parsed_date is None:
+            return None
+        parsed_value = datetime.combine(parsed_date, datetime.min.time())
+
+    if timezone.is_naive(parsed_value):
+        parsed_value = timezone.make_aware(parsed_value, timezone.get_current_timezone())
+    return parsed_value
 
 
 # ─────────────────────────────────────────────────────────────
@@ -280,13 +299,17 @@ def assignment_create(request):
         if not due_date_raw:
             return JsonResponse({'success': False, 'error': 'Due date is required.'}, status=400)
 
+        due_date = _parse_due_date_value(due_date_raw)
+        if due_date is None:
+            return JsonResponse({'success': False, 'error': 'Invalid due date format.'}, status=400)
+
         assignment = Assignment.objects.create(
             user=request.user,
             course=course,
             title=request.POST.get('title', '').strip(),
             description=request.POST.get('description', '').strip(),
             assignment_type=request.POST.get('assignment_type', 'other'),
-            due_date=due_date_raw,
+            due_date=due_date,
             estimated_hours=request.POST.get('estimated_hours') or None,
             status=request.POST.get('status', 'not_started'),
             priority=request.POST.get('priority', 'medium'),
@@ -336,7 +359,10 @@ def assignment_edit(request, pk):
         assignment.assignment_type = request.POST.get('assignment_type', assignment.assignment_type)
         due_date_raw               = request.POST.get('due_date')
         if due_date_raw:
-            assignment.due_date = due_date_raw
+            due_date = _parse_due_date_value(due_date_raw)
+            if due_date is None:
+                return JsonResponse({'success': False, 'error': 'Invalid due date format.'}, status=400)
+            assignment.due_date = due_date
         assignment.estimated_hours = request.POST.get('estimated_hours') or None
         assignment.status          = request.POST.get('status', assignment.status)
         assignment.priority        = request.POST.get('priority', assignment.priority)
@@ -405,6 +431,7 @@ def assignment_list_json(request):
             'course_code': a.course.course_code,
             'course_color': a.course.color_hex,
             'due_date': a.due_date.isoformat(),
+            'estimated_hours': float(a.estimated_hours) if a.estimated_hours is not None else None,
             'status': a.status,
             'priority': a.priority,
             'completion_pct': a.completion_pct,
