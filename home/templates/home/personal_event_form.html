@@ -1,395 +1,427 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Personal Event</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --yellow: #FCAF17;
-            --blue: #007DC5;
-            --blue-dark: #034EA2;
-            --bg: #F4F7FB;
-            --surface: #FFFFFF;
-            --text: #1A2540;
-            --muted: #6B7A99;
-            --border: #E4EAF4;
-            --shadow: 0 2px 16px rgba(3,78,162,0.08);
-            --radius: 14px;
-        }
+{% extends "accounts/base.html" %}
 
-        * { box-sizing: border-box; }
-        body {
-            margin: 0;
-            font-family: 'DM Sans', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            padding: 28px 16px;
-        }
+{% block title %}Add Personal Event — StudyStream{% endblock %}
 
-        .ss-wrap {
-            max-width: 760px;
-            margin: 0 auto;
-        }
+{% block extra_head %}
+<style>
+    .ss-wrap {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 22px 16px 40px;
+        animation: formIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
 
-        .ss-card {
-            background: var(--surface);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            padding: 24px;
-        }
+    @keyframes formIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 
-        h1 {
-            margin: 0 0 8px;
-            font-family: 'Nunito', sans-serif;
-            font-size: 28px;
-            color: var(--blue-dark);
-        }
+    .ss-back-row {
+        margin-bottom: 12px;
+    }
 
-        .ss-sub {
-            margin: 0 0 20px;
-            color: var(--muted);
-            font-size: 14px;
-        }
+    .ss-back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border-radius: 999px;
+        border: 1px solid var(--card-border);
+        background: var(--card);
+        color: var(--text);
+        padding: 8px 13px;
+        font-size: 13px;
+        font-weight: 800;
+        text-decoration: none;
+        transition: transform 0.16s ease, box-shadow 0.16s ease, color 0.16s ease;
+    }
 
-        .ss-form p {
-            margin: 0 0 14px;
-        }
+    .ss-back-link:hover {
+        transform: translateY(-1px);
+        color: var(--ss-blue-light);
+        box-shadow: 0 8px 24px rgba(3, 78, 162, 0.18);
+    }
 
+    .ss-card {
+        background: var(--card);
+        border: 1px solid var(--card-border);
+        border-radius: 18px;
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        padding: 24px;
+    }
+
+    h1 {
+        margin: 0 0 8px;
+        font-family: 'Montserrat', sans-serif;
+        font-size: 28px;
+        color: var(--text);
+    }
+
+    .ss-sub {
+        margin: 0 0 20px;
+        color: var(--text2);
+        font-size: 14px;
+    }
+
+    .ss-form p {
+        margin: 0 0 14px;
+    }
+
+    .ss-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+    }
+
+    .ss-field {
+        margin-bottom: 14px;
+    }
+
+    .ss-field-full {
+        grid-column: 1 / -1;
+    }
+
+    .ss-recurring-toggle {
+        margin: 0 0 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    .ss-recurring-box {
+        margin-top: 10px;
+        border: 1px solid var(--input-border);
+        border-radius: 10px;
+        padding: 12px;
+        background: var(--input-bg);
+    }
+
+    .ss-recurring-box.hidden {
+        display: none;
+    }
+
+    .ss-checkbox-list {
+        list-style: none;
+        margin: 6px 0 0;
+        padding: 0;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px 12px;
+    }
+
+    .ss-checkbox-list li label {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 0;
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    .ss-note {
+        margin-top: 6px;
+        font-size: 12px;
+        color: var(--text2);
+    }
+
+    .ss-form label {
+        display: block;
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 6px;
+        color: var(--text);
+    }
+
+    .ss-form input,
+    .ss-form textarea,
+    .ss-form select {
+        width: 100%;
+        font-family: inherit;
+        font-size: 14px;
+        border: 1px solid var(--input-border);
+        border-radius: 10px;
+        padding: 10px 12px;
+        background: var(--input-bg);
+        color: var(--text);
+    }
+
+    .ss-form select {
+        color-scheme: dark;
+    }
+
+    .ss-form select option {
+        background: var(--card);
+        color: var(--text);
+    }
+
+    .ss-form input:focus,
+    .ss-form textarea:focus,
+    .ss-form select:focus {
+        outline: none;
+        box-shadow: var(--glow);
+        border-color: var(--ss-blue-light);
+    }
+
+    .ss-form textarea {
+        min-height: 96px;
+        resize: vertical;
+    }
+
+    .errorlist {
+        margin: 6px 0 0;
+        padding: 8px 10px;
+        list-style: none;
+        border-radius: 8px;
+        background: rgba(220, 38, 38, 0.14);
+        border: 1px solid rgba(220, 38, 38, 0.28);
+        color: #fca5a5;
+        font-size: 13px;
+    }
+
+    .ss-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 18px;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 999px;
+        padding: 10px 16px;
+        font-size: 14px;
+        font-weight: 800;
+        text-decoration: none;
+        cursor: pointer;
+        border: none;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--ss-blue), var(--ss-blue-deep));
+        color: #fff;
+        box-shadow: 0 6px 18px rgba(3, 78, 162, 0.28);
+    }
+
+    .btn-secondary {
+        background: transparent;
+        color: var(--text);
+        border: 1px solid var(--input-border);
+    }
+
+    .ss-manage-link {
+        margin-top: 12px;
+        font-size: 13px;
+        color: var(--ss-blue-light);
+        text-decoration: none;
+        font-weight: 700;
+        display: inline-block;
+    }
+
+    .ss-manage-link:hover {
+        text-decoration: underline;
+    }
+
+    .color-swatch {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 3px solid transparent;
+        transition: border-color 0.15s, transform 0.15s;
+    }
+
+    .color-swatch.active {
+        border-color: var(--ss-blue-light);
+        transform: scale(1.18);
+    }
+
+    @media (max-width: 680px) {
         .ss-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 14px;
-        }
-
-        .ss-field {
-            margin-bottom: 14px;
-        }
-
-        .ss-field-full {
-            grid-column: 1 / -1;
-        }
-
-        .ss-recurring-toggle {
-            margin: 0 0 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text);
-        }
-
-        .ss-recurring-box {
-            margin-top: 10px;
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 12px;
-            background: #FAFCFF;
-        }
-
-        .ss-recurring-box.hidden {
-            display: none;
+            grid-template-columns: 1fr;
         }
 
         .ss-checkbox-list {
-            list-style: none;
-            margin: 6px 0 0;
-            padding: 0;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 6px 12px;
+            grid-template-columns: 1fr;
         }
+    }
+</style>
+{% endblock %}
 
-        .ss-checkbox-list li label {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            margin-bottom: 0;
-            font-size: 13px;
-            font-weight: 500;
-        }
+{% block content %}
+<div class="ss-wrap">
+    <div class="ss-back-row">
+        <a href="{% url 'dashboard' %}" class="ss-back-link" aria-label="Back to dashboard">← Back to Dashboard</a>
+    </div>
 
-        .ss-note {
-            margin-top: 6px;
-            font-size: 12px;
-            color: var(--muted);
-        }
+    <div class="ss-card">
+        <h1>Add Personal Event</h1>
+        <p class="ss-sub">Create a one-time or recurring personal event in one form.</p>
 
-        .ss-form label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 6px;
-            color: var(--text);
-        }
+        <form method="post" class="ss-form">
+            {% csrf_token %}
 
-        .ss-form input,
-        .ss-form textarea,
-        .ss-form select {
-            width: 100%;
-            font-family: inherit;
-            font-size: 14px;
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 10px 12px;
-            background: #fff;
-            color: var(--text);
-        }
-
-        .ss-form textarea {
-            min-height: 96px;
-            resize: vertical;
-        }
-
-        .errorlist {
-            margin: 0 0 8px;
-            padding: 8px 10px;
-            list-style: none;
-            border-radius: 8px;
-            background: #FFE8E8;
-            color: #7B1B1B;
-            font-size: 13px;
-        }
-
-        .ss-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 18px;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 999px;
-            padding: 10px 16px;
-            font-size: 14px;
-            font-weight: 700;
-            text-decoration: none;
-            cursor: pointer;
-            border: none;
-        }
-
-        .btn-primary {
-            background: var(--blue-dark);
-            color: #fff;
-        }
-
-        .btn-secondary {
-            background: #fff;
-            color: var(--blue-dark);
-            border: 1px solid var(--border);
-        }
-
-        .ss-manage-link {
-            margin-top: 12px;
-            font-size: 13px;
-            color: var(--blue-dark);
-            text-decoration: none;
-            font-weight: 700;
-            display: inline-block;
-        }
-
-        .ss-manage-link:hover {
-            text-decoration: underline;
-        }
-
-        .color-swatch {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            cursor: pointer;
-            border: 3px solid transparent;
-            transition: border-color 0.15s, transform 0.15s;
-        }
-        .color-swatch.active {
-            border-color: var(--blue-dark);
-            transform: scale(1.18);
-        }
-
-        @media (max-width: 680px) {
-            .ss-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .ss-checkbox-list {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="ss-wrap">
-        <div class="ss-card">
-            <h1>Add Personal Event</h1>
-            <p class="ss-sub">Create a one-time or recurring personal event in one form.</p>
-
-            <form method="post" class="ss-form">
-                {% csrf_token %}
-
-                <div class="ss-grid">
-                    <div class="ss-field ss-field-full">
-                        {{ form.title.label_tag }}
-                        {{ form.title }}
-                        {{ form.title.errors }}
-                    </div>
-
-                    <div class="ss-field ss-field-full">
-                        {{ form.description.label_tag }}
-                        {{ form.description }}
-                        {{ form.description.errors }}
-                    </div>
-
-                    <div class="ss-field">
-                        {{ form.event_date.label_tag }}
-                        {{ form.event_date }}
-                        {{ form.event_date.errors }}
-                    </div>
-
-                    <div class="ss-field"></div>
-
-                    <div class="ss-field">
-                        {{ form.start_time.label_tag }}
-                        {{ form.start_time }}
-                        {{ form.start_time.errors }}
-                    </div>
-
-                    <div class="ss-field">
-                        {{ form.end_time.label_tag }}
-                        {{ form.end_time }}
-                        {{ form.end_time.errors }}
-                    </div>
-
-                    <div class="ss-field ss-field-full">
-                        {{ form.location.label_tag }}
-                        {{ form.location }}
-                        {{ form.location.errors }}
-                    </div>
-
-                    <div class="ss-field ss-field-full">
-                        <label class="ss-recurring-toggle" for="id_recurring_enabled">
-                            {{ form.recurring_enabled }}
-                            <span>Yes, this repeats</span>
-                        </label>
-
-                        <div id="recurringOptions" class="ss-recurring-box hidden">
-                            <div class="ss-field">
-                                {{ form.recurrence_pattern.label_tag }}
-                                {{ form.recurrence_pattern }}
-                                {{ form.recurrence_pattern.errors }}
-                            </div>
-
-                            <div class="ss-field" id="weekdayField">
-                                {{ form.selected_weekdays.label_tag }}
-                                <ul class="ss-checkbox-list">
-                                    {{ form.selected_weekdays }}
-                                </ul>
-                                {{ form.selected_weekdays.errors }}
-                            </div>
-
-                            <div class="ss-field" id="monthlyField">
-                                {{ form.monthly_day.label_tag }}
-                                {{ form.monthly_day }}
-                                {{ form.monthly_day.errors }}
-                                <div class="ss-note">Leave blank to use the day from event date.</div>
-                            </div>
-
-                            <div class="ss-field">
-                                <label class="ss-recurring-toggle" for="id_recurring_is_active">
-                                    {{ form.recurring_is_active }}
-                                    <span>Recurring event active</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
+            <div class="ss-grid">
+                <div class="ss-field ss-field-full">
+                    {{ form.title.label_tag }}
+                    {{ form.title }}
+                    {{ form.title.errors }}
                 </div>
 
                 <div class="ss-field ss-field-full">
-                    <label>Event Color</label>
-                    <div id="peColorPicker" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;"></div>
-                    {{ form.color_hex }}
+                    {{ form.description.label_tag }}
+                    {{ form.description }}
+                    {{ form.description.errors }}
                 </div>
 
-                <div class="ss-actions">
-                    <button type="submit" class="btn btn-primary">Save Event</button>
-                    <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancel</a>
+                <div class="ss-field">
+                    {{ form.event_date.label_tag }}
+                    {{ form.event_date }}
+                    {{ form.event_date.errors }}
                 </div>
-                <a href="{% url 'recurring_personal_event_list' %}" class="ss-manage-link">Manage recurring personal events</a>
-            </form>
-        </div>
+
+                <div class="ss-field"></div>
+
+                <div class="ss-field">
+                    {{ form.start_time.label_tag }}
+                    {{ form.start_time }}
+                    {{ form.start_time.errors }}
+                </div>
+
+                <div class="ss-field">
+                    {{ form.end_time.label_tag }}
+                    {{ form.end_time }}
+                    {{ form.end_time.errors }}
+                </div>
+
+                <div class="ss-field ss-field-full">
+                    {{ form.location.label_tag }}
+                    {{ form.location }}
+                    {{ form.location.errors }}
+                </div>
+
+                <div class="ss-field ss-field-full">
+                    <label class="ss-recurring-toggle" for="id_recurring_enabled">
+                        {{ form.recurring_enabled }}
+                        <span>Yes, this repeats</span>
+                    </label>
+
+                    <div id="recurringOptions" class="ss-recurring-box hidden">
+                        <div class="ss-field">
+                            {{ form.recurrence_pattern.label_tag }}
+                            {{ form.recurrence_pattern }}
+                            {{ form.recurrence_pattern.errors }}
+                        </div>
+
+                        <div class="ss-field" id="weekdayField">
+                            {{ form.selected_weekdays.label_tag }}
+                            <ul class="ss-checkbox-list">
+                                {{ form.selected_weekdays }}
+                            </ul>
+                            {{ form.selected_weekdays.errors }}
+                        </div>
+
+                        <div class="ss-field" id="monthlyField">
+                            {{ form.monthly_day.label_tag }}
+                            {{ form.monthly_day }}
+                            {{ form.monthly_day.errors }}
+                            <div class="ss-note">Leave blank to use the day from event date.</div>
+                        </div>
+
+                        <div class="ss-field">
+                            <label class="ss-recurring-toggle" for="id_recurring_is_active">
+                                {{ form.recurring_is_active }}
+                                <span>Recurring event active</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ss-field ss-field-full">
+                <label>Event Color</label>
+                <div id="peColorPicker" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;"></div>
+                {{ form.color_hex }}
+            </div>
+
+            <div class="ss-actions">
+                <button type="submit" class="btn btn-primary">Save Event</button>
+                <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+            <a href="{% url 'recurring_personal_event_list' %}" class="ss-manage-link">Manage recurring personal events</a>
+        </form>
     </div>
+</div>
+{% endblock %}
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const recurringToggle = document.getElementById('id_recurring_enabled');
-            const recurrencePattern = document.getElementById('id_recurrence_pattern');
-            const recurringOptions = document.getElementById('recurringOptions');
-            const weekdayField = document.getElementById('weekdayField');
-            const monthlyField = document.getElementById('monthlyField');
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const recurringToggle = document.getElementById('id_recurring_enabled');
+        const recurrencePattern = document.getElementById('id_recurrence_pattern');
+        const recurringOptions = document.getElementById('recurringOptions');
+        const weekdayField = document.getElementById('weekdayField');
+        const monthlyField = document.getElementById('monthlyField');
 
-            function updateRecurringVisibility() {
-                if (!recurringToggle || !recurringOptions) {
-                    return;
-                }
-
-                if (recurringToggle.checked) {
-                    recurringOptions.classList.remove('hidden');
-                } else {
-                    recurringOptions.classList.add('hidden');
-                }
+        function updateRecurringVisibility() {
+            if (!recurringToggle || !recurringOptions) {
+                return;
             }
 
-            function updatePatternFields() {
-                if (!recurrencePattern || !weekdayField || !monthlyField) {
-                    return;
-                }
+            if (recurringToggle.checked) {
+                recurringOptions.classList.remove('hidden');
+            } else {
+                recurringOptions.classList.add('hidden');
+            }
+        }
 
-                const pattern = recurrencePattern.value;
-                const isWeekly = pattern === 'weekly' || pattern === 'biweekly';
-                const isMonthly = pattern === 'monthly';
-
-                weekdayField.style.display = isWeekly ? 'block' : 'none';
-                monthlyField.style.display = isMonthly ? 'block' : 'none';
+        function updatePatternFields() {
+            if (!recurrencePattern || !weekdayField || !monthlyField) {
+                return;
             }
 
-            if (recurringToggle) {
-                recurringToggle.addEventListener('change', updateRecurringVisibility);
-            }
+            const pattern = recurrencePattern.value;
+            const isWeekly = pattern === 'weekly' || pattern === 'biweekly';
+            const isMonthly = pattern === 'monthly';
 
-            if (recurrencePattern) {
-                recurrencePattern.addEventListener('change', updatePatternFields);
-            }
+            weekdayField.style.display = isWeekly ? 'block' : 'none';
+            monthlyField.style.display = isMonthly ? 'block' : 'none';
+        }
 
-            updateRecurringVisibility();
-            updatePatternFields();
+        if (recurringToggle) {
+            recurringToggle.addEventListener('change', updateRecurringVisibility);
+        }
 
-            // Color picker
-            const PE_COLORS = ['#ef4444','#f97316','#f59e0b','#FCAF17','#10b981','#06b6d4','#3b82f6','#8b5cf6','#ec4899','#6b7280'];
-            const colorContainer = document.getElementById('peColorPicker');
-            const colorInput = document.getElementById('id_color_hex');
-            const currentColor = (colorInput && colorInput.value) ? colorInput.value : '#FCAF17';
+        if (recurrencePattern) {
+            recurrencePattern.addEventListener('change', updatePatternFields);
+        }
 
-            if (colorContainer && colorInput) {
-                PE_COLORS.forEach(function(hex) {
-                    const swatch = document.createElement('div');
-                    swatch.className = 'color-swatch' + (hex.toLowerCase() === currentColor.toLowerCase() ? ' active' : '');
-                    swatch.style.background = hex;
-                    swatch.title = hex;
-                    swatch.addEventListener('click', function() {
-                        colorContainer.querySelectorAll('.color-swatch').forEach(function(s) { s.classList.remove('active'); });
-                        swatch.classList.add('active');
-                        colorInput.value = hex;
-                    });
-                    colorContainer.appendChild(swatch);
+        updateRecurringVisibility();
+        updatePatternFields();
+
+        const PE_COLORS = ['#ef4444','#f97316','#f59e0b','#FCAF17','#10b981','#06b6d4','#3b82f6','#8b5cf6','#ec4899','#6b7280'];
+        const colorContainer = document.getElementById('peColorPicker');
+        const colorInput = document.getElementById('id_color_hex');
+        const currentColor = (colorInput && colorInput.value) ? colorInput.value : '#FCAF17';
+
+        if (colorContainer && colorInput) {
+            PE_COLORS.forEach(function(hex) {
+                const swatch = document.createElement('div');
+                swatch.className = 'color-swatch' + (hex.toLowerCase() === currentColor.toLowerCase() ? ' active' : '');
+                swatch.style.background = hex;
+                swatch.title = hex;
+                swatch.addEventListener('click', function() {
+                    colorContainer.querySelectorAll('.color-swatch').forEach(function(s) { s.classList.remove('active'); });
+                    swatch.classList.add('active');
+                    colorInput.value = hex;
                 });
-            }
-        });
-    </script>
-</body>
-</html>
+                colorContainer.appendChild(swatch);
+            });
+        }
+    });
+</script>
+{% endblock %}

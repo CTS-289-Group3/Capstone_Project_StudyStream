@@ -1,216 +1,283 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Work Shift</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --yellow: #FCAF17;
-            --blue: #007DC5;
-            --blue-dark: #034EA2;
-            --bg: #F4F7FB;
-            --surface: #FFFFFF;
-            --text: #1A2540;
-            --muted: #6B7A99;
-            --border: #E4EAF4;
-            --shadow: 0 2px 16px rgba(3,78,162,0.08);
-            --radius: 14px;
-        }
+{% extends "accounts/base.html" %}
 
-        * { box-sizing: border-box; }
-        body {
-            margin: 0;
-            font-family: 'DM Sans', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            padding: 28px 16px;
-        }
+{% block title %}Add Work Shift — StudyStream{% endblock %}
 
-        .ss-wrap {
-            max-width: 760px;
-            margin: 0 auto;
-        }
+{% block nav_links %}
+  <a href="{% url 'home' %}">Home</a>
+  <a href="{% url 'dashboard' %}" class="active">Dashboard</a>
+{% endblock %}
 
-        .ss-card {
-            background: var(--surface);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            padding: 24px;
-        }
+{% block nav_actions %}
+  {{ block.super }}
+{% endblock %}
 
-        h1 {
-            margin: 0 0 8px;
-            font-family: 'Nunito', sans-serif;
-            font-size: 28px;
-            color: var(--blue-dark);
-        }
+{% block extra_head %}
+<style>
+    .ss-wrap {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 22px 16px 40px;
+        animation: formIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
 
-        .ss-sub {
-            margin: 0 0 20px;
-            color: var(--muted);
-            font-size: 14px;
-        }
+    @keyframes formIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 
-        .ss-form p {
-            margin: 0 0 14px;
-        }
+    .ss-back-row {
+        margin-bottom: 12px;
+    }
 
-        .ss-quick-link {
-            font-size: 12px;
-            color: var(--blue-dark);
-            font-weight: 700;
-            text-decoration: none;
-        }
+    .ss-back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border-radius: 999px;
+        border: 1px solid var(--card-border);
+        background: var(--card);
+        color: var(--text);
+        padding: 8px 13px;
+        font-size: 13px;
+        font-weight: 800;
+        text-decoration: none;
+        transition: transform 0.16s ease, box-shadow 0.16s ease, color 0.16s ease;
+    }
 
-        .ss-quick-link:hover {
-            text-decoration: underline;
-        }
+    .ss-back-link:hover {
+        transform: translateY(-1px);
+        color: var(--ss-blue-light);
+        box-shadow: 0 8px 24px rgba(3, 78, 162, 0.18);
+    }
 
+    .ss-card {
+        background: var(--card);
+        border: 1px solid var(--card-border);
+        border-radius: 18px;
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        padding: 24px;
+    }
+
+    h1 {
+        margin: 0 0 8px;
+        font-family: 'Montserrat', sans-serif;
+        font-size: 28px;
+        color: var(--text);
+    }
+
+    .ss-sub {
+        margin: 0 0 20px;
+        color: var(--text2);
+        font-size: 14px;
+    }
+
+    .ss-form p {
+        margin: 0 0 14px;
+    }
+
+    .ss-quick-link {
+        font-size: 12px;
+        color: var(--ss-blue-light);
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .ss-quick-link:hover {
+        text-decoration: underline;
+    }
+
+    .ss-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+    }
+
+    .ss-field {
+        margin-bottom: 14px;
+    }
+
+    .ss-field-full {
+        grid-column: 1 / -1;
+    }
+
+    .ss-field-meta {
+        margin-top: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .ss-inline-note {
+        font-size: 12px;
+        color: var(--text2);
+    }
+
+    .ss-form label {
+        display: block;
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 6px;
+        color: var(--text);
+    }
+
+    .ss-form input,
+    .ss-form textarea,
+    .ss-form select {
+        width: 100%;
+        font-family: inherit;
+        font-size: 14px;
+        border: 1px solid var(--input-border);
+        border-radius: 10px;
+        padding: 10px 12px;
+        background: var(--input-bg);
+        color: var(--text);
+    }
+
+    .ss-form select {
+        color-scheme: dark;
+    }
+
+    .ss-form select option {
+        background: var(--card);
+        color: var(--text);
+    }
+
+    .ss-form input:focus,
+    .ss-form textarea:focus,
+    .ss-form select:focus {
+        outline: none;
+        box-shadow: var(--glow);
+        border-color: var(--ss-blue-light);
+    }
+
+    .ss-form textarea {
+        min-height: 96px;
+        resize: vertical;
+    }
+
+    .errorlist {
+        margin: 6px 0 0;
+        padding: 8px 10px;
+        list-style: none;
+        border-radius: 8px;
+        background: rgba(220, 38, 38, 0.14);
+        border: 1px solid rgba(220, 38, 38, 0.28);
+        color: #fca5a5;
+        font-size: 13px;
+    }
+
+    .ss-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 18px;
+    }
+
+    .ss-form-errors {
+        margin: 0 0 12px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        background: rgba(220, 38, 38, 0.14);
+        border: 1px solid rgba(220, 38, 38, 0.28);
+        color: #fca5a5;
+        font-size: 13px;
+    }
+
+    .ss-form-errors ul {
+        margin: 0;
+        padding-left: 18px;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 999px;
+        padding: 10px 16px;
+        font-size: 14px;
+        font-weight: 800;
+        text-decoration: none;
+        cursor: pointer;
+        border: none;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--ss-blue), var(--ss-blue-deep));
+        color: #fff;
+        box-shadow: 0 6px 18px rgba(3, 78, 162, 0.28);
+    }
+
+    .btn-secondary {
+        background: transparent;
+        color: var(--text);
+        border: 1px solid var(--input-border);
+    }
+
+    .color-picker-row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 6px;
+    }
+
+    .shift-color-swatch {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 3px solid transparent;
+        transition: transform 0.15s, border-color 0.15s;
+    }
+
+    .shift-color-swatch.active,
+    .shift-color-swatch:hover {
+        transform: scale(1.2);
+        border-color: #fff;
+        outline: 2px solid var(--ss-blue-light);
+    }
+
+    @media (max-width: 680px) {
         .ss-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 14px;
+            grid-template-columns: 1fr;
         }
+    }
 
-        .ss-field {
-            margin-bottom: 14px;
-        }
+    .ss-radio-group {
+        margin-bottom: 14px;
+    }
 
-        .ss-field-full {
-            grid-column: 1 / -1;
-        }
+    .ss-radio-group label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        font-weight: 500;
+    }
 
-        .ss-field-meta {
-            margin-top: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
+    .ss-radio-group input[type="radio"] {
+        width: auto;
+        margin: 0;
+        cursor: pointer;
+    }
 
-        .ss-inline-note {
-            font-size: 12px;
-            color: var(--muted);
-        }
+    .ss-template-section {
+        display: none;
+    }
 
-        .ss-form label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 6px;
-            color: var(--text);
-        }
+    .ss-template-section.visible {
+        display: block;
+    }
+</style>
+{% endblock %}
 
-        .ss-form input,
-        .ss-form textarea,
-        .ss-form select {
-            width: 100%;
-            font-family: inherit;
-            font-size: 14px;
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 10px 12px;
-            background: #fff;
-            color: var(--text);
-        }
-
-        .ss-form textarea {
-            min-height: 96px;
-            resize: vertical;
-        }
-
-        .errorlist {
-            margin: 0 0 8px;
-            padding: 8px 10px;
-            list-style: none;
-            border-radius: 8px;
-            background: #FFE8E8;
-            color: #7B1B1B;
-            font-size: 13px;
-        }
-
-        .ss-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 18px;
-        }
-
-        .ss-form-errors {
-            margin: 0 0 12px;
-            padding: 10px 12px;
-            border-radius: 8px;
-            background: #FFE8E8;
-            color: #7B1B1B;
-            font-size: 13px;
-        }
-
-        .ss-form-errors ul {
-            margin: 0;
-            padding-left: 18px;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 999px;
-            padding: 10px 16px;
-            font-size: 14px;
-            font-weight: 700;
-            text-decoration: none;
-            cursor: pointer;
-            border: none;
-        }
-
-        .btn-primary {
-            background: var(--blue-dark);
-            color: #fff;
-        }
-
-        .btn-secondary {
-            background: #fff;
-            color: var(--blue-dark);
-            border: 1px solid var(--border);
-        }
-
-        .color-picker-row {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-top: 6px;
-        }
-
-        .shift-color-swatch {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            cursor: pointer;
-            border: 3px solid transparent;
-            transition: transform 0.15s, border-color 0.15s;
-        }
-
-        .shift-color-swatch.active,
-        .shift-color-swatch:hover {
-            transform: scale(1.2);
-            border-color: #fff;
-            outline: 2px solid #007DC5;
-        }
-
-        @media (max-width: 680px) {
-            .ss-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-</head>
-<body>
+{% block content %}
     <div class="ss-wrap">
+        <div class="ss-back-row">
+            <a href="{% url 'dashboard' %}" class="ss-back-link" aria-label="Back to dashboard">← Back to Dashboard</a>
+        </div>
+
         <div class="ss-card">
             <h1>Add Work Shift</h1>
             <p class="ss-sub">Create a work shift and it will appear on your dashboard calendar.</p>
@@ -223,6 +290,37 @@
                 {% endif %}
 
                 <div class="ss-grid">
+                    <div class="ss-field ss-field-full ss-radio-group">
+                        {{ form.shift_type.label_tag }}
+                        {{ form.shift_type }}
+                        {{ form.shift_type.errors }}
+                    </div>
+
+                    <div class="ss-field ss-field-full ss-template-section" id="templateSection">
+                        {{ form.recurring_template.label_tag }}
+                        {{ form.recurring_template }}
+                        {{ form.recurring_template.errors }}
+                        <div class="ss-field-meta">
+                            <span class="ss-inline-note">Select a template to auto-fill the time and location.</span>
+                            <a href="{% url 'recurring_shift_list' %}" class="ss-quick-link">Manage recurring shifts{% if recurring_count %} ({{ recurring_count }}){% endif %}</a>
+                        </div>
+                    </div>
+
+                    <div class="ss-field ss-template-section" id="templateSection">
+                        {{ form.recurrence_pattern.label_tag }}
+                        {{ form.recurrence_pattern }}
+                        {{ form.recurrence_pattern.errors }}
+                    </div>
+
+                    <div class="ss-field ss-template-section" id="templateSection">
+                        {{ form.recurrence_end_date.label_tag }}
+                        {{ form.recurrence_end_date }}
+                        {{ form.recurrence_end_date.errors }}
+                        <div class="ss-field-meta">
+                            <span class="ss-inline-note">Shifts will be created from the start date until this end date.</span>
+                        </div>
+                    </div>
+
                     <div class="ss-field ss-field-full">
                         {{ form.job_title.label_tag }}
                         {{ form.job_title }}
@@ -242,19 +340,6 @@
                         {{ form.shift_date.label_tag }}
                         {{ form.shift_date }}
                         {{ form.shift_date.errors }}
-                    </div>
-
-                    <div class="ss-field">
-                        <label for="shiftPreset">Recurring Shift Template</label>
-                        <select id="shiftPreset">
-                            <option value="">Apply a saved/common shift...</option>
-                            {% for preset in shift_presets %}
-                                <option data-start="{{ preset.start }}" data-end="{{ preset.end }}" data-location="{{ preset.location|default:'' }}">{{ preset.label }}</option>
-                            {% endfor %}
-                        </select>
-                        <div class="ss-field-meta">
-                            <a href="{% url 'recurring_shift_list' %}" class="ss-quick-link">Manage recurring shifts{% if recurring_count %} ({{ recurring_count }}){% endif %}</a>
-                        </div>
                     </div>
 
                     <div class="ss-field">
@@ -305,65 +390,81 @@
             </form>
         </div>
     </div>
+{% endblock %}
 
-    <script>
-        const SHIFT_COLORS = ['#ef4444','#f97316','#f59e0b','#10b981','#06b6d4','#3b82f6','#8b5cf6','#ec4899','#6b7280'];
+{% block extra_scripts %}
+<script>
+    const SHIFT_COLORS = ['#ef4444','#f97316','#f59e0b','#10b981','#06b6d4','#3b82f6','#8b5cf6','#ec4899','#6b7280'];
 
-        function buildShiftColorPicker(defaultColor) {
-            const container = document.getElementById('shiftColorPicker');
-            const hidden = document.getElementById('id_color_hex');
-            if (!container || !hidden) return;
-            if (!hidden.value) hidden.value = defaultColor;
-            container.innerHTML = '';
-            SHIFT_COLORS.forEach(hex => {
-                const s = document.createElement('div');
-                s.className = 'shift-color-swatch' + (hex === hidden.value ? ' active' : '');
-                s.style.background = hex;
-                s.title = hex;
-                s.onclick = () => {
-                    hidden.value = hex;
-                    container.querySelectorAll('.shift-color-swatch').forEach(x => x.classList.remove('active'));
-                    s.classList.add('active');
-                };
-                container.appendChild(s);
+    function buildShiftColorPicker(defaultColor) {
+        const container = document.getElementById('shiftColorPicker');
+        const hidden = document.getElementById('id_color_hex');
+        if (!container || !hidden) return;
+        if (!hidden.value) hidden.value = defaultColor;
+        container.innerHTML = '';
+        SHIFT_COLORS.forEach(hex => {
+            const s = document.createElement('div');
+            s.className = 'shift-color-swatch' + (hex === hidden.value ? ' active' : '');
+            s.style.background = hex;
+            s.title = hex;
+            s.onclick = () => {
+                hidden.value = hex;
+                container.querySelectorAll('.shift-color-swatch').forEach(x => x.classList.remove('active'));
+                s.classList.add('active');
+            };
+            container.appendChild(s);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        buildShiftColorPicker('#10b981');
+
+        const shiftTypeRadios = document.querySelectorAll('input[name="shift_type"]');
+        const templateSections = document.querySelectorAll('.ss-template-section');
+        const recurringTemplateSelect = document.getElementById('id_recurring_template');
+        const recurrencePatternSelect = document.getElementById('id_recurrence_pattern');
+        const recurrenceEndDateInput = document.getElementById('id_recurrence_end_date');
+        const jobTitleInput = document.getElementById('id_job_title');
+        const startTimeInput = document.getElementById('id_start_time');
+        const endTimeInput = document.getElementById('id_end_time');
+        const locationInput = document.getElementById('id_location');
+
+        if (jobTitleInput) {
+            jobTitleInput.setAttribute('list', 'jobTitleOptions');
+        }
+
+        if (locationInput) {
+            locationInput.setAttribute('list', 'locationOptions');
+        }
+
+        // Handle shift type toggle
+        function updateTemplateVisibility() {
+            const selectedType = document.querySelector('input[name="shift_type"]:checked')?.value;
+            templateSections.forEach(section => {
+                if (selectedType === 'recurring') {
+                    section.classList.add('visible');
+                } else {
+                    section.classList.remove('visible');
+                }
             });
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
-            buildShiftColorPicker('#10b981');
-
-            const shiftPreset = document.getElementById('shiftPreset');
-            const jobTitleInput = document.getElementById('id_job_title');
-            const startTimeInput = document.getElementById('id_start_time');
-            const endTimeInput = document.getElementById('id_end_time');
-            const locationInput = document.getElementById('id_location');
-
-            if (jobTitleInput) {
-                jobTitleInput.setAttribute('list', 'jobTitleOptions');
-            }
-
-            if (locationInput) {
-                locationInput.setAttribute('list', 'locationOptions');
-            }
-
-            if (shiftPreset && startTimeInput && endTimeInput) {
-                shiftPreset.addEventListener('change', function () {
-                    const selected = shiftPreset.options[shiftPreset.selectedIndex];
-                    const start = selected.dataset.start;
-                    const end = selected.dataset.end;
-                    const location = selected.dataset.location;
-
-                    if (start && end) {
-                        startTimeInput.value = start;
-                        endTimeInput.value = end;
-                    }
-
-                    if (location && locationInput) {
-                        locationInput.value = location;
-                    }
-                });
-            }
+        shiftTypeRadios.forEach(radio => {
+            radio.addEventListener('change', updateTemplateVisibility);
         });
-    </script>
-</body>
-</html>
+
+        // Initialize visibility on page load
+        updateTemplateVisibility();
+
+        // Handle recurring template selection to auto-fill times
+        if (recurringTemplateSelect) {
+            recurringTemplateSelect.addEventListener('change', function () {
+                if (this.value && startTimeInput && endTimeInput) {
+                    // The template times will be used in the view
+                    // Just ensure the fields are ready
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

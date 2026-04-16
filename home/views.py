@@ -182,10 +182,15 @@ def _get_work_shift_quick_options(user):
         key = (start_str, end_str)
         seen_ranges.add(key)
         shift_presets.append({
-            "label": f"Recurring: {recurring.name} ({recurring.start_time.strftime('%I:%M %p')} - {recurring.end_time.strftime('%I:%M %p')})",
+            "label": (
+                f"Recurring: {recurring.name} "
+                f"({recurring.start_time.strftime('%I:%M %p')} - {recurring.end_time.strftime('%I:%M %p')}, "
+                f"{recurring.get_recurrence_pattern_display()})"
+            ),
             "start": start_str,
             "end": end_str,
             "location": recurring.location,
+            "recurrence": recurring.get_recurrence_pattern_display(),
         })
 
     for start_time, end_time in recent_shifts.values_list("start_time", "end_time"):
@@ -497,14 +502,68 @@ def add_work_shift(request):
     quick_options = _get_work_shift_quick_options(request.user)
 
     if request.method == "POST":
-        form = WorkShiftForm(request.POST)
+        form = WorkShiftForm(request.user, request.POST)
         if form.is_valid():
             shift = form.save(commit=False)
             shift.user = request.user
-            shift.save()
+            
+            # If using a recurring template, auto-fill the shift times and location
+            if form.cleaned_data.get("shift_type") == "recurring" and form.cleaned_data.get("recurring_template"):
+                template = form.cleaned_data.get("recurring_template")
+                shift.start_time = template.start_time
+                shift.end_time = template.end_time
+                if not shift.location:  # Only use template location if user didn't specify one
+                    shift.location = template.location
+                
+                # Generate recurring shifts based on pattern
+                recurrence_pattern = form.cleaned_data.get("recurrence_pattern")
+                recurrence_end_date = form.cleaned_data.get("recurrence_end_date")
+                
+                if recurrence_pattern and recurrence_end_date:
+                    # Generate shifts for the recurrence period
+                    current_date = shift.shift_date
+                    
+                    # Determine the increment days based on pattern
+                    if recurrence_pattern == "weekly":
+                        increment = timedelta(days=7)
+                    elif recurrence_pattern == "biweekly":
+                        increment = timedelta(days=14)
+                    elif recurrence_pattern == "monthly":
+                        increment = None  # Handle monthly separately
+                    
+                    # Create all recurring shifts
+                    while current_date <= recurrence_end_date:
+                        new_shift = WorkShift(
+                            user=request.user,
+                            job_title=shift.job_title,
+                            shift_date=current_date,
+                            start_time=shift.start_time,
+                            end_time=shift.end_time,
+                            location=shift.location,
+                            notes=shift.notes,
+                            color_hex=shift.color_hex,
+                        )
+                        new_shift.save()
+                        
+                        # Calculate next date
+                        if recurrence_pattern == "monthly":
+                            # Add one month
+                            if current_date.month == 12:
+                                current_date = current_date.replace(year=current_date.year + 1, month=1)
+                            else:
+                                current_date = current_date.replace(month=current_date.month + 1)
+                        else:
+                            current_date = current_date + increment
+                else:
+                    # No recurrence pattern selected, just save as one shift
+                    shift.save()
+            else:
+                # One-time shift
+                shift.save()
+            
             return redirect("dashboard")
     else:
-        form = WorkShiftForm()
+        form = WorkShiftForm(request.user)
 
     context = {
         "form": form,
