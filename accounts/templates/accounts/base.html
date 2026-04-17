@@ -245,8 +245,10 @@
         </span>
       </label>
       {% block nav_actions %}
-        <a class="ss-btn ss-btn-ghost" href="{% url 'login' %}">Sign in</a>
-        <a class="ss-btn ss-btn-solid" href="{% url 'register' %}">Get started free</a>
+        {% if not request.user.is_authenticated %}
+          <a class="ss-btn ss-btn-ghost" href="{% url 'login' %}">Sign in</a>
+          <a class="ss-btn ss-btn-solid" href="{% url 'register' %}">Get started free</a>
+        {% endif %}
       {% endblock %}
     </div>
   </nav>
