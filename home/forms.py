@@ -132,11 +132,15 @@ class WorkShiftForm(forms.ModelForm):
 
     class Meta:
         model = WorkShift
-        fields = ["job_title", "shift_date", "start_time", "end_time", "location", "notes", "color_hex"]
+        fields = ["employer_name", "shift_start", "shift_end", "location", "notes", "color_hex"]
+        labels = {
+            "employer_name": "Employer Name",
+            "shift_start": "Shift Start",
+            "shift_end": "Shift End",
+        }
         widgets = {
-            "shift_date": forms.DateInput(attrs={"type": "date"}),
-            "start_time": forms.TimeInput(attrs={"type": "time"}),
-            "end_time": forms.TimeInput(attrs={"type": "time"}),
+            "shift_start": forms.DateTimeInput(attrs={"type": "datetime-local"}),
+            "shift_end": forms.DateTimeInput(attrs={"type": "datetime-local"}),
             "color_hex": forms.HiddenInput(),
         }
 

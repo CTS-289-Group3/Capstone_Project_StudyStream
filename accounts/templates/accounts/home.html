@@ -179,11 +179,21 @@
 .ma-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 .ma-title { font-size: 13px; font-weight: 700; color: var(--text); flex: 1; }
 .ma-due   { font-size: 11px; font-weight: 600; color: var(--muted); }
-.ma-status { font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.06em; }
-.ma-done   { background: rgba(0,176,76,0.15); color: #4ade80; }
-.ma-prog   { background: rgba(252,175,23,0.15); color: var(--ss-yellow); }
-.ma-todo   { background: rgba(83,183,232,0.12); color: var(--ss-blue-light); }
-.ma-work   { background: rgba(139,92,246,0.15); color: #a78bfa; }
+.ma-status-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 900;
+  border: 1px solid transparent;
+}
+.ma-done   { background: rgba(0,176,76,0.15); color: #4ade80; border-color: rgba(0,176,76,0.28); }
+.ma-prog   { background: rgba(252,175,23,0.15); color: var(--ss-yellow); border-color: rgba(252,175,23,0.28); }
+.ma-todo   { background: rgba(83,183,232,0.12); color: var(--ss-blue-light); border-color: rgba(83,183,232,0.28); }
+.ma-work   { background: rgba(139,92,246,0.15); color: #a78bfa; border-color: rgba(139,92,246,0.28); }
 .mockup-alert {
   display: flex; align-items: center; gap: 9px; margin-top: 12px;
   background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.20);
@@ -468,25 +478,25 @@
               <div class="ma-dot" style="background:#ef4444;"></div>
               <div class="ma-title">BIO 201 Lab Report</div>
               <div class="ma-due">Mon 11:59pm</div>
-              <div class="ma-status ma-prog">In progress</div>
+              <div class="ma-status-icon ma-prog" title="In progress" aria-label="In progress">◐</div>
             </div>
             <div class="ma-row">
               <div class="ma-dot" style="background:#3b82f6;"></div>
               <div class="ma-title">HIST 102 Essay</div>
               <div class="ma-due">Wed 5pm</div>
-              <div class="ma-status ma-todo">Not started</div>
+              <div class="ma-status-icon ma-todo" title="Not started" aria-label="Not started">○</div>
             </div>
             <div class="ma-row">
               <div class="ma-dot" style="background:#8b5cf6;"></div>
               <div class="ma-title">Work Shift &mdash; Java Caf&eacute;</div>
               <div class="ma-due">Fri 4&ndash;9pm</div>
-              <div class="ma-status ma-work">Shift</div>
+              <div class="ma-status-icon ma-work" title="Work shift" aria-label="Work shift">◌</div>
             </div>
             <div class="ma-row">
               <div class="ma-dot" style="background:#10b981;"></div>
               <div class="ma-title">CS 150 Problem Set</div>
               <div class="ma-due">Fri 11:59pm</div>
-              <div class="ma-status ma-done">&#10003; Done</div>
+              <div class="ma-status-icon ma-done" title="Done" aria-label="Done">●</div>
             </div>
           </div>
           <div class="mockup-alert">

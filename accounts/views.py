@@ -13,8 +13,26 @@ from django.utils.dateparse import parse_date, parse_datetime
 from django.utils import timezone
 from django.db.models import Q
 
+from home.workload_engine import recompute_and_persist_workload
+
 from .forms import ProfileForm
-from .models import Assignment, AssignmentSubtask, Course, Profile, Semester, Tag, TimeBlock
+from .models import Assignment, AssignmentSubtask, CLASS_COLORS, Course, Profile, Semester, Tag, TimeBlock
+
+
+ALLOWED_CLASS_COLORS = {hex_value for hex_value, _ in CLASS_COLORS}
+
+
+def _parse_checkbox_value(raw_value, default=False):
+    if raw_value is None:
+        return default
+    return str(raw_value).strip().lower() in {'1', 'true', 'yes', 'on'}
+
+
+def _normalize_course_color(raw_value):
+    color_value = (raw_value or '').strip().upper()
+    if color_value in ALLOWED_CLASS_COLORS:
+        return color_value
+    return '#1E90FF'
 
 
 def _parse_due_date_value(raw_value):
@@ -32,6 +50,11 @@ def _parse_due_date_value(raw_value):
     if timezone.is_naive(parsed_value):
         parsed_value = timezone.make_aware(parsed_value, timezone.get_current_timezone())
     return parsed_value
+
+
+def _refresh_workload(user):
+    # Keep workload density snapshots current whenever assignments change.
+    return recompute_and_persist_workload(user, weeks=4)
 
 
 # ─────────────────────────────────────────────────────────────
@@ -201,7 +224,7 @@ def course_create(request):
             semester=semester,
             course_code=request.POST.get('course_code', '').strip(),
             course_name=request.POST.get('course_name', '').strip(),
-            color_hex=request.POST.get('color_hex', '#3b82f6'),
+            color_hex=_normalize_course_color(request.POST.get('color_hex')),
             professor_name=request.POST.get('professor_name', '').strip(),
             professor_email=request.POST.get('professor_email', '').strip(),
             meeting_times=request.POST.get('meeting_times', '').strip(),
@@ -228,7 +251,7 @@ def course_edit(request, pk):
             course.semester = get_object_or_404(Semester, pk=semester_id, user=request.user)
         course.course_code     = request.POST.get('course_code', course.course_code).strip()
         course.course_name     = request.POST.get('course_name', course.course_name).strip()
-        course.color_hex       = request.POST.get('color_hex', course.color_hex)
+        course.color_hex       = _normalize_course_color(request.POST.get('color_hex', course.color_hex))
         course.professor_name  = request.POST.get('professor_name', course.professor_name).strip()
         course.professor_email = request.POST.get('professor_email', course.professor_email).strip()
         course.meeting_times   = request.POST.get('meeting_times', course.meeting_times).strip()
@@ -263,7 +286,7 @@ def course_list_json(request):
 def tag_create(request):
     if request.method == 'POST':
         name      = request.POST.get('name', '').strip()
-        color_hex = request.POST.get('color_hex', '#3b82f6')
+        color_hex = request.POST.get('color_hex', '#1E90FF')
         if not name:
             return JsonResponse({'success': False, 'error': 'Name required.'}, status=400)
         tag, created = Tag.objects.get_or_create(user=request.user, name=name, defaults={'color_hex': color_hex})
@@ -310,11 +333,21 @@ def assignment_create(request):
             description=request.POST.get('description', '').strip(),
             assignment_type=request.POST.get('assignment_type', 'other'),
             due_date=due_date,
+            due_time=request.POST.get('due_time', '').strip(),
             estimated_hours=request.POST.get('estimated_hours') or None,
             status=request.POST.get('status', 'not_started'),
-            priority=request.POST.get('priority', 'medium'),
-            is_major=request.POST.get('is_major') == 'on',
+            priority_level=request.POST.get('priority_level') or request.POST.get('priority', 'medium'),
+            is_major_project=_parse_checkbox_value(
+                request.POST.get('is_major_project', request.POST.get('is_major')),
+                default=False,
+            ),
             canvas_link=request.POST.get('canvas_link', '').strip(),
+            rubric_link=request.POST.get('rubric_link', '').strip(),
+            submission_link=request.POST.get('submission_link', '').strip(),
+            contributes_to_workload=_parse_checkbox_value(
+                request.POST.get('contributes_to_workload'),
+                default=True,
+            ),
         )
 
         # Tags
@@ -325,24 +358,42 @@ def assignment_create(request):
 
         # Subtasks
         subtask_titles = request.POST.getlist('subtask_title[]')
+        subtask_due_dates = request.POST.getlist('subtask_due_date[]')
+        subtask_due_times = request.POST.getlist('subtask_due_time[]')
+        subtask_estimated_hours = request.POST.getlist('subtask_estimated_hours[]')
         for i, st in enumerate(subtask_titles):
             st = st.strip()
             if st:
+                raw_due_date = subtask_due_dates[i].strip() if i < len(subtask_due_dates) else ''
+                due_date = _parse_due_date_value(raw_due_date) if raw_due_date else None
+                due_time = subtask_due_times[i].strip() if i < len(subtask_due_times) else ''
+                raw_estimated = subtask_estimated_hours[i].strip() if i < len(subtask_estimated_hours) else ''
                 AssignmentSubtask.objects.create(
                     assignment=assignment,
                     title=st,
-                    sequence_order=i,
+                    step_order=i,
+                    due_date=due_date,
+                    due_time=due_time,
+                    estimated_hours=raw_estimated or None,
                 )
+
+        _refresh_workload(request.user)
 
         return JsonResponse({
             'success': True,
             'id': assignment.id,
+            'assignment_id': str(assignment.assignment_id),
             'title': assignment.title,
             'course_code': course.course_code,
             'course_color': course.color_hex,
             'due_date': str(assignment.due_date),
             'status': assignment.status,
-            'priority': assignment.priority,
+            'priority': assignment.priority_level,
+            'priority_level': assignment.priority_level,
+            'is_major': assignment.is_major_project,
+            'is_major_project': assignment.is_major_project,
+            'completion_pct': assignment.completion_percentage,
+            'completion_percentage': assignment.completion_percentage,
         })
     return JsonResponse({'success': False}, status=405)
 
@@ -363,32 +414,91 @@ def assignment_edit(request, pk):
             if due_date is None:
                 return JsonResponse({'success': False, 'error': 'Invalid due date format.'}, status=400)
             assignment.due_date = due_date
+        assignment.due_time        = request.POST.get('due_time', assignment.due_time).strip()
         assignment.estimated_hours = request.POST.get('estimated_hours') or None
         assignment.status          = request.POST.get('status', assignment.status)
-        assignment.priority        = request.POST.get('priority', assignment.priority)
-        assignment.is_major        = request.POST.get('is_major') == 'on'
+        assignment.priority_level  = request.POST.get('priority_level') or request.POST.get('priority', assignment.priority_level)
+        assignment.is_major_project = _parse_checkbox_value(
+            request.POST.get('is_major_project', request.POST.get('is_major')),
+            default=assignment.is_major_project,
+        )
         assignment.canvas_link     = request.POST.get('canvas_link', assignment.canvas_link).strip()
+        assignment.rubric_link     = request.POST.get('rubric_link', assignment.rubric_link).strip()
+        assignment.submission_link = request.POST.get('submission_link', assignment.submission_link).strip()
+        assignment.contributes_to_workload = _parse_checkbox_value(
+            request.POST.get('contributes_to_workload'),
+            default=assignment.contributes_to_workload,
+        )
         assignment.save()
 
         tag_ids = request.POST.getlist('tags')
         valid_tags = Tag.objects.filter(pk__in=tag_ids, user=request.user)
         assignment.tags.set(valid_tags)
 
+        # Subtasks (replace existing ordering/content from modal payload)
+        subtask_titles = request.POST.getlist('subtask_title[]')
+        subtask_due_dates = request.POST.getlist('subtask_due_date[]')
+        subtask_due_times = request.POST.getlist('subtask_due_time[]')
+        subtask_estimated_hours = request.POST.getlist('subtask_estimated_hours[]')
+        assignment.subtasks.all().delete()
+        for i, st in enumerate(subtask_titles):
+            st = st.strip()
+            if st:
+                raw_due_date = subtask_due_dates[i].strip() if i < len(subtask_due_dates) else ''
+                due_date = _parse_due_date_value(raw_due_date) if raw_due_date else None
+                due_time = subtask_due_times[i].strip() if i < len(subtask_due_times) else ''
+                raw_estimated = subtask_estimated_hours[i].strip() if i < len(subtask_estimated_hours) else ''
+                AssignmentSubtask.objects.create(
+                    assignment=assignment,
+                    title=st,
+                    step_order=i,
+                    due_date=due_date,
+                    due_time=due_time,
+                    estimated_hours=raw_estimated or None,
+                )
+
+        _refresh_workload(request.user)
+
         return JsonResponse({'success': True})
     # GET — return data for edit form
     tags = list(assignment.tags.values('id', 'name', 'color_hex'))
-    subtasks = list(assignment.subtasks.values('id', 'title', 'status', 'sequence_order'))
+    subtasks = []
+    for st in assignment.subtasks.all().order_by('step_order'):
+        subtasks.append({
+            'id': st.id,
+            'subtask_id': str(st.subtask_id),
+            'title': st.title,
+            'description': st.description,
+            'status': st.status,
+            'step_order': st.step_order,
+            'sequence_order': st.step_order,
+            'due_date': st.due_date.strftime('%Y-%m-%dT%H:%M') if st.due_date else '',
+            'due_time': st.due_time,
+            'estimated_hours': str(st.estimated_hours) if st.estimated_hours else '',
+            'completion_percentage': st.completion_percentage,
+            'started_at': st.started_at.isoformat() if st.started_at else None,
+            'completed_at': st.completed_at.isoformat() if st.completed_at else None,
+        })
     return JsonResponse({
         'id': assignment.id,
+        'assignment_id': str(assignment.assignment_id),
         'title': assignment.title,
         'description': assignment.description,
         'assignment_type': assignment.assignment_type,
         'due_date': assignment.due_date.strftime('%Y-%m-%dT%H:%M') if assignment.due_date else '',
+        'due_time': assignment.due_time,
         'estimated_hours': str(assignment.estimated_hours) if assignment.estimated_hours else '',
         'status': assignment.status,
-        'priority': assignment.priority,
-        'is_major': assignment.is_major,
+        'priority': assignment.priority_level,
+        'priority_level': assignment.priority_level,
+        'is_major': assignment.is_major_project,
+        'is_major_project': assignment.is_major_project,
+        'completion_pct': assignment.completion_percentage,
+        'completion_percentage': assignment.completion_percentage,
         'canvas_link': assignment.canvas_link,
+        'rubric_link': assignment.rubric_link,
+        'submission_link': assignment.submission_link,
+        'contributes_to_workload': assignment.contributes_to_workload,
         'course_id': assignment.course_id,
         'tags': tags,
         'subtasks': subtasks,
@@ -400,6 +510,7 @@ def assignment_delete(request, pk):
     assignment = get_object_or_404(Assignment, pk=pk, user=request.user)
     if request.method == 'POST':
         assignment.delete()
+        _refresh_workload(request.user)
         return JsonResponse({'success': True})
     return JsonResponse({'success': False}, status=405)
 
@@ -412,10 +523,16 @@ def assignment_status_update(request, pk):
         new_status = request.POST.get('status', 'complete')
         assignment.status = new_status
         if new_status == 'complete':
-            assignment.completion_pct = 100
+            assignment.completion_percentage = 100
             assignment.completed_at   = timezone.now()
         assignment.save()
-        return JsonResponse({'success': True, 'status': assignment.status, 'completion_pct': assignment.completion_pct})
+        _refresh_workload(request.user)
+        return JsonResponse({
+            'success': True,
+            'status': assignment.status,
+            'completion_pct': assignment.completion_percentage,
+            'completion_percentage': assignment.completion_percentage,
+        })
     return JsonResponse({'success': False}, status=405)
 
 
@@ -426,17 +543,27 @@ def assignment_list_json(request):
     for a in qs:
         data.append({
             'id': a.id,
+            'assignment_id': str(a.assignment_id),
             'title': a.title,
+            'description': a.description,
             'course_id': a.course_id,
             'course_code': a.course.course_code,
             'course_color': a.course.color_hex,
             'due_date': a.due_date.isoformat(),
+            'due_time': a.due_time,
             'estimated_hours': float(a.estimated_hours) if a.estimated_hours is not None else None,
             'status': a.status,
-            'priority': a.priority,
-            'completion_pct': a.completion_pct,
-            'is_major': a.is_major,
+            'priority': a.priority_level,
+            'priority_level': a.priority_level,
+            'completion_pct': a.completion_percentage,
+            'completion_percentage': a.completion_percentage,
+            'is_major': a.is_major_project,
+            'is_major_project': a.is_major_project,
             'assignment_type': a.assignment_type,
+            'canvas_link': a.canvas_link,
+            'rubric_link': a.rubric_link,
+            'submission_link': a.submission_link,
+            'contributes_to_workload': a.contributes_to_workload,
             'subtask_count': a.subtasks.count(),
             'subtask_done': a.subtasks.filter(status='complete').count(),
             'tags': [{'id': t.id, 'name': t.name, 'color_hex': t.color_hex} for t in a.tags.all()],
@@ -459,11 +586,61 @@ def subtask_create(request, assignment_pk):
             assignment=assignment,
             title=title,
             description=request.POST.get('description', '').strip(),
-            sequence_order=order,
+            step_order=order,
+            due_date=_parse_due_date_value(request.POST.get('due_date')) if request.POST.get('due_date') else None,
+            due_time=request.POST.get('due_time', '').strip(),
             estimated_hours=request.POST.get('estimated_hours') or None,
         )
-        return JsonResponse({'success': True, 'id': subtask.id, 'title': subtask.title, 'status': subtask.status})
+        return JsonResponse({
+            'success': True,
+            'id': subtask.id,
+            'subtask_id': str(subtask.subtask_id),
+            'title': subtask.title,
+            'status': subtask.status,
+            'step_order': subtask.step_order,
+            'sequence_order': subtask.step_order,
+            'completion_percentage': subtask.completion_percentage,
+        })
     return JsonResponse({'success': False}, status=405)
+
+
+@login_required(login_url='/accounts/login/')
+def subtask_edit(request, pk):
+    subtask = get_object_or_404(AssignmentSubtask, pk=pk)
+    if subtask.assignment.user != request.user:
+        return JsonResponse({'success': False}, status=403)
+
+    if request.method != 'POST':
+        return JsonResponse({'success': False}, status=405)
+
+    title = request.POST.get('title', subtask.title).strip()
+    if not title:
+        return JsonResponse({'success': False, 'error': 'Title required.'}, status=400)
+
+    raw_due_date = request.POST.get('due_date', '')
+    due_date = _parse_due_date_value(raw_due_date) if raw_due_date else None
+
+    subtask.title = title
+    subtask.description = request.POST.get('description', subtask.description).strip()
+    subtask.due_date = due_date
+    subtask.due_time = request.POST.get('due_time', subtask.due_time).strip()
+    subtask.estimated_hours = request.POST.get('estimated_hours') or None
+    subtask.save()
+
+    return JsonResponse({
+        'success': True,
+        'id': subtask.id,
+        'subtask_id': str(subtask.subtask_id),
+        'title': subtask.title,
+        'description': subtask.description,
+        'status': subtask.status,
+        'step_order': subtask.step_order,
+        'sequence_order': subtask.step_order,
+        'due_date': subtask.due_date.isoformat() if subtask.due_date else None,
+        'due_time': subtask.due_time,
+        'estimated_hours': float(subtask.estimated_hours) if subtask.estimated_hours is not None else None,
+        'completion_percentage': subtask.completion_percentage,
+    })
 
 
 @login_required(login_url='/accounts/login/')
@@ -476,9 +653,18 @@ def subtask_toggle(request, pk):
         subtask.status = 'complete' if subtask.status != 'complete' else 'not_started'
         if subtask.status == 'complete':
             subtask.completed_at = timezone.now()
+            if not subtask.started_at:
+                subtask.started_at = timezone.now()
+        else:
+            subtask.completed_at = None
         subtask.save()
-        return JsonResponse({'success': True, 'status': subtask.status,
-                             'completion_pct': subtask.assignment.completion_pct})
+        return JsonResponse({
+            'success': True,
+            'status': subtask.status,
+            'subtask_completion_percentage': subtask.completion_percentage,
+            'completion_pct': subtask.assignment.completion_percentage,
+            'completion_percentage': subtask.assignment.completion_percentage,
+        })
     return JsonResponse({'success': False}, status=405)
 
 
@@ -496,7 +682,25 @@ def subtask_delete(request, pk):
 @login_required(login_url='/accounts/login/')
 def subtask_list_json(request, assignment_pk):
     assignment = get_object_or_404(Assignment, pk=assignment_pk, user=request.user)
-    subtasks = list(assignment.subtasks.values(
-        'id', 'title', 'description', 'status', 'sequence_order', 'estimated_hours'
-    ))
-    return JsonResponse({'subtasks': subtasks, 'completion_pct': assignment.completion_pct})
+    subtasks = []
+    for st in assignment.subtasks.all().order_by('step_order'):
+        subtasks.append({
+            'id': st.id,
+            'subtask_id': str(st.subtask_id),
+            'title': st.title,
+            'description': st.description,
+            'status': st.status,
+            'step_order': st.step_order,
+            'sequence_order': st.step_order,
+            'due_date': st.due_date.isoformat() if st.due_date else None,
+            'due_time': st.due_time,
+            'estimated_hours': float(st.estimated_hours) if st.estimated_hours is not None else None,
+            'completion_percentage': st.completion_percentage,
+            'started_at': st.started_at.isoformat() if st.started_at else None,
+            'completed_at': st.completed_at.isoformat() if st.completed_at else None,
+        })
+    return JsonResponse({
+        'subtasks': subtasks,
+        'completion_pct': assignment.completion_percentage,
+        'completion_percentage': assignment.completion_percentage,
+    })

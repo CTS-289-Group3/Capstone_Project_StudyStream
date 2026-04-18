@@ -41,6 +41,11 @@
   gap: 20px;
   animation: dashIn 0.5s cubic-bezier(0.22,1,0.36,1) both;
 }
+[data-theme="light"] {
+  --ss-soft-bubble-bg: #edf3fa;
+  --ss-soft-bubble-border: #d6e2ef;
+  --ss-soft-bubble-hover: #e3ecf7;
+}
 @keyframes dashIn { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
 
 .ss-user-menu {
@@ -184,32 +189,256 @@
   color: var(--ss-blue-light);
 }
 
-/* STATS */
-.dash-stats {
+/* SUMMARY */
+.top-overview {
   grid-column: 1/-1;
   display: grid;
-  grid-template-columns: repeat(4,1fr);
-  gap: 12px;
+  grid-template-columns: minmax(300px, 0.95fr) minmax(0, 1.55fr);
+  gap: 14px;
+  align-items: stretch;
 }
-.stat-pill {
+.top-overview-main {
+  min-width: 0;
+  height: 100%;
+}
+.dash-summary {
+  min-width: 0;
+  height: 100%;
+}
+.semester-strip {
   background: var(--card);
   backdrop-filter: blur(20px);
   border: 1px solid var(--card-border);
-  border-radius: 18px;
-  padding: 18px 18px;
+  border-radius: 16px;
+  padding: 7px 10px;
   box-shadow: var(--shadow);
-  display: flex; align-items: center; gap: 12px;
-  transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.25s;
-  cursor: default;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  height: 100%;
+  position: relative;
+  z-index: 20;
+  overflow: visible;
 }
-.stat-pill:hover { transform:translateY(-3px); box-shadow:0 14px 36px rgba(3,78,162,0.16); }
-.stat-icon { width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0; }
-.stat-icon.yellow { background:linear-gradient(135deg,rgba(252,175,23,.25),rgba(255,221,0,.1)); }
-.stat-icon.blue   { background:linear-gradient(135deg,rgba(0,125,197,.22),rgba(83,183,232,.1)); }
-.stat-icon.green  { background:linear-gradient(135deg,rgba(0,176,76,.22),rgba(0,176,76,.08)); }
-.stat-icon.red    { background:linear-gradient(135deg,rgba(239,68,68,.22),rgba(239,68,68,.08)); }
-.stat-value { font-family:'Montserrat',sans-serif; font-size:24px; font-weight:900; color:var(--text); line-height:1; }
-.stat-label { font-size:11px; color:var(--text2); font-weight:700; margin-top:3px; }
+.semester-strip-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  min-width: 0;
+  flex: 1;
+}
+.semester-strip-actions {
+  display: flex;
+  gap: 5px;
+  flex-wrap: nowrap;
+  position: relative;
+  z-index: 25;
+}
+.semester-strip-actions .ss-create-menu[open] {
+  z-index: 260;
+}
+.semester-inline-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+.semester-inline-copy {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.semester-inline-title {
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--text);
+  line-height: 1.1;
+}
+.semester-inline-stats {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.semester-inline-stat {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--text2);
+}
+.semester-inline-stat strong {
+  color: var(--text);
+}
+.course-inline-list {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+.course-inline-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  background: transparent;
+  border: none;
+  border-radius: 999px;
+  padding: 0;
+}
+.course-inline-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.course-inline-name {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--text);
+  white-space: nowrap;
+}
+.course-inline-summary {
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--text2);
+}
+.semester-strip-empty {
+  font-size: 11px;
+  color: var(--muted);
+}
+.summary-card {
+  background: var(--card);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 7px 9px;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: flex-start;
+  height: 100%;
+}
+.summary-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 74px) minmax(170px, 1fr);
+  gap: 5px;
+  width: 100%;
+  align-items: stretch;
+}
+.summary-metric {
+  background: var(--ss-soft-bubble-bg, var(--input-bg));
+  border: 1px solid var(--ss-soft-bubble-border, var(--input-border));
+  border-radius: 11px;
+  padding: 7px;
+  min-height: 74px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.summary-metric-compact {
+  width: 74px;
+  min-width: 74px;
+  text-align: center;
+  align-items: center;
+}
+.summary-metric-value {
+  font-family:'Montserrat',sans-serif;
+  font-size:16px;
+  font-weight:900;
+  line-height:1;
+  color:var(--text);
+}
+.summary-metric-label {
+  margin-top: 4px;
+  font-size:9px;
+  color:var(--text2);
+  font-weight:800;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+  line-height: 1.15;
+}
+.summary-metric-note {
+  margin-top: 3px;
+  font-size: 8px;
+  font-weight: 700;
+  color: var(--text2);
+  line-height: 1.25;
+}
+.summary-metric-warning {
+  border-color: rgba(245, 158, 11, 0.25);
+  min-width: 0;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 7px 9px;
+}
+
+.workload-overview {
+  grid-column: 1/-1;
+  display: block;
+  margin-top: 4px;
+  position: relative;
+  z-index: 5;
+}
+#workloadDensityWidget {
+  width: 100%;
+  max-width: none;
+  border-radius: 999px;
+  padding: 9px 12px;
+  display: grid;
+  grid-template-columns: auto minmax(128px, 164px) minmax(118px, 164px) minmax(72px, .78fr) minmax(64px, .7fr) minmax(86px, .95fr) minmax(178px, 1.4fr);
+  align-items: center;
+  gap: 6px 8px;
+}
+#workloadDensityWidget .g-card-title {
+  margin: 0;
+  white-space: nowrap;
+}
+#workloadDensityWidget .workload-headline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+#workloadDensityWidget .workload-meter {
+  height: 8px;
+  margin: 0;
+}
+#workloadDensityWidget .workload-row {
+  margin-top: 0;
+  font-size: 11px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 1px;
+}
+#workloadDensityWidget .workload-row-label {
+  font-size: 9px;
+  line-height: 1.1;
+}
+#workloadDensityWidget .workload-row-value {
+  font-size: 11px;
+  line-height: 1.1;
+}
+#workloadDensityWidget .workload-row-value.workload-assignment-due {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  min-width: 0;
+}
+#workloadUpcomingWeek {
+  margin-left: 0;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.05;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
 
 /* SIDEBAR */
 .dash-sidebar { display:flex; flex-direction:column; gap:16px; }
@@ -262,9 +491,31 @@
 .class-dot { width:10px;height:10px;border-radius:50%;flex-shrink:0; }
 .class-name { font-size:13px;font-weight:700;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
 .class-count { font-size:11px;font-weight:700;color:var(--text2);flex-shrink:0; }
+.compact-card {
+  padding: 14px 14px;
+}
+.compact-divider {
+  height: 1px;
+  background: var(--card-border);
+  margin: 10px 0;
+}
+.compact-section-label {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--text2);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
 
 /* MAIN */
-.dash-main { display:flex; flex-direction:column; gap:18px; }
+.dash-main {
+  grid-column: 1/-1;
+  display:grid;
+  grid-template-columns: minmax(290px, 340px) minmax(0, 1fr);
+  gap:14px;
+  align-items:start;
+}
 
 .calendar-layout {
   display:grid;
@@ -280,15 +531,16 @@
 }
 
 /* ── CALENDAR ── */
-.calendar-card { background:var(--card); backdrop-filter:blur(20px); border:1px solid var(--card-border); border-radius:20px; padding:18px; box-shadow:var(--shadow); overflow:visible; }
+.calendar-card { background:var(--card); backdrop-filter:blur(20px); border:1px solid var(--card-border); border-radius:20px; padding:18px; box-shadow:var(--shadow); overflow:hidden; min-width:0; height:560px; }
 .calendar-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:8px; }
 .calendar-nav { display:flex; align-items:center; gap:8px; }
 .cal-nav-btn { background:var(--input-bg); border:1px solid var(--input-border); border-radius:8px; padding:5px 10px; color:var(--text); cursor:pointer; font-size:13px; font-weight:700; transition:background .15s; }
-.cal-nav-btn:hover { background:var(--card-border); }
+.cal-nav-btn { background: var(--ss-soft-bubble-bg, var(--input-bg)); border:1px solid var(--ss-soft-bubble-border, var(--input-border)); }
+.cal-nav-btn:hover { background:var(--ss-soft-bubble-hover, var(--card-border)); }
 .cal-month-label { font-family:'Montserrat',sans-serif; font-size:15px; font-weight:900; color:var(--text); min-width:140px; text-align:center; }
-.view-tabs { display:flex; gap:4px; background:var(--input-bg); border-radius:10px; padding:3px; }
+.view-tabs { display:flex; gap:4px; background:var(--ss-soft-bubble-bg, var(--input-bg)); border-radius:10px; padding:3px; }
 .view-tab { background:none; border:none; color:var(--text2); font-size:12px; font-weight:700; padding:5px 12px; border-radius:8px; cursor:pointer; transition:all .18s; }
-.view-tab.active { background:var(--card); color:var(--text); box-shadow:0 2px 8px rgba(0,0,0,.15); }
+.view-tab.active { background:var(--ss-soft-bubble-hover, var(--card)); color:var(--text); box-shadow:0 2px 8px rgba(0,0,0,.10); }
 
 /* Month grid */
 #monthGrid { display:none; }
@@ -314,7 +566,7 @@
   grid-auto-rows: 52px;
   gap:1px;
   overflow-x:auto;
-  max-height:520px;
+  max-height:470px;
   overflow-y:auto;
 }
 .week-day-header:hover,.week-day-date:hover { color:var(--ss-blue-light) !important; }
@@ -331,7 +583,7 @@
 
 /* Day view */
 #dayView { display:none; }
-#dayView.active { display:block; max-height:520px; overflow-y:auto; }
+#dayView.active { display:block; max-height:470px; overflow-y:auto; }
 .day-header-row { font-family:'Montserrat',sans-serif; font-size:18px; font-weight:900; color:var(--text); padding:10px 0 12px; position:sticky; top:0; background:var(--card); z-index:2; }
 .day-slot { display:flex; min-height:52px; border-bottom:1px solid var(--card-border); }
 .day-time { font-size:11px;font-weight:700;color:var(--muted);width:56px;flex-shrink:0;padding:8px 10px 0 0;text-align:right;border-right:1px solid var(--card-border); }
@@ -343,12 +595,96 @@
 .day-slot.shift-slot { background:transparent; }
 
 /* ── TASKS ── */
-.tasks-card { background:var(--card);backdrop-filter:blur(20px);border:1px solid var(--card-border);border-radius:20px;padding:18px;box-shadow:var(--shadow); }
+.tasks-card { background:var(--card);backdrop-filter:blur(20px);border:1px solid var(--card-border);border-radius:20px;padding:18px;box-shadow:var(--shadow); position:sticky; top:88px; height:560px; max-height:560px; overflow:auto; }
 .tasks-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:14px; }
+.planner-tabs {
+  display:flex;
+  gap:6px;
+  margin-bottom:12px;
+  flex-wrap:wrap;
+}
+.planner-tab {
+  font-size:11px;
+  font-weight:800;
+  padding:6px 12px;
+  border-radius:999px;
+  background:var(--ss-soft-bubble-bg, var(--input-bg));
+  border:1px solid var(--ss-soft-bubble-border, var(--input-border));
+  color:var(--text2);
+  cursor:pointer;
+  transition:all .15s;
+}
+.planner-tab.active {
+  background:var(--ss-blue);
+  border-color:var(--ss-blue);
+  color:#fff;
+}
+.planner-item {
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  padding:10px 0;
+  border-bottom:1px solid var(--card-border);
+}
+.planner-item:last-child { border-bottom:none; }
+.planner-item-dot {
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  margin-top:5px;
+  flex-shrink:0;
+}
+.planner-item-body {
+  min-width:0;
+  flex:1;
+}
+.planner-item-title {
+  font-size:13px;
+  font-weight:800;
+  color:var(--text);
+  line-height:1.35;
+}
+.planner-item-meta {
+  margin-top:3px;
+  font-size:11px;
+  color:var(--text2);
+  line-height:1.45;
+}
+.planner-kind-badge {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  margin-top:2px;
+  margin-left:auto;
+  flex-shrink:0;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+  border-radius:999px;
+  padding:3px 7px;
+  background:var(--input-bg);
+  color:var(--text2);
+  border:1px solid var(--input-border);
+}
+.planner-kind-badge-assignment {
+  margin-top: 0;
+  margin-left: 8px;
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+.planner-kind-badge-assignment .task-status-icon {
+  width: 24px;
+  height: 24px;
+  font-size: 13px;
+  border-width: 1.5px;
+  cursor: pointer;
+}
 .filter-row { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; overflow-x:auto; padding-bottom:2px; }
 .filter-chip {
   font-size:11px;font-weight:700;padding:4px 12px;border-radius:999px;
-  background:var(--input-bg);border:1px solid var(--input-border);color:var(--text2);
+  background:var(--ss-soft-bubble-bg, var(--input-bg));border:1px solid var(--ss-soft-bubble-border, var(--input-border));color:var(--text2);
   cursor:pointer;transition:all .15s;
 }
 .filter-chip.active { background:var(--ss-blue);border-color:var(--ss-blue);color:#fff; }
@@ -370,9 +706,53 @@
 .due-ok   { background:rgba(0,176,76,.12);color:#00803a; }
 .due-soon { background:rgba(252,175,23,.14);color:#a06000; }
 .due-late { background:rgba(239,68,68,.12);color:#dc2626; }
+.task-status-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 900;
+  border: 1px solid transparent;
+}
+.task-status-not-started {
+  background: rgba(83,183,232,.12);
+  border-color: rgba(83,183,232,.28);
+  color: var(--ss-blue-light);
+}
+.task-status-in-progress {
+  background: rgba(252,175,23,.14);
+  border-color: rgba(252,175,23,.28);
+  color: #a06000;
+}
+.task-status-done {
+  background: rgba(0,176,76,.12);
+  border-color: rgba(0,176,76,.28);
+  color: #00803a;
+}
 [data-theme="dark"] .due-ok   { color:#4ade80; }
 [data-theme="dark"] .due-soon { color:#fcd34d; }
 [data-theme="dark"] .due-late { color:#f87171; }
+[data-theme="dark"] .task-status-not-started { color: var(--ss-blue-light); }
+[data-theme="dark"] .task-status-in-progress { color: #fcd34d; }
+[data-theme="dark"] .task-status-done { color: #4ade80; }
+[data-theme="light"] .task-status-not-started {
+  background: rgba(30, 144, 255, .22);
+  border-color: rgba(30, 144, 255, .48);
+  color: #1d4ed8;
+}
+[data-theme="light"] .task-status-in-progress {
+  background: rgba(245, 158, 11, .24);
+  border-color: rgba(245, 158, 11, .52);
+  color: #b45309;
+}
+[data-theme="light"] .task-status-done {
+  background: rgba(34, 197, 94, .22);
+  border-color: rgba(34, 197, 94, .50);
+  color: #15803d;
+}
 .task-priority-dot { width:7px;height:7px;border-radius:50%;flex-shrink:0; }
 .task-tag { font-size:9px;font-weight:800;padding:2px 7px;border-radius:999px;color:#fff;opacity:.9; }
 .task-progress { display:flex;align-items:center;gap:6px;margin-top:6px; }
@@ -381,6 +761,78 @@
 .progress-text { font-size:10px;font-weight:700;color:var(--muted); }
 .task-actions { display:flex;gap:4px;margin-left:auto;flex-shrink:0; }
 .task-empty { text-align:center;padding:32px;color:var(--muted);font-size:14px;font-weight:600; }
+.planner-assignment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.planner-assignment-item {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--ss-soft-bubble-border, var(--card-border));
+  background: var(--card);
+  cursor: pointer;
+  transition: border-color .16s ease, transform .16s ease;
+}
+.planner-assignment-item:hover {
+  border-color: var(--ss-blue-light);
+  transform: translateY(-1px);
+}
+.planner-assignment-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.planner-assignment-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.planner-assignment-due {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text2);
+  white-space: nowrap;
+}
+.planner-assignment-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.planner-assignment-status .task-status-icon {
+  width: 22px;
+  height: 22px;
+  font-size: 12px;
+}
+.task-list-more {
+  margin-top: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  background: var(--ss-soft-bubble-bg, var(--input-bg));
+  border: 1px solid var(--ss-soft-bubble-border, var(--input-border));
+  border-radius: 12px;
+  padding: 10px 12px;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background .18s ease, border-color .18s ease, color .18s ease;
+}
+.task-list-more:hover {
+  background: var(--ss-soft-bubble-hover, var(--card-border));
+  border-color: var(--ss-blue);
+  color: var(--ss-blue-light);
+}
 
 /* ══════════════════════════════════════════
    MODALS
@@ -451,8 +903,11 @@ body.modal-open { overflow:hidden; }
 
 /* Subtask builder */
 .subtask-list { display:flex;flex-direction:column;gap:6px;margin-top:8px; }
-.subtask-row { display:flex;gap:8px;align-items:center; }
-.subtask-row .form-input { flex:1; }
+.subtask-row { display:flex;gap:8px;align-items:center;flex-wrap:wrap; }
+.subtask-row .subtask-title { flex:1 1 100%; }
+.subtask-row .subtask-due-date { flex:1 1 180px; }
+.subtask-row .subtask-due-time { flex:1 1 160px; }
+.subtask-row .subtask-hours { flex:0 1 130px; }
 .add-subtask-btn { background:var(--input-bg);border:1.5px dashed var(--input-border);border-radius:10px;padding:8px;font-size:12px;font-weight:700;color:var(--text2);cursor:pointer;text-align:center;margin-top:6px;width:100%;transition:all .15s; }
 .add-subtask-btn:hover { border-color:var(--ss-blue);color:var(--ss-blue); }
 
@@ -488,15 +943,80 @@ body.modal-open { overflow:hidden; }
 .sb-event-title { font-size:13px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
 .sb-event-meta { font-size:11px;color:var(--text2);margin-top:2px;line-height:1.5; }
 
+.workload-meter {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  overflow: hidden;
+  margin: 10px 0 8px;
+}
+.workload-meter-fill {
+  height: 100%;
+  width: 0;
+  transition: width .35s ease;
+}
+.workload-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+  margin-top: 6px;
+}
+.workload-row-label { color: var(--text2); font-weight: 700; }
+.workload-row-value { color: var(--text); font-weight: 800; }
+.workload-alert-item {
+  border-left: 4px solid transparent;
+  background: var(--input-bg);
+  border-radius: 10px;
+  padding: 10px 10px 10px 12px;
+  margin-bottom: 8px;
+}
+.workload-alert-title {
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.workload-alert-message {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text2);
+}
+
 /* Responsive */
 @media(max-width:1024px) {
   .dash-wrap { grid-template-columns:1fr; }
-  .dash-stats { grid-template-columns:repeat(2,1fr); }
-  .calendar-layout { grid-template-columns:1fr; }
+  .top-overview { grid-template-columns:1fr; }
+  .top-overview-main { gap: 10px; }
+  .semester-inline-copy { align-items:flex-start; flex-direction:column; gap:2px; }
+  .summary-metrics { grid-template-columns:repeat(3, minmax(110px, 1fr)); }
+  .summary-metric-compact { width:auto; min-width:0; }
+  #workloadDensityWidget {
+    border-radius: 16px;
+    padding: 12px 14px;
+    display: block;
+  }
+  #workloadDensityWidget .g-card-title { margin-bottom: 8px; }
+  #workloadDensityWidget .workload-meter { margin: 7px 0 6px; }
+  #workloadDensityWidget .workload-row {
+    margin-top: 4px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .dash-main { grid-template-columns:1fr; }
+  .calendar-card { height:auto; overflow:visible; }
+  #weekGrid.active { max-height:560px; }
+  #dayView.active { max-height:560px; }
+  .tasks-card { position:static; height:auto; max-height:none; overflow:visible; }
 }
-@media(max-width:600px) {
+
+@media(max-width:680px) {
   .dash-wrap { padding:14px 12px 36px; gap:12px; }
-  .dash-stats { grid-template-columns:1fr 1fr; }
+  .summary-card { padding:12px; }
+  .summary-metrics { grid-template-columns:1fr 1fr; width:100%; }
   .form-row { grid-template-columns:1fr; }
   .ss-user-chip-name { display:none; }
 }
@@ -517,6 +1037,12 @@ body.modal-open { overflow:hidden; }
     tags:           {{ tags_json|safe }},
     workShifts:     {{ work_shifts_json|safe }},
     personalEvents: {{ personal_events_json|safe }},
+    workloadSummary: {{ workload_summary_json|safe }},
+    workloadAlerts: {{ workload_alerts_json|safe }},
+    workloadForecast: {{ workload_forecast_json|safe }},
+    workloadDensityColors: {{ workload_density_colors_json|safe }},
+    statusColors: {{ status_colors_json|safe }},
+    dashboardWidgets: {{ dashboard_widgets_json|safe }},
     activeSemId:    {{ active_sem_id|default:"null" }},
     csrfToken:   '{{ csrf_token }}',
     urls: {
@@ -534,6 +1060,7 @@ body.modal-open { overflow:hidden; }
       asgStatus:  '/accounts/api/assignments/{id}/status/',
       stCreate:   '/accounts/api/assignments/{id}/subtasks/create/',
       stList:     '/accounts/api/assignments/{id}/subtasks/',
+      stEdit:     '/accounts/api/subtasks/{id}/edit/',
       stToggle:   '/accounts/api/subtasks/{id}/toggle/',
       stDelete:   '/accounts/api/subtasks/{id}/delete/',
     }
@@ -561,86 +1088,113 @@ body.modal-open { overflow:hidden; }
     </div>
   </div>
 
-  <!-- STATS -->
-  <div class="dash-stats">
-    <div class="stat-pill">
-      <div class="stat-icon yellow">📋</div>
-      <div>
-        <div class="stat-value" id="statDueWeek">{{ stats.due_this_week }}</div>
-        <div class="stat-label">Due this week</div>
+  <div class="top-overview">
+    <div class="semester-strip">
+      <div class="semester-strip-main">
+        <div id="semesterList"></div>
+        <div id="courseList"></div>
+      </div>
+      <div class="semester-strip-actions">
+        <details class="ss-create-menu">
+          <summary class="ss-btn ss-btn-solid ss-create-trigger" style="font-size:11px;padding:5px 12px;">Manage <span class="ss-create-caret">▼</span></summary>
+          <div class="ss-create-dropdown">
+            <a class="ss-create-dropdown-link" href="javascript:void(0)" onclick="openSemesterModal(); this.closest('details').removeAttribute('open');">Semester</a>
+            <a class="ss-create-dropdown-link" href="javascript:void(0)" onclick="openCourseModal(); this.closest('details').removeAttribute('open');">Course</a>
+          </div>
+        </details>
       </div>
     </div>
-    <div class="stat-pill">
-      <div class="stat-icon blue">✅</div>
-      <div>
-        <div class="stat-value" id="statCompleted">{{ stats.completed }}</div>
-        <div class="stat-label">Completed</div>
-      </div>
-    </div>
-    <div class="stat-pill">
-      <div class="stat-icon green">📚</div>
-      <div>
-        <div class="stat-value" id="statCourses">{{ stats.active_courses }}</div>
-        <div class="stat-label">Active courses</div>
-      </div>
-    </div>
-    <div class="stat-pill">
-      <div class="stat-icon red">⚠️</div>
-      <div>
-        <div class="stat-value" id="statOverdue">{{ stats.overdue }}</div>
-        <div class="stat-label">Overdue</div>
+
+    <div class="top-overview-main">
+      <div class="dash-summary">
+        <div class="summary-card">
+          <div class="summary-metrics">
+            <div class="summary-metric summary-metric-compact">
+              <div class="summary-metric-value" id="statDueWeek">{{ stats.due_this_week }}</div>
+              <div class="summary-metric-label">Due This Week</div>
+            </div>
+            <div class="summary-metric summary-metric-compact">
+              <div class="summary-metric-value" id="statCompleted">{{ stats.completed }}</div>
+              <div class="summary-metric-label">Completed</div>
+            </div>
+            <div class="summary-metric summary-metric-compact">
+              <div class="summary-metric-value" id="statCourses">{{ stats.active_courses }}</div>
+              <div class="summary-metric-label">Active Courses</div>
+            </div>
+            <div class="summary-metric summary-metric-compact">
+              <div class="summary-metric-value" id="statOverdue">{{ stats.overdue }}</div>
+              <div class="summary-metric-label">Overdue</div>
+            </div>
+            <div class="summary-metric summary-metric-warning" id="summaryWorkloadWarningCard">
+              <div class="summary-metric-value" id="summaryWorkloadWarningValue">Clear</div>
+              <div class="summary-metric-label">Workload Warning</div>
+              <div class="summary-metric-note" id="summaryWorkloadWarningNote">No warnings right now.</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- SIDEBAR -->
-  <aside class="dash-sidebar">
-
-    <!-- Semesters -->
-    <div class="g-card">
-      <div class="g-card-title">
-        🗓 Semesters
-        <button class="ss-btn ss-btn-solid" onclick="openSemesterModal()" style="margin-left:auto;font-size:11px;padding:5px 12px;">+ Add</button>
+  <div class="workload-overview">
+    <div class="g-card" id="workloadDensityWidget">
+      <div class="g-card-title" id="workloadCurrentWeekLabel"></div>
+      <div class="workload-headline">
+        <div id="workloadStatusLabel" style="font-size:13px;font-weight:900;color:var(--text);"></div>
+        <div id="workloadUtilPct" style="font-size:12px;font-weight:800;color:var(--text2);"></div>
       </div>
-      <div id="semesterList"></div>
-    </div>
-
-    <!-- My Courses -->
-    <div class="g-card">
-      <div class="g-card-title">
-        🎓 My Courses
-        <button class="ss-btn ss-btn-solid" onclick="openCourseModal()" style="margin-left:auto;font-size:11px;padding:5px 12px;">+ Add</button>
+      <div class="workload-meter">
+        <div id="workloadMeterFill" class="workload-meter-fill"></div>
       </div>
-      <div id="courseList"></div>
-    </div>
-
-    <!-- Tags -->
-    <div class="g-card">
-      <div class="g-card-title">🏷 Tags</div>
-      <div id="tagChipList" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;"></div>
-      <div class="new-tag-row">
-        <input class="form-input" id="quickTagName" placeholder="New tag…" style="flex:1;padding:7px 11px;font-size:12px;">
-        <button class="ss-btn ss-btn-solid" onclick="quickCreateTag()" style="font-size:11px;padding:7px 12px;">Add</button>
+      <div class="workload-row">
+        <span class="workload-row-label">Assignments</span>
+        <span id="workloadAssignmentHours" class="workload-row-value"></span>
+      </div>
+      <div class="workload-row">
+        <span class="workload-row-label">Work</span>
+        <span id="workloadWorkHours" class="workload-row-value"></span>
+      </div>
+      <div class="workload-row">
+        <span class="workload-row-label">Available Study</span>
+        <span id="workloadAvailableHours" class="workload-row-value"></span>
+      </div>
+      <div class="workload-row">
+        <span class="workload-row-label">Assignments Due</span>
+        <span class="workload-row-value workload-assignment-due"><span id="workloadAssignmentCount"></span><span id="workloadUpcomingWeek"></span></span>
       </div>
     </div>
-
-    <!-- Upcoming Events -->
-    <div class="g-card">
-      <div class="g-card-title">
-        📅 Upcoming Events
-        <span id="sidebarUpcomingCount" style="margin-left:auto;font-size:9px;font-weight:800;padding:2px 7px;border-radius:999px;background:rgba(99,102,241,.15);color:#4338ca;letter-spacing:.05em;"></span>
-      </div>
-      <div id="sidebarUpcoming"></div>
-      <div style="display:flex;gap:8px;margin-top:6px;">
-        <a href="{% url 'add_personal_event' %}" class="add-new-link" style="flex:1;text-align:center;">＋ Personal event</a>
-        <a href="{% url 'add_work_shift' %}" class="add-new-link" style="flex:1;text-align:center;">＋ Work shift</a>
-      </div>
-    </div>
-
-  </aside>
+  </div>
 
   <!-- MAIN -->
   <div class="dash-main">
+
+    <!-- TASKS -->
+    <div class="tasks-card">
+      <div class="tasks-header">
+        <div class="g-card-title" style="margin-bottom:0;">📌 Planner</div>
+        <details class="ss-create-menu">
+          <summary class="ss-btn ss-btn-solid ss-create-trigger" style="font-size:12px;padding:7px 14px;">+ Add <span class="ss-create-caret">▼</span></summary>
+          <div class="ss-create-dropdown">
+            <a class="ss-create-dropdown-link" href="javascript:void(0)" onclick="openModal('assignmentModal'); this.closest('details').removeAttribute('open');">Course Task</a>
+            <a class="ss-create-dropdown-link" href="{% url 'add_work_shift' %}">Work Shift</a>
+            <a class="ss-create-dropdown-link" href="{% url 'add_personal_event' %}">Personal Event</a>
+          </div>
+        </details>
+      </div>
+      <div class="planner-tabs">
+        <div class="planner-tab active" data-planner-tab="all" onclick="setPlannerTab('all',this)">All</div>
+        <div class="planner-tab" data-planner-tab="assignments" onclick="setPlannerTab('assignments',this)">Assignments</div>
+        <div class="planner-tab" data-planner-tab="events" onclick="setPlannerTab('events',this)">Events</div>
+      </div>
+      <div class="filter-row" id="assignmentFilterRow" style="display:none;">
+        <div class="filter-chip active" data-filter="all" onclick="setFilter('all',this)">All</div>
+        <div class="filter-chip" data-filter="not_started" onclick="setFilter('not_started',this)">To Do</div>
+        <div class="filter-chip" data-filter="in_progress" onclick="setFilter('in_progress',this)">In Progress</div>
+        <div class="filter-chip" data-filter="complete" onclick="setFilter('complete',this)">Done</div>
+        <div class="filter-chip" data-filter="overdue" onclick="setFilter('overdue',this)">Overdue</div>
+      </div>
+      <div id="taskList"></div>
+    </div>
 
     <!-- CALENDAR -->
     <div class="calendar-card">
@@ -659,29 +1213,6 @@ body.modal-open { overflow:hidden; }
       <div id="monthGrid"></div>
       <div id="weekGrid" class="active"></div>
       <div id="dayView"></div>
-    </div>
-
-    <!-- TASKS -->
-    <div class="tasks-card">
-      <div class="tasks-header">
-        <div class="g-card-title" style="margin-bottom:0;">📌 Assignments</div>
-        <details class="ss-create-menu">
-          <summary class="ss-btn ss-btn-solid ss-create-trigger" style="font-size:12px;padding:7px 14px;">+ Add <span class="ss-create-caret">▼</span></summary>
-          <div class="ss-create-dropdown">
-            <a class="ss-create-dropdown-link" href="javascript:void(0)" onclick="openModal('assignmentModal'); this.closest('details').removeAttribute('open');">Course Task</a>
-            <a class="ss-create-dropdown-link" href="{% url 'add_work_shift' %}">Work Shift</a>
-            <a class="ss-create-dropdown-link" href="{% url 'add_personal_event' %}">Personal Event</a>
-          </div>
-        </details>
-      </div>
-      <div class="filter-row">
-        <div class="filter-chip active" data-filter="all" onclick="setFilter('all',this)">All</div>
-        <div class="filter-chip" data-filter="not_started" onclick="setFilter('not_started',this)">To Do</div>
-        <div class="filter-chip" data-filter="in_progress" onclick="setFilter('in_progress',this)">In Progress</div>
-        <div class="filter-chip" data-filter="complete" onclick="setFilter('complete',this)">Done</div>
-        <div class="filter-chip" data-filter="overdue" onclick="setFilter('overdue',this)">Overdue</div>
-      </div>
-      <div id="taskList"></div>
     </div>
 
   </div><!-- end dash-main -->
@@ -757,7 +1288,7 @@ body.modal-open { overflow:hidden; }
     <div class="form-group">
       <label class="form-label">Color</label>
       <div class="color-picker-row" id="courseColorPicker"></div>
-      <input type="hidden" id="courseColorVal" value="#3b82f6">
+      <input type="hidden" id="courseColorVal" value="#1E90FF">
     </div>
     <div class="modal-footer">
       <button class="ss-btn ss-btn-ghost" onclick="closeModal('courseModal')">Cancel</button>
@@ -805,6 +1336,12 @@ body.modal-open { overflow:hidden; }
         <input class="form-input" type="datetime-local" id="asgDue">
       </div>
       <div class="form-group">
+        <label class="form-label">Due Time Label</label>
+        <input class="form-input" id="asgDueTime" placeholder="e.g. 11:59pm, in class, by 5pm">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
         <label class="form-label">Priority</label>
         <select class="form-select" id="asgPriority">
           <option value="low">Low</option>
@@ -836,6 +1373,16 @@ body.modal-open { overflow:hidden; }
       <label class="form-label">Canvas Link</label>
       <input class="form-input" type="url" id="asgCanvas" placeholder="https://…">
     </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Rubric Link</label>
+        <input class="form-input" type="url" id="asgRubric" placeholder="https://…">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Submission Link</label>
+        <input class="form-input" type="url" id="asgSubmission" placeholder="https://…">
+      </div>
+    </div>
     <div class="form-group">
       <label class="form-label">Tags</label>
       <div class="tag-selector" id="asgTagSelector"></div>
@@ -848,6 +1395,10 @@ body.modal-open { overflow:hidden; }
     <div class="form-group" style="flex-direction:row;align-items:center;gap:10px;">
       <input type="checkbox" id="asgMajor" style="width:16px;height:16px;accent-color:var(--ss-blue);">
       <label class="form-label" for="asgMajor" style="margin-bottom:0;">Major Assignment / Exam</label>
+    </div>
+    <div class="form-group" style="flex-direction:row;align-items:center;gap:10px;">
+      <input type="checkbox" id="asgWorkload" checked style="width:16px;height:16px;accent-color:var(--ss-blue);">
+      <label class="form-label" for="asgWorkload" style="margin-bottom:0;">Include in workload analysis</label>
     </div>
 
     <!-- SUBTASKS -->
@@ -1015,28 +1566,27 @@ body.modal-open { overflow:hidden; }
     <div class="modal-title">💼 <span id="wsModalTitle">Edit Work Shift</span></div>
     <input type="hidden" id="wsEditId">
     <div class="form-group">
-      <label class="form-label">Job Title</label>
-      <input class="form-input" id="wsJobTitle" placeholder="Job title…">
+      <label class="form-label">Employer Name</label>
+      <input class="form-input" id="wsEmployerName" placeholder="e.g. Target, Campus Library">
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">Date *</label>
-        <input class="form-input" type="date" id="wsDate">
+        <label class="form-label">Shift Start *</label>
+        <input class="form-input" type="datetime-local" id="wsShiftStart">
       </div>
+      <div class="form-group">
+        <label class="form-label">Shift End *</label>
+        <input class="form-input" type="datetime-local" id="wsShiftEnd">
+      </div>
+    </div>
+    <div class="form-row">
       <div class="form-group">
         <label class="form-label">Color</label>
         <div class="color-picker-row" id="wsColorPicker"></div>
         <input type="hidden" id="wsColorVal" value="#10b981">
       </div>
-    </div>
-    <div class="form-row">
       <div class="form-group">
-        <label class="form-label">Start Time *</label>
-        <input class="form-input" type="time" id="wsStartTime">
-      </div>
-      <div class="form-group">
-        <label class="form-label">End Time *</label>
-        <input class="form-input" type="time" id="wsEndTime">
+        <div style="height:1px;"></div>
       </div>
     </div>
     <div class="form-group">
@@ -1046,6 +1596,20 @@ body.modal-open { overflow:hidden; }
     <div class="form-group">
       <label class="form-label">Notes</label>
       <textarea class="form-textarea" id="wsNotes" placeholder="Notes…"></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="flex-direction:row;align-items:center;gap:10px;">
+        <input type="checkbox" id="wsConfirmed" checked style="width:16px;height:16px;accent-color:var(--ss-blue);">
+        <label class="form-label" for="wsConfirmed" style="margin-bottom:0;">Confirmed shift</label>
+      </div>
+      <div class="form-group" style="flex-direction:row;align-items:center;gap:10px;">
+        <input type="checkbox" id="wsRecurring" style="width:16px;height:16px;accent-color:var(--ss-blue);">
+        <label class="form-label" for="wsRecurring" style="margin-bottom:0;">Recurring</label>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Recurrence Pattern</label>
+      <input class="form-input" id="wsRecurrencePattern" placeholder="e.g. weekly_monday">
     </div>
     <div class="modal-footer">
       <button class="ss-btn ss-btn-ghost" onclick="closeModal('workShiftModal')">Cancel</button>
@@ -1075,6 +1639,25 @@ function parseLocalDate(isoStr) {
   // Remove trailing +00:00 or Z so JS treats it as local
   const local = isoStr.replace(/([+-]\d{2}:\d{2}|Z)$/, '');
   return new Date(local);
+}
+
+function toDatetimeLocalValue(isoStr) {
+  const d = parseLocalDate(isoStr);
+  if (Number.isNaN(d.getTime())) return '';
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  return `${y}-${m}-${day}T${hh}:${mm}`;
+}
+
+function escapeAttr(value) {
+  return (value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 }
 
 // Returns YYYY-MM-DD in local timezone (avoids UTC offset shifting the date)
@@ -1172,18 +1755,32 @@ let state = {
   workShifts:     SS_DATA.workShifts,
   personalEvents: SS_DATA.personalEvents,
 };
+const workloadSummary = SS_DATA.workloadSummary || {};
+const workloadAlerts = SS_DATA.workloadAlerts || [];
 let activeFilter = 'all';
+let plannerTab = 'all';
+let taskListExpanded = false;
+let plannerExpanded = { all: false, assignments: false, events: false };
+const TASK_LIST_COLLAPSED_COUNT = 6;
+const PLANNER_EVENT_COLLAPSED_COUNT = 6;
 
 /* ═════════════════════════════════════════════
    COLOR SWATCHES
 ═════════════════════════════════════════════ */
-const COLORS = ['#ef4444','#f97316','#f59e0b','#10b981','#06b6d4','#3b82f6','#8b5cf6','#ec4899','#6b7280'];
+const COURSE_COLORS = [
+  '#1E90FF', '#3B82F6', '#2563EB', '#14B8A6',
+  '#22C55E', '#84CC16', '#F59E0B', '#EF4444',
+];
+const SCHEDULE_COLORS = [
+  '#8B5CF6', '#A855F7', '#EC4899', '#F43F5E',
+  '#06B6D4', '#0EA5E9', '#10B981', '#F97316',
+];
 
-function buildColorPicker(containerId, hiddenId, defaultColor='#3b82f6') {
+function buildColorPicker(containerId, hiddenId, defaultColor='#1E90FF', palette=COURSE_COLORS) {
   const c = $(containerId);
   if (!c) return;
   c.innerHTML = '';
-  COLORS.forEach(hex => {
+  palette.forEach(hex => {
     const s = document.createElement('div');
     s.className = 'color-swatch' + (hex === defaultColor ? ' active' : '');
     s.style.background = hex;
@@ -1198,13 +1795,13 @@ function buildColorPicker(containerId, hiddenId, defaultColor='#3b82f6') {
   if ($(hiddenId)) $(hiddenId).value = defaultColor;
 }
 
-buildColorPicker('courseColorPicker', 'courseColorVal');
-buildColorPicker('asgNewTagColorPicker', 'asgNewTagColorVal');
-buildColorPicker('peColorPicker', 'peColorVal', '#FCAF17');
-buildColorPicker('wsColorPicker', 'wsColorVal', '#10b981');
+buildColorPicker('courseColorPicker', 'courseColorVal', '#1E90FF', COURSE_COLORS);
+buildColorPicker('asgNewTagColorPicker', 'asgNewTagColorVal', '#3B82F6', COURSE_COLORS);
+buildColorPicker('peColorPicker', 'peColorVal', '#8B5CF6', SCHEDULE_COLORS);
+buildColorPicker('wsColorPicker', 'wsColorVal', '#10B981', SCHEDULE_COLORS);
 if (!$('asgNewTagColorVal')) {
   const h = document.createElement('input');
-  h.type = 'hidden'; h.id = 'asgNewTagColorVal'; h.value = '#3b82f6';
+  h.type = 'hidden'; h.id = 'asgNewTagColorVal'; h.value = '#1E90FF';
   $('asgNewTagColorPicker').after(h);
 }
 
@@ -1265,7 +1862,7 @@ async function editPersonalEvent(eventId) {
   $('peEndTime').value = data.end_time ? data.end_time.substring(0, 5) : '';
   $('peLocation').value = data.location || '';
   $('peDescription').value = data.description || '';
-  buildColorPicker('peColorPicker', 'peColorVal', data.color_hex);
+  buildColorPicker('peColorPicker', 'peColorVal', data.color_hex, SCHEDULE_COLORS);
   $('peModalTitle').textContent = 'Edit Personal Event';
 
   $('peDeleteBtn').onclick = () => deletePersonalEvent(data.id);
@@ -1287,7 +1884,7 @@ async function editPersonalEvent(eventId) {
   $('peEndTime').value = data.end_time ? data.end_time.substring(0, 5) : '';
   $('peLocation').value = data.location || '';
   $('peDescription').value = data.description || '';
-  buildColorPicker('peColorPicker', 'peColorVal', data.color_hex);
+  buildColorPicker('peColorPicker', 'peColorVal', data.color_hex, SCHEDULE_COLORS);
   $('peModalTitle').textContent = 'Edit Personal Event';
 
   $('peDeleteBtn').onclick = () => deletePersonalEvent(data.id);
@@ -1343,11 +1940,11 @@ async function openWorkShiftView(shiftId) {
   if (!data.id) { alert('Could not load shift.'); return; }
 
   $('wsvViewId').value = data.id;
-  $('wsvTitle').textContent = data.job_title || 'Work Shift';
+  $('wsvTitle').textContent = data.employer_name || data.job_title || 'Work Shift';
 
-  if (data.job_title) {
+  if (data.employer_name || data.job_title) {
     $('wsvJobTitle').style.display = 'block';
-    $('wsvJobTitleValue').textContent = data.job_title;
+    $('wsvJobTitleValue').textContent = data.employer_name || data.job_title;
   } else {
     $('wsvJobTitle').style.display = 'none';
   }
@@ -1356,7 +1953,8 @@ async function openWorkShiftView(shiftId) {
   const dateStr = d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
   const start = formatTime12(data.start_time.substring(0, 5));
   const end = formatTime12(data.end_time.substring(0, 5));
-  $('wsvDateTimeValue').textContent = `${dateStr} · ${start}–${end}`;
+  const duration = data.duration_hours ? ` (${data.duration_hours}h)` : '';
+  $('wsvDateTimeValue').textContent = `${dateStr} · ${start}–${end}${duration}`;
 
   if (data.location) {
     $('wsvLocation').style.display = 'block';
@@ -1387,13 +1985,15 @@ async function editWorkShift(shiftId) {
   if (!data.id) { alert('Could not load shift.'); return; }
 
   $('wsEditId').value = data.id;
-  $('wsJobTitle').value = data.job_title || '';
-  $('wsDate').value = data.shift_date;
-  $('wsStartTime').value = data.start_time ? data.start_time.substring(0, 5) : '';
-  $('wsEndTime').value = data.end_time ? data.end_time.substring(0, 5) : '';
+  $('wsEmployerName').value = data.employer_name || data.job_title || '';
+  $('wsShiftStart').value = toDatetimeLocalValue(data.shift_start || '');
+  $('wsShiftEnd').value = toDatetimeLocalValue(data.shift_end || '');
   $('wsLocation').value = data.location || '';
   $('wsNotes').value = data.notes || '';
-  buildColorPicker('wsColorPicker', 'wsColorVal', data.color_hex);
+  $('wsConfirmed').checked = data.is_confirmed !== false;
+  $('wsRecurring').checked = !!data.is_recurring;
+  $('wsRecurrencePattern').value = data.recurrence_pattern || '';
+  buildColorPicker('wsColorPicker', 'wsColorVal', data.color_hex, SCHEDULE_COLORS);
   $('wsModalTitle').textContent = 'Edit Work Shift';
 
   $('wsDeleteBtn').onclick = () => deleteWorkShift(data.id);
@@ -1405,23 +2005,32 @@ async function saveWorkShift() {
   if (!id) { alert('No shift ID.'); return; }
   
   const body = {
-    job_title: $('wsJobTitle').value.trim(),
-    shift_date: $('wsDate').value,
-    start_time: $('wsStartTime').value,
-    end_time: $('wsEndTime').value,
+    employer_name: $('wsEmployerName').value.trim(),
+    job_title: $('wsEmployerName').value.trim(),
+    shift_start: $('wsShiftStart').value,
+    shift_end: $('wsShiftEnd').value,
     location: $('wsLocation').value.trim(),
     notes: $('wsNotes').value.trim(),
+    is_confirmed: $('wsConfirmed').checked ? 'on' : '',
+    is_recurring: $('wsRecurring').checked ? 'on' : '',
+    recurrence_pattern: $('wsRecurrencePattern').value.trim(),
     color_hex: $('wsColorVal').value,
   };
   
-  if (!body.shift_date) { alert('Date is required.'); return; }
-  if (!body.start_time) { alert('Start time is required.'); return; }
-  if (!body.end_time) { alert('End time is required.'); return; }
+  if (!body.shift_start) { alert('Shift start is required.'); return; }
+  if (!body.shift_end) { alert('Shift end is required.'); return; }
 
   const data = await api(`/home/api/work-shifts/${id}/edit/`, 'POST', body);
   if (data.success) {
     const idx = state.workShifts.findIndex(s => s.id == id);
-    if (idx > -1) state.workShifts[idx] = { ...state.workShifts[idx], ...body, id: parseInt(id) };
+    if (idx > -1) {
+      const updated = data.shift || {};
+      state.workShifts[idx] = {
+        ...state.workShifts[idx],
+        ...updated,
+        title: updated.title || updated.employer_name || updated.job_title || state.workShifts[idx].title,
+      };
+    }
     closeModal('workShiftModal');
      closeModal('workShiftViewModal');
     renderCalendar();
@@ -1448,19 +2057,24 @@ function renderSemesters() {
   const el = $('semesterList');
   if (!el) return;
   if (!state.semesters.length) {
-    el.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px 0;">No semesters yet.</div>';
+    el.innerHTML = '<div class="semester-strip-empty">No active semester yet.</div>';
     return;
   }
-  el.innerHTML = state.semesters.map(s => `
-    <div class="sem-item">
-      <span style="flex:1;">${s.name}</span>
-      ${s.is_active ? '<span class="sem-badge">ACTIVE</span>' : ''}
-      <div class="sem-item-actions">
-        <button class="icon-btn" onclick="editSemester(${s.id})" title="Edit">✏️</button>
-        <button class="icon-btn danger" onclick="deleteSemester(${s.id},'${s.name}')" title="Delete">🗑</button>
+  const activeSemester = state.semesters.find(s => s.is_active) || state.semesters[0];
+  const activeCourseCount = state.courses.filter(c => c['semester__id'] === activeSemester.id).length;
+  const dueThisSemesterCount = state.assignments.filter(a => a['semester__id'] === activeSemester.id && a.status !== 'complete').length;
+  el.innerHTML = `
+    <div class="semester-inline-card">
+      <div class="semester-inline-copy">
+        <div class="semester-inline-title">${activeSemester.name}</div>
+        <div class="semester-inline-stats">
+          <span class="semester-inline-stat"><strong>${activeCourseCount}</strong> active course${activeCourseCount === 1 ? '' : 's'}</span>
+          <span class="semester-inline-stat"><strong>${dueThisSemesterCount}</strong> assignment${dueThisSemesterCount === 1 ? '' : 's'} due this semester</span>
+        </div>
       </div>
+      <button class="icon-btn" onclick="editSemester(${activeSemester.id})" title="Edit semester">✏️</button>
     </div>
-  `).join('');
+  `;
 }
 
 function openSemesterModal(edit=false) {
@@ -1505,12 +2119,19 @@ async function saveSemester() {
   if (data.success) {
     if (id) {
       const idx = state.semesters.findIndex(s => s.id == id);
-      if (idx > -1) state.semesters[idx] = { ...state.semesters[idx], ...body, id: parseInt(id) };
+      if (body.is_active) {
+        state.semesters = state.semesters.map(s => ({ ...s, is_active: false }));
+      }
+      if (idx > -1) state.semesters[idx] = { ...state.semesters[idx], ...body, id: parseInt(id), is_active: !!body.is_active };
     } else {
+      if (body.is_active) {
+        state.semesters = state.semesters.map(s => ({ ...s, is_active: false }));
+      }
       state.semesters.unshift({ id: data.id, name: data.name, is_active: data.is_active, start_date: data.start_date, end_date: data.end_date });
     }
     closeModal('semesterModal');
     renderSemesters();
+    renderCourses();
     populateCourseModalSemDropdown();
   } else alert(data.error || 'Error saving semester.');
 }
@@ -1541,23 +2162,26 @@ function populateCourseModalSemDropdown() {
 function renderCourses() {
   const el = $('courseList');
   if (!el) return;
-  if (!state.courses.length) {
-    el.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px 0;">No courses yet.</div>';
+  const activeSemester = state.semesters.find(s => s.is_active) || null;
+  if (!activeSemester) {
+    el.innerHTML = '<div class="semester-strip-empty">Add an active semester first.</div>';
     return;
   }
-  el.innerHTML = state.courses.map(c => {
-    const due = state.assignments.filter(a => a.course_id === c.id && a.status !== 'complete').length;
-    return `
-    <div class="class-item">
-      <div class="class-dot" style="background:${c.color_hex}"></div>
-      <span class="class-name">${c.course_code}</span>
-      <span class="class-count" style="font-size:10px;">${due} pending</span>
-      <div class="sem-item-actions">
-        <button class="icon-btn" onclick="editCourse(${c.id})" title="Edit">✏️</button>
-        <button class="icon-btn danger" onclick="deleteCourse(${c.id},'${c.course_code}')" title="Delete">🗑</button>
+  const visibleCourses = state.courses.filter(c => c['semester__id'] === activeSemester.id);
+  if (!visibleCourses.length) {
+    el.innerHTML = '<div class="semester-strip-empty">No courses in the active semester yet.</div>';
+    return;
+  }
+  const previewCourses = visibleCourses.slice(0, 4);
+  const overflowCount = Math.max(0, visibleCourses.length - previewCourses.length);
+  el.innerHTML = `<div class="course-inline-list">${previewCourses.map(c => `
+      <div class="course-inline-chip" title="${c.course_code}: ${c.course_name}">
+        <div class="course-inline-dot" style="background:${c.color_hex}"></div>
+        <span class="course-inline-name">${c.course_code}</span>
       </div>
-    </div>`;
-  }).join('');
+    `).join('')}
+    ${overflowCount ? `<span class="course-inline-summary">+${overflowCount} more</span>` : ''}
+  </div>`;
 }
 
 function openCourseModal() {
@@ -1569,7 +2193,7 @@ function openCourseModal() {
   $('courseMeetTimes').value = '';
   $('courseCanvas').value = '';
   populateCourseModalSemDropdown();
-  buildColorPicker('courseColorPicker','courseColorVal');
+  buildColorPicker('courseColorPicker','courseColorVal', '#1E90FF', COURSE_COLORS);
   openModal('courseModal');
 }
 
@@ -1585,7 +2209,7 @@ function editCourse(id) {
   $('courseModalTitle').textContent = 'Edit Course';
   populateCourseModalSemDropdown();
   $('courseSemester').value  = c['semester__id'];
-  buildColorPicker('courseColorPicker','courseColorVal', c.color_hex);
+  buildColorPicker('courseColorPicker','courseColorVal', c.color_hex, COURSE_COLORS);
   openModal('courseModal');
 }
 
@@ -1728,8 +2352,18 @@ function populateAsgCourseDropdown() {
 
 function setFilter(f, el) {
   activeFilter = f;
+  plannerExpanded.assignments = false;
   document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
+  renderTasks();
+}
+
+function setPlannerTab(tab, el) {
+  plannerTab = tab;
+  document.querySelectorAll('.planner-tab').forEach(node => node.classList.remove('active'));
+  el.classList.add('active');
+  const filterRow = $('assignmentFilterRow');
+  if (filterRow) filterRow.style.display = tab === 'assignments' ? '' : 'none';
   renderTasks();
 }
 
@@ -1763,45 +2397,191 @@ function getDueLabel(isoDate, status) {
   return 'Due ' + d.toLocaleDateString('en-US', {month:'short', day:'numeric'});
 }
 
+function getStatusIconMarkup(status) {
+  const icon = {
+    not_started: '○',
+    in_progress: '◐',
+    complete: '●',
+  };
+  const label = {
+    not_started: 'Not started',
+    in_progress: 'In progress',
+    complete: 'Done',
+  };
+  const css = {
+    not_started: 'task-status-not-started',
+    in_progress: 'task-status-in-progress',
+    complete: 'task-status-done',
+  };
+  const safeStatus = icon[status] ? status : 'not_started';
+  return `<span class="task-status-icon ${css[safeStatus]}" title="${label[safeStatus]}" aria-label="${label[safeStatus]}">${icon[safeStatus]}</span>`;
+}
+
+function getPlannerDueMeta(a) {
+  const d = parseLocalDate(a.due_date);
+  if (!d || Number.isNaN(d.getTime())) return 'No due date';
+  const day = d.toLocaleDateString('en-US', { weekday: 'short' });
+  const monthDay = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  if (!a.due_time) return `${day} ${monthDay}`;
+  const [hRaw, mRaw] = String(a.due_time).split(':');
+  const h = Number(hRaw);
+  const m = Number(mRaw || 0);
+  if (Number.isNaN(h) || Number.isNaN(m)) return `${day} ${monthDay}`;
+  const ampm = h >= 12 ? 'pm' : 'am';
+  const h12 = h % 12 || 12;
+  const minute = m ? `:${String(m).padStart(2, '0')}` : '';
+  return `${day} ${monthDay} ${h12}${minute}${ampm}`;
+}
+
+function getUpcomingPlannerItems() {
+  const now = new Date();
+  const DAY = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+  const eventItems = state.personalEvents
+    .filter(e => localDateTime(e.event_date, e.start_time, true) >= now)
+    .map(e => {
+      const d = new Date(e.event_date + 'T00:00:00');
+      const dateStr = `${DAY[d.getDay()]}, ${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
+      const timeStr = e.start_time ? ` · ${formatTime12(e.start_time)}` : '';
+      const recur = e.recurrence_label ? ` · ${e.recurrence_label}` : '';
+      return {
+        id: e.id,
+        kind: 'event',
+        kindLabel: 'Event',
+        dt: localDateTime(e.event_date, e.start_time, true),
+        color: e.color_hex || '#FCAF17',
+        title: e.title,
+        meta: `${dateStr}${timeStr}${recur}${e.location ? ` · ${e.location}` : ''}`,
+        onclick: e.id ? `openPersonalEventView(${e.id})` : '',
+      };
+    });
+
+  const shiftItems = state.workShifts
+    .filter(s => {
+      const startDt = localDateTime(s.shift_date, s.start_time);
+      const endDt = s.end_time ? localDateTime(s.shift_date, s.end_time) : startDt;
+      return endDt >= now;
+    })
+    .map(s => {
+      const d = new Date(s.shift_date + 'T00:00:00');
+      const dateStr = `${DAY[d.getDay()]}, ${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
+      return {
+        id: s.id,
+        kind: 'shift',
+        kindLabel: 'Shift',
+        dt: localDateTime(s.shift_date, s.start_time),
+        color: s.color_hex || '#10B981',
+        title: s.title,
+        meta: `${dateStr} · ${formatTime12(s.start_time)}–${formatTime12(s.end_time)}${s.location ? ` · ${s.location}` : ''}`,
+        onclick: `openWorkShiftView(${s.id})`,
+      };
+    });
+
+  return [...eventItems, ...shiftItems].sort((a, b) => a.dt - b.dt);
+}
+
+function getPlannerAllItems() {
+  const assignments = state.assignments
+    .filter(a => a.status !== 'complete')
+    .map(a => ({
+      kind: 'assignment',
+      kindLabel: 'Task',
+      status: a.status,
+      dt: parseLocalDate(a.due_date),
+      color: a.course_color,
+      title: a.title,
+      meta: `${a.course_code} · ${getDueLabel(a.due_date, a.status)}`,
+      onclick: `openTaskView(${a.id})`,
+    }));
+  return [...assignments, ...getUpcomingPlannerItems()]
+    .filter(item => item.dt && !Number.isNaN(item.dt.getTime()))
+    .sort((a, b) => a.dt - b.dt);
+}
+
+function renderPlannerItems(items, emptyMessage, tabKey) {
+  const el = $('taskList');
+  if (!el) return;
+  if (!items.length) {
+    el.innerHTML = `<div class="task-empty">${emptyMessage}</div>`;
+    return;
+  }
+  const expanded = plannerExpanded[tabKey];
+  const limit = tabKey === 'all' ? PLANNER_EVENT_COLLAPSED_COUNT : PLANNER_EVENT_COLLAPSED_COUNT;
+  const visibleItems = expanded ? items : items.slice(0, limit);
+  const hiddenCount = Math.max(0, items.length - visibleItems.length);
+  const html = visibleItems.map(item => `
+    <div class="planner-item" ${item.onclick ? `style="cursor:pointer;" onclick="${item.onclick}"` : ''}>
+      <div class="planner-item-dot" style="background:${item.color};"></div>
+      <div class="planner-item-body">
+        <div class="planner-item-title">${item.title}</div>
+        <div class="planner-item-meta">${item.meta}</div>
+      </div>
+      <div class="planner-kind-badge ${item.kind === 'assignment' ? 'planner-kind-badge-assignment' : ''}">${item.kind === 'assignment' ? getStatusIconMarkup(item.status) : item.kindLabel}</div>
+    </div>
+  `).join('');
+  const toggleHtml = hiddenCount > 0
+    ? `<button class="task-list-more" onclick="togglePlannerExpanded('${tabKey}')">Show ${hiddenCount} more</button>`
+    : (expanded && items.length > limit ? `<button class="task-list-more" onclick="togglePlannerExpanded('${tabKey}')">Show fewer</button>` : '');
+  el.innerHTML = html + toggleHtml;
+}
+
 function renderTasks() {
   const el = $('taskList');
   if (!el) return;
+  if (plannerTab === 'events') {
+    renderPlannerItems(getUpcomingPlannerItems(), 'No upcoming events.', 'events');
+    return;
+  }
+  if (plannerTab === 'all') {
+    renderPlannerItems(getPlannerAllItems(), 'Nothing upcoming right now.', 'all');
+    return;
+  }
   const list = getFilteredAssignments();
   if (!list.length) {
     el.innerHTML = '<div class="task-empty">No tasks here 🎉</div>';
     return;
   }
-  el.innerHTML = list.map(a => {
-    const dueClass = getDueClass(a.due_date, a.status);
-    const dueLabel = getDueLabel(a.due_date, a.status);
-    const isDone   = a.status === 'complete';
-    const tagHtml  = a.tags.map(t => `<span class="task-tag" style="background:${t.color_hex}">${t.name}</span>`).join('');
-    const stHtml   = a.subtask_count > 0 ? `
-      <div class="task-progress">
-        <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${a.completion_pct}%"></div></div>
-        <span class="progress-text">${a.subtask_done}/${a.subtask_count} steps</span>
-        <span class="icon-btn" onclick="openSubtasks(${a.id},'${a.title.replace(/'/g,"&#39;")}')" style="font-size:11px;cursor:pointer;color:var(--ss-blue);">📝</span>
-      </div>` : '';
+  const visibleList = plannerExpanded.assignments ? list : list.slice(0, TASK_LIST_COLLAPSED_COUNT);
+  const hiddenCount = Math.max(0, list.length - visibleList.length);
+  const itemsHtml = visibleList.map(a => {
+    const statusIcon = getStatusIconMarkup(a.status);
+    const dueMeta = getPlannerDueMeta(a);
     return `
-    <div class="task-item" data-asg-id="${a.id}">
-      <div class="task-check${isDone ? ' done' : ''}" onclick="toggleTaskDone(${a.id},this)">${isDone ? '✓' : ''}</div>
-      <div class="task-body">
-        <div class="task-name${isDone ? ' done' : ''}" onclick="openTaskView(${a.id})" style="cursor:pointer;" title="Click to view">${a.title}</div>
-        <div class="task-meta">
-          <div class="task-class-dot" style="background:${a.course_color}"></div>
-          <span class="task-class-name">${a.course_code}</span>
-          <span class="task-due ${dueClass}">${dueLabel}</span>
-          <div class="task-priority-dot" style="background:${PRIORITY_COLORS[a.priority]}" title="${a.priority}"></div>
-          ${tagHtml}
-        </div>
-        ${stHtml}
-      </div>
-      <div class="task-actions">
-        <button class="icon-btn" onclick="editAssignment(${a.id})" title="Edit">✏️</button>
-        <button class="icon-btn danger" onclick="deleteAssignment(${a.id})" title="Delete">🗑</button>
-      </div>
+    <div class="planner-assignment-item" data-asg-id="${a.id}" onclick="openTaskView(${a.id})" title="Click to view">
+      <div class="planner-assignment-dot" style="background:${a.course_color}"></div>
+      <div class="planner-assignment-title">${a.title}</div>
+      <div class="planner-assignment-due">${dueMeta}</div>
+      <div class="planner-assignment-status" onclick="event.stopPropagation(); cycleAssignmentStatus(${a.id})" title="Change status">${statusIcon}</div>
     </div>`;
   }).join('');
+
+  const toggleHtml = hiddenCount > 0
+    ? `<button class="task-list-more" onclick="togglePlannerExpanded('assignments')">Show ${hiddenCount} more assignments</button>`
+    : (plannerExpanded.assignments && list.length > TASK_LIST_COLLAPSED_COUNT
+      ? '<button class="task-list-more" onclick="togglePlannerExpanded(\'assignments\')">Show fewer assignments</button>'
+      : '');
+
+  el.innerHTML = `<div class="planner-assignment-list">${itemsHtml}</div>` + toggleHtml;
+}
+
+function togglePlannerExpanded(tabKey) {
+  plannerExpanded[tabKey] = !plannerExpanded[tabKey];
+  renderTasks();
+}
+
+async function cycleAssignmentStatus(id) {
+  const asg = state.assignments.find(a => a.id === id);
+  if (!asg) return;
+  const statusOrder = ['not_started', 'in_progress', 'complete'];
+  const currentIndex = statusOrder.indexOf(asg.status);
+  const nextStatus = statusOrder[(currentIndex + 1) % statusOrder.length];
+  const data = await api(url(SS_DATA.urls.asgStatus, id), 'POST', { status: nextStatus });
+  if (!data.success) return;
+  asg.status = data.status;
+  asg.completion_pct = data.completion_pct;
+  renderTasks();
+  renderCalendar();
+  updateStats();
 }
 
 async function toggleTaskDone(id, el) {
@@ -1824,9 +2604,13 @@ function openAssignmentModal() {
   $('asgTitle').value  = '';
   $('asgDesc').value   = '';
   $('asgDue').value    = '';
+  $('asgDueTime').value = '';
   $('asgHours').value  = '';
   $('asgCanvas').value = '';
+  $('asgRubric').value = '';
+  $('asgSubmission').value = '';
   $('asgMajor').checked = false;
+  $('asgWorkload').checked = true;
   $('asgStatus').value   = 'not_started';
   $('asgPriority').value = 'medium';
   $('asgType').value     = 'other';
@@ -1837,30 +2621,31 @@ function openAssignmentModal() {
 }
 
 async function editAssignment(id) {
-  const a = state.assignments.find(x => x.id === id);
-  if (!a) return;
+  const res = await fetch(url(SS_DATA.urls.asgEdit, id));
+  const a = await res.json();
+  if (!a.id) return;
   $('asgModalTitle').textContent = 'Edit Task';
   $('asgEditId').value    = a.id;
   $('asgTitle').value     = a.title;
-  $('asgDesc').value      = '';
+  $('asgDesc').value      = a.description || '';
   $('asgDue').value       = a.due_date ? a.due_date.slice(0,16) : '';
-  $('asgHours').value     = '';
-  $('asgCanvas').value    = '';
-  $('asgMajor').checked   = a.is_major;
+  $('asgDueTime').value   = a.due_time || '';
+  $('asgHours').value     = a.estimated_hours || '';
+  $('asgCanvas').value    = a.canvas_link || '';
+  $('asgRubric').value    = a.rubric_link || '';
+  $('asgSubmission').value = a.submission_link || '';
+  $('asgMajor').checked   = !!a.is_major_project;
+  $('asgWorkload').checked = a.contributes_to_workload !== false;
   $('asgStatus').value    = a.status;
-  $('asgPriority').value  = a.priority;
+  $('asgPriority').value  = a.priority_level || a.priority;
   $('asgType').value      = a.assignment_type;
   populateAsgCourseDropdown();
   $('asgCourse').value = a.course_id;
-  renderAsgTagSelector(a.tags.map(t => t.id));
+  renderAsgTagSelector((a.tags || []).map(t => t.id));
 
   // Load subtasks
-  try {
-    const stData = await fetch(url(SS_DATA.urls.stList, id));
-    const stJson = await stData.json();
-    $('subtaskBuilder').innerHTML = '';
-    stJson.subtasks.forEach(st => addSubtaskRow(st.title));
-  } catch(e) {}
+  $('subtaskBuilder').innerHTML = '';
+  (a.subtasks || []).forEach(st => addSubtaskRow(st));
 
   openModal('assignmentModal');
 }
@@ -1868,21 +2653,36 @@ async function editAssignment(id) {
 async function saveAssignment() {
   const id     = $('asgEditId').value;
   const tagIds = getSelectedTagIds();
-  const subtaskInputs = [...document.querySelectorAll('#subtaskBuilder .subtask-input')].map(i => i.value.trim()).filter(Boolean);
+  const subtaskRows = [...document.querySelectorAll('#subtaskBuilder .subtask-row')];
+  const subtaskPayload = subtaskRows
+    .map((row) => ({
+      title: row.querySelector('.subtask-title')?.value.trim() || '',
+      due_date: row.querySelector('.subtask-due-date')?.value || '',
+      due_time: row.querySelector('.subtask-due-time')?.value.trim() || '',
+      estimated_hours: row.querySelector('.subtask-hours')?.value || '',
+    }))
+    .filter((item) => item.title);
 
   const body = {
     title:           $('asgTitle').value.trim(),
     course:          $('asgCourse').value,
     assignment_type: $('asgType').value,
     due_date:        $('asgDue').value,
-    priority:        $('asgPriority').value,
+    due_time:        $('asgDueTime').value.trim(),
+    priority_level:  $('asgPriority').value,
     status:          $('asgStatus').value,
     estimated_hours: $('asgHours').value,
     description:     $('asgDesc').value.trim(),
     canvas_link:     $('asgCanvas').value.trim(),
-    is_major:        $('asgMajor').checked ? 'on' : '',
+    rubric_link:     $('asgRubric').value.trim(),
+    submission_link: $('asgSubmission').value.trim(),
+    is_major_project: $('asgMajor').checked ? 'on' : '',
+    contributes_to_workload: $('asgWorkload').checked ? 'on' : '',
     tags:            tagIds,
-    'subtask_title[]': subtaskInputs,
+    'subtask_title[]': subtaskPayload.map((item) => item.title),
+    'subtask_due_date[]': subtaskPayload.map((item) => item.due_date),
+    'subtask_due_time[]': subtaskPayload.map((item) => item.due_time),
+    'subtask_estimated_hours[]': subtaskPayload.map((item) => item.estimated_hours),
   };
 
   if (!body.title)    { alert('Title is required.'); return; }
@@ -1919,11 +2719,22 @@ async function deleteAssignment(id) {
 /* ═════════════════════════════════════════════
    SUBTASK BUILDER (in assignment modal)
 ═════════════════════════════════════════════ */
-function addSubtaskRow(defaultVal='') {
+function addSubtaskRow(defaultData='') {
+  const item = typeof defaultData === 'string'
+    ? { title: defaultData, due_date: '', due_time: '', estimated_hours: '' }
+    : {
+        title: defaultData.title || '',
+        due_date: defaultData.due_date ? String(defaultData.due_date).slice(0, 16) : '',
+        due_time: defaultData.due_time || '',
+        estimated_hours: defaultData.estimated_hours || '',
+      };
   const row = document.createElement('div');
   row.className = 'subtask-row';
   row.innerHTML = `
-    <input class="form-input subtask-input" value="${defaultVal}" placeholder="Step description…" style="flex:1;padding:8px 12px;font-size:13px;">
+    <input class="form-input subtask-title" value="${escapeAttr(item.title)}" placeholder="Step description…" style="padding:8px 12px;font-size:13px;">
+    <input class="form-input subtask-due-date" type="datetime-local" value="${escapeAttr(item.due_date)}" style="padding:8px 12px;font-size:12px;">
+    <input class="form-input subtask-due-time" value="${escapeAttr(item.due_time)}" placeholder="e.g. by 5pm" style="padding:8px 12px;font-size:12px;">
+    <input class="form-input subtask-hours" type="number" min="0" step="0.5" value="${escapeAttr(String(item.estimated_hours))}" placeholder="Hours" style="padding:8px 12px;font-size:12px;">
     <button class="icon-btn danger" onclick="this.closest('.subtask-row').remove()" style="flex-shrink:0;">✕</button>
   `;
   $('subtaskBuilder').appendChild(row);
@@ -1950,7 +2761,16 @@ async function refreshSubtaskPanel(asgId) {
     el.innerHTML = json.subtasks.map(st => `
       <div class="subtask-panel-item">
         <div class="st-check${st.status==='complete'?' done':''}" onclick="toggleSubtask(${st.id},this,${asgId})">${st.status==='complete'?'✓':''}</div>
-        <div class="st-title${st.status==='complete'?' done':''}">${st.title}</div>
+        <div style="display:grid;grid-template-columns:1fr 170px 140px 90px;gap:6px;flex:1;min-width:0;align-items:center;">
+          <input class="form-input st-edit-title" data-subtask-id="${st.id}" value="${escapeAttr(st.title)}" placeholder="Step title" style="padding:6px 10px;font-size:12px;">
+          <input class="form-input st-edit-due-date" data-subtask-id="${st.id}" type="datetime-local" value="${st.due_date ? escapeAttr(String(st.due_date).slice(0,16)) : ''}" style="padding:6px 10px;font-size:12px;">
+          <input class="form-input st-edit-due-time" data-subtask-id="${st.id}" value="${escapeAttr(st.due_time || '')}" placeholder="e.g. by 5pm" style="padding:6px 10px;font-size:12px;">
+          <input class="form-input st-edit-hours" data-subtask-id="${st.id}" type="number" min="0" step="0.5" value="${st.estimated_hours ?? ''}" placeholder="Hours" style="padding:6px 10px;font-size:12px;">
+          <div style="grid-column:1/-1;display:flex;align-items:center;gap:8px;">
+            <span style="font-size:11px;color:var(--muted);">${st.status === 'complete' ? 'Complete' : 'Not complete'}</span>
+            <button class="ss-btn ss-btn-ghost" onclick="saveSubtaskInline(${st.id},${asgId})" style="font-size:11px;padding:4px 10px;">Save</button>
+          </div>
+        </div>
         <button class="icon-btn danger" onclick="deleteSubtask(${st.id},${asgId})" title="Delete">✕</button>
       </div>
     `).join('');
@@ -1968,6 +2788,34 @@ async function refreshSubtaskPanel(asgId) {
 async function toggleSubtask(stId, el, asgId) {
   const data = await api(url(SS_DATA.urls.stToggle, stId), 'POST');
   if (data.success) await refreshSubtaskPanel(asgId);
+}
+
+async function saveSubtaskInline(stId, asgId) {
+  const titleEl = document.querySelector(`.st-edit-title[data-subtask-id="${stId}"]`);
+  const dueDateEl = document.querySelector(`.st-edit-due-date[data-subtask-id="${stId}"]`);
+  const dueTimeEl = document.querySelector(`.st-edit-due-time[data-subtask-id="${stId}"]`);
+  const hoursEl = document.querySelector(`.st-edit-hours[data-subtask-id="${stId}"]`);
+  if (!titleEl) return;
+
+  const payload = {
+    title: titleEl.value.trim(),
+    due_date: dueDateEl ? dueDateEl.value : '',
+    due_time: dueTimeEl ? dueTimeEl.value.trim() : '',
+    estimated_hours: hoursEl ? hoursEl.value : '',
+  };
+
+  if (!payload.title) {
+    alert('Subtask title is required.');
+    titleEl.focus();
+    return;
+  }
+
+  const data = await api(url(SS_DATA.urls.stEdit, stId), 'POST', payload);
+  if (!data.success) {
+    alert(data.error || 'Could not save subtask.');
+    return;
+  }
+  await refreshSubtaskPanel(asgId);
 }
 
 async function addSubtaskFromPanel() {
@@ -2010,6 +2858,7 @@ function openTaskView(id) {
     <span style="background:${statusColors[a.status]||'rgba(83,183,232,.15)'};padding:4px 12px;border-radius:999px;font-size:12px;font-weight:800;color:var(--text);">${statusText[a.status]||a.status}</span>
     <span style="background:${dueColors[dueClass]||'rgba(83,183,232,.12)'};padding:4px 12px;border-radius:999px;font-size:12px;font-weight:800;color:${dueTxtColors[dueClass]||'var(--text)'};">${dueLabel}</span>
     ${a.priority !== 'medium' ? `<span style="background:${priorityColors[a.priority]}22;border:1px solid ${priorityColors[a.priority]}44;padding:4px 12px;border-radius:999px;font-size:12px;font-weight:800;color:${priorityColors[a.priority]};">${a.priority.charAt(0).toUpperCase()+a.priority.slice(1)} Priority</span>` : ''}
+    ${a.is_major_project ? `<span style="background:rgba(239,68,68,.16);border:1px solid rgba(239,68,68,.3);padding:4px 12px;border-radius:999px;font-size:12px;font-weight:800;color:#f87171;">Major Project</span>` : ''}
     ${a.tags.map(t=>`<span style="background:${t.color_hex};padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;color:#fff;">${t.name}</span>`).join('')}
   `;
 
@@ -2019,7 +2868,7 @@ function openTaskView(id) {
     <div style="background:var(--input-bg);border-radius:12px;padding:12px;">
       <div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Due Date</div>
       <div style="font-size:13px;font-weight:700;color:var(--text);">${due.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'})}</div>
-      <div style="font-size:12px;color:var(--text2);">${due.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})}</div>
+      <div style="font-size:12px;color:var(--text2);">${a.due_time || due.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})}</div>
     </div>
     <div style="background:var(--input-bg);border-radius:12px;padding:12px;">
       <div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Type</div>
@@ -2035,6 +2884,13 @@ function openTaskView(id) {
         </div>
         <span style="font-size:12px;font-weight:800;color:var(--text2);">${a.subtask_done}/${a.subtask_count} steps (${a.completion_pct}%)</span>
       </div>
+    </div>` : ''}
+    ${(a.canvas_link || a.rubric_link || a.submission_link) ? `
+    <div style="background:var(--input-bg);border-radius:12px;padding:12px;grid-column:1/-1;display:flex;flex-wrap:wrap;gap:10px;">
+      ${a.canvas_link ? `<a href="${a.canvas_link}" target="_blank" rel="noopener" style="font-size:12px;font-weight:700;color:var(--ss-blue);text-decoration:none;">Canvas</a>` : ''}
+      ${a.rubric_link ? `<a href="${a.rubric_link}" target="_blank" rel="noopener" style="font-size:12px;font-weight:700;color:var(--ss-blue);text-decoration:none;">Rubric</a>` : ''}
+      ${a.submission_link ? `<a href="${a.submission_link}" target="_blank" rel="noopener" style="font-size:12px;font-weight:700;color:var(--ss-blue);text-decoration:none;">Submission</a>` : ''}
+      ${a.contributes_to_workload === false ? `<span style="font-size:12px;color:var(--muted);margin-left:auto;">Excluded from workload</span>` : ''}
     </div>` : ''}
   `;
 
@@ -2057,7 +2913,10 @@ function openTaskView(id) {
                    background:${s.status==='complete'?'var(--ss-blue)':'var(--input-bg)'};
                    border:2px solid ${s.status==='complete'?'var(--ss-blue)':'var(--muted)'};
                    color:${s.status==='complete'?'#fff':'transparent'};">✓</div>
-              <span style="font-size:13px;font-weight:600;color:var(--text);${s.status==='complete'?'text-decoration:line-through;color:var(--muted);':''}">${s.title}</span>
+              <div style="display:flex;flex-direction:column;gap:2px;min-width:0;">
+                <span style="font-size:13px;font-weight:600;color:var(--text);${s.status==='complete'?'text-decoration:line-through;color:var(--muted);':''}">${s.title}</span>
+                <span style="font-size:11px;color:var(--muted);">${s.due_time || (s.due_date ? new Date(s.due_date).toLocaleString() : 'No due date')}${s.estimated_hours ? ` · ${s.estimated_hours}h` : ''}</span>
+              </div>
             </div>
           `).join('')}
         `;
@@ -2473,10 +3332,13 @@ $('calNext').onclick = () => { calOffset++; renderCalendar(); };
 ═════════════════════════════════════════════ */
 function updateStats() {
   const now = new Date();
-  const weekEnd = new Date(now); weekEnd.setDate(now.getDate() + 7);
+  const weekStart = startOfLocalDay(now);
+  weekStart.setDate(weekStart.getDate() - ((weekStart.getDay() + 6) % 7));
+  const weekEndExclusive = new Date(weekStart);
+  weekEndExclusive.setDate(weekEndExclusive.getDate() + 7);
   const dueWeek = state.assignments.filter(a => {
     const d = parseLocalDate(a.due_date);
-    return d >= now && d <= weekEnd && a.status !== 'complete';
+    return d >= weekStart && d < weekEndExclusive && a.status !== 'complete';
   }).length;
   const completed = state.assignments.filter(a => a.status === 'complete').length;
   const overdue   = state.assignments.filter(a => parseLocalDate(a.due_date) < now && a.status !== 'complete').length;
@@ -2516,85 +3378,140 @@ function localDateTime(dateStr, timeStr = null, useEndOfDayIfNoTime = false) {
    SIDEBAR: UPCOMING EVENTS (COMBINED)
 ═════════════════════════════════════════════ */
 function renderSidebarUpcoming() {
-  const el = $('sidebarUpcoming');
-  if (!el) return;
-  const now = new Date();
-  const DAY = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  renderTasks();
+}
 
-  const eventItems = state.personalEvents
-    .filter(e => localDateTime(e.event_date, e.start_time, true) >= now)
-    .map(e => {
-      const d = new Date(e.event_date + 'T00:00:00');
-      const dateStr = `${DAY[d.getDay()]}, ${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
-      const timeStr = e.start_time ? ` · ${formatTime12(e.start_time)}` : '';
-      const recur = e.recurrence_label ? ` 🔁` : '';
-      const sub = e.location ? `<br>📍 ${e.location}` : '';
-      return {
-        id: e.id,
-        recurringId: e.recurring_id,
-        kind: 'personal',
-        dt: localDateTime(e.event_date, e.start_time, true),
-        color: e.color_hex || '#FCAF17',
-        title: e.title,
-        meta: `📅 ${dateStr}${timeStr}${recur}${sub}`,
-      };
-    });
+function computeWeekClientMetrics(weekStartDate) {
+  const weekEndDate = new Date(weekStartDate);
+  weekEndDate.setDate(weekEndDate.getDate() + 7);
 
-  const shiftItems = state.workShifts
-    .filter(s => {
-      const startDt = localDateTime(s.shift_date, s.start_time);
-      const endDt = s.end_time ? localDateTime(s.shift_date, s.end_time) : startDt;
-      return endDt >= now;
-    })
-    .map(s => {
-      const d = new Date(s.shift_date + 'T00:00:00');
-      const dateStr = `${DAY[d.getDay()]}, ${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
-      const sub = s.location ? `<br>📍 ${s.location}` : '';
-      return {
-        id: s.id,
-        kind: 'shift',
-        dt: localDateTime(s.shift_date, s.start_time),
-        color: s.color_hex || '#10B981',
-        title: s.title,
-        meta: `📅 ${dateStr} · ${formatTime12(s.start_time)}–${formatTime12(s.end_time)}${sub}`,
-      };
-    });
+  const assignments = state.assignments.filter((a) => {
+    if (a.status === 'complete') return false;
+    if (a.contributes_to_workload === false) return false;
+    const due = parseLocalDate(a.due_date);
+    return !Number.isNaN(due.getTime()) && due >= weekStartDate && due < weekEndDate;
+  });
 
-  const sortedCombined = [...eventItems, ...shiftItems].sort((a, b) => a.dt - b.dt);
-  let combined = sortedCombined.slice(0, 6);
+  const assignmentHours = assignments.reduce((sum, a) => {
+    const h = Number(a.estimated_hours || 0);
+    return sum + (Number.isFinite(h) ? h : 0);
+  }, 0);
 
-  // Keep a shift visible when one is upcoming, even if personal events occupy the first 6 slots.
-  if (shiftItems.length && !combined.some(item => item.kind === 'shift')) {
-    const firstShift = [...shiftItems].sort((a, b) => a.dt - b.dt)[0];
-    combined = [...combined.slice(0, Math.max(combined.length - 1, 0)), firstShift]
-      .sort((a, b) => a.dt - b.dt)
-      .slice(0, 6);
-  }
-
-  const countEl = $('sidebarUpcomingCount');
-  if (countEl) countEl.textContent = combined.length ? `${combined.length} upcoming` : '';
-  if (!combined.length) {
-    el.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px 0;">No upcoming events.</div>';
-    return;
-  }
-  el.innerHTML = combined.map(item => {
-    let clickHandler = '';
-    let cursorStyle = '';
-    if (item.kind === 'personal' && item.id) {
-      clickHandler = `onclick="openPersonalEventView(${item.id})"`;
-      cursorStyle = 'cursor:pointer;';
-    } else if (item.kind === 'shift' && item.id) {
-      clickHandler = `onclick="openWorkShiftView(${item.id})"`;
-      cursorStyle = 'cursor:pointer;';
+  const workHours = state.workShifts.reduce((sum, shift) => {
+    const shiftDay = new Date(`${shift.shift_date}T00:00:00`);
+    if (Number.isNaN(shiftDay.getTime()) || shiftDay < weekStartDate || shiftDay >= weekEndDate) {
+      return sum;
     }
-    return `<div class="sb-event-item" style="${cursorStyle}" ${clickHandler}>
-      <div class="sb-event-dot" style="background:${item.color};"></div>
-      <div class="sb-event-info">
-        <div class="sb-event-title">${item.title}</div>
-        <div class="sb-event-meta">${item.meta}</div>
+    const h = Number(shift.duration_hours || 0);
+    return sum + (Number.isFinite(h) ? h : 0);
+  }, 0);
+
+  return {
+    assignmentCount: assignments.length,
+    assignmentHours,
+    workHours,
+  };
+}
+
+function renderWorkloadWidgets() {
+  const densityWidget = $('workloadDensityWidget');
+  const alertsWidget = $('workloadAlertsWidget');
+  const currentWeekLabel = $('workloadCurrentWeekLabel');
+  const summaryWarningCard = $('summaryWorkloadWarningCard');
+  const summaryWarningValue = $('summaryWorkloadWarningValue');
+  const summaryWarningNote = $('summaryWorkloadWarningNote');
+  const widgets = Array.isArray(SS_DATA.dashboardWidgets) ? SS_DATA.dashboardWidgets : [];
+  const workloadForecast = Array.isArray(SS_DATA.workloadForecast) ? SS_DATA.workloadForecast : [];
+
+  const clientWeekStart = startOfLocalDay(new Date());
+  clientWeekStart.setDate(clientWeekStart.getDate() - ((clientWeekStart.getDay() + 6) % 7));
+  const clientWeekStartIso = localDateStr(clientWeekStart);
+  const nextClientWeekStart = new Date(clientWeekStart);
+  nextClientWeekStart.setDate(nextClientWeekStart.getDate() + 7);
+  const nextClientWeekStartIso = localDateStr(nextClientWeekStart);
+  const selectedWeekSummary = workloadForecast.find((w) => w.week_start_date === clientWeekStartIso) || workloadSummary;
+  const selectedWeekClientMetrics = computeWeekClientMetrics(clientWeekStart);
+  const nextWeekClientMetrics = computeWeekClientMetrics(nextClientWeekStart);
+
+  const densityEnabled = widgets.find(w => w.id === 'workload_density')?.default_shown !== false;
+  const alertsEnabled = widgets.find(w => w.id === 'workload_alerts')?.default_shown !== false;
+
+  if (densityWidget) densityWidget.style.display = densityEnabled ? '' : 'none';
+  if (alertsWidget) alertsWidget.style.display = alertsEnabled ? '' : 'none';
+
+  if (densityEnabled && densityWidget) {
+    const status = String(selectedWeekSummary.status || 'GREEN').toUpperCase();
+    const densityColor = selectedWeekSummary.density_color || SS_DATA.workloadDensityColors?.[status] || '#27AE60';
+    const pct = Number(selectedWeekSummary.utilization_percent || 0);
+    const meterWidth = Math.max(0, Math.min(100, pct));
+
+    const weekNumber = Number(selectedWeekSummary.week_number || 0);
+    if (currentWeekLabel) {
+      currentWeekLabel.textContent = weekNumber > 0 ? `Week ${weekNumber} - ${status}` : `${status}`;
+      currentWeekLabel.style.color = densityColor;
+    }
+    $('workloadStatusLabel').textContent = 'Current Week';
+    $('workloadStatusLabel').style.color = 'var(--text2)';
+    $('workloadUtilPct').textContent = `${pct.toFixed(1)}% utilization`;
+    $('workloadMeterFill').style.width = `${meterWidth}%`;
+    $('workloadMeterFill').style.background = densityColor;
+
+    $('workloadAssignmentHours').textContent = `${Number(selectedWeekClientMetrics.assignmentHours || 0).toFixed(1)}h`;
+    $('workloadWorkHours').textContent = `${Number(selectedWeekClientMetrics.workHours || 0).toFixed(1)}h`;
+    $('workloadAvailableHours').textContent = `${Number(selectedWeekSummary.available_study_hours || 0).toFixed(1)}h`;
+    $('workloadAssignmentCount').textContent = String(selectedWeekClientMetrics.assignmentCount || 0);
+
+    const upcomingEl = $('workloadUpcomingWeek');
+    if (upcomingEl) {
+      const nextWeek = workloadForecast.find((w) => w.week_start_date === nextClientWeekStartIso)
+        || workloadForecast.find((w) => String(w.week_start_date) > String(clientWeekStartIso))
+        || null;
+      if (nextWeek) {
+        const nextStatus = String(nextWeek.status || '').toUpperCase();
+        const nextWeekNumber = Number(nextWeek.week_number || 0);
+        const nextColor = nextWeek.density_color || SS_DATA.workloadDensityColors?.[nextStatus] || 'var(--text2)';
+        const dueCountText = `${nextWeekClientMetrics.assignmentCount} due`;
+        upcomingEl.textContent = nextWeekNumber > 0
+          ? `Next: Wk ${nextWeekNumber} ${nextStatus} (${dueCountText})`
+          : `Next: ${nextStatus} (${dueCountText})`;
+        upcomingEl.style.color = nextColor;
+      } else {
+        upcomingEl.textContent = `Next: (${nextWeekClientMetrics.assignmentCount} due)`;
+        upcomingEl.style.color = 'var(--text2)';
+      }
+    }
+
+  }
+
+  if (summaryWarningCard && summaryWarningValue && summaryWarningNote) {
+    const primaryAlert = workloadAlerts[0] || null;
+    if (!primaryAlert) {
+      summaryWarningCard.style.borderColor = 'var(--input-border)';
+      summaryWarningValue.style.color = 'var(--text)';
+      summaryWarningValue.textContent = 'Clear';
+      summaryWarningNote.textContent = 'No warnings right now.';
+    } else {
+      summaryWarningCard.style.borderColor = primaryAlert.color || '#f59e0b';
+      summaryWarningValue.style.color = primaryAlert.color || '#f59e0b';
+      summaryWarningValue.textContent = workloadAlerts.length === 1 ? '1 Alert' : `${workloadAlerts.length} Alerts`;
+      summaryWarningNote.textContent = primaryAlert.title || 'Workload alert';
+    }
+  }
+
+  if (alertsEnabled && alertsWidget) {
+    const list = $('workloadAlertsList');
+    if (!workloadAlerts.length) {
+      list.innerHTML = '<div style="font-size:12px;color:var(--muted);">No workload warnings right now. Keep going.</div>';
+    } else {
+      list.innerHTML = workloadAlerts.map(alert => `
+      <div class="workload-alert-item" style="border-left-color:${alert.color || '#E74C3C'};">
+        <div class="workload-alert-title">${alert.title || 'Workload Alert'}</div>
+        <div class="workload-alert-message">${alert.message || ''}</div>
       </div>
-    </div>`;
-  }).join('');
+      `).join('');
+    }
+  }
+
 }
 
 /* ═════════════════════════════════════════════
@@ -2604,10 +3521,10 @@ populateCourseModalSemDropdown();
 populateAsgCourseDropdown();
 renderSemesters();
 renderCourses();
-renderTagChips();
 renderAsgTagSelector();
 renderTasks();
 renderSidebarUpcoming();
+renderWorkloadWidgets();
 updateStats();
 
 // Default to week view

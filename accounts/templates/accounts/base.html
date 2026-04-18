@@ -36,21 +36,40 @@
       --scrollbar:      rgba(83,183,232,0.25);
     }
     [data-theme="light"] {
-      --bg:             #f0f5fc;
-      --bg2:            #e6eef8;
-      --card:           rgba(255,255,255,0.72);
-      --card-border:    rgba(3,78,162,0.10);
-      --nav-bg:         rgba(235,242,255,0.88);
-      --nav-border:     rgba(3,78,162,0.16);
-      --text:           #1a2538;
-      --text2:          #4f6380;
-      --muted:          #8a9bb5;
-      --input-bg:       rgba(240,246,255,0.80);
-      --input-border:   rgba(3,78,162,0.14);
-      --glow:           0 0 0 3px rgba(0,125,197,0.18);
-      --shadow:         0 8px 32px rgba(3,78,162,0.10);
-      --shadow-lg:      0 20px 60px rgba(3,78,162,0.14);
-      --scrollbar:      rgba(0,125,197,0.25);
+      /* Branding tokens (light mode) */
+      --brand-primary:         #4A90E2;
+      --brand-primary-dark:    #2E5C8A;
+      --brand-primary-light:   #7BB3F0;
+      --brand-secondary:       #50C878;
+      --brand-secondary-dark:  #3A9B5C;
+      --brand-secondary-light: #7FD99A;
+      --brand-background:      #F8F9FA;
+      --brand-surface:         #FFFFFF;
+      --brand-text-primary:    #2C3E50;
+      --brand-text-secondary:  #7F8C8D;
+      --brand-text-muted:      #BDC3C7;
+
+      /* Existing app tokens mapped to branding */
+      --ss-blue:        var(--brand-primary);
+      --ss-blue-deep:   var(--brand-primary-dark);
+      --ss-blue-light:  var(--brand-primary-light);
+      --ss-green:       var(--brand-secondary);
+
+      --bg:             var(--brand-background);
+      --bg2:            #EEF3F8;
+      --card:           var(--brand-surface);
+      --card-border:    rgba(46,92,138,0.14);
+      --nav-bg:         rgba(248,249,250,0.93);
+      --nav-border:     rgba(46,92,138,0.18);
+      --text:           var(--brand-text-primary);
+      --text2:          var(--brand-text-secondary);
+      --muted:          var(--brand-text-muted);
+      --input-bg:       #F2F5F8;
+      --input-border:   #D6DFE8;
+      --glow:           0 0 0 3px rgba(74,144,226,0.18);
+      --shadow:         0 8px 32px rgba(46,92,138,0.10);
+      --shadow-lg:      0 20px 60px rgba(46,92,138,0.15);
+      --scrollbar:      rgba(74,144,226,0.28);
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; scrollbar-width: thin; scrollbar-color: var(--scrollbar) transparent; }

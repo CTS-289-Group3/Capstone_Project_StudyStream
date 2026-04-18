@@ -322,9 +322,9 @@
                     </div>
 
                     <div class="ss-field ss-field-full">
-                        {{ form.job_title.label_tag }}
-                        {{ form.job_title }}
-                        {{ form.job_title.errors }}
+                        {{ form.employer_name.label_tag }}
+                        {{ form.employer_name }}
+                        {{ form.employer_name.errors }}
                         <div class="ss-field-meta">
                             <datalist id="jobTitleOptions">
                                 {% for job_title in job_title_options %}
@@ -337,21 +337,15 @@
                     </div>
 
                     <div class="ss-field">
-                        {{ form.shift_date.label_tag }}
-                        {{ form.shift_date }}
-                        {{ form.shift_date.errors }}
+                        {{ form.shift_start.label_tag }}
+                        {{ form.shift_start }}
+                        {{ form.shift_start.errors }}
                     </div>
 
                     <div class="ss-field">
-                        {{ form.start_time.label_tag }}
-                        {{ form.start_time }}
-                        {{ form.start_time.errors }}
-                    </div>
-
-                    <div class="ss-field">
-                        {{ form.end_time.label_tag }}
-                        {{ form.end_time }}
-                        {{ form.end_time.errors }}
+                        {{ form.shift_end.label_tag }}
+                        {{ form.shift_end }}
+                        {{ form.shift_end.errors }}
                     </div>
 
                     <div class="ss-field ss-field-full">
@@ -424,9 +418,7 @@
         const recurringTemplateSelect = document.getElementById('id_recurring_template');
         const recurrencePatternSelect = document.getElementById('id_recurrence_pattern');
         const recurrenceEndDateInput = document.getElementById('id_recurrence_end_date');
-        const jobTitleInput = document.getElementById('id_job_title');
-        const startTimeInput = document.getElementById('id_start_time');
-        const endTimeInput = document.getElementById('id_end_time');
+        const jobTitleInput = document.getElementById('id_employer_name');
         const locationInput = document.getElementById('id_location');
 
         if (jobTitleInput) {
@@ -456,15 +448,7 @@
         // Initialize visibility on page load
         updateTemplateVisibility();
 
-        // Handle recurring template selection to auto-fill times
-        if (recurringTemplateSelect) {
-            recurringTemplateSelect.addEventListener('change', function () {
-                if (this.value && startTimeInput && endTimeInput) {
-                    // The template times will be used in the view
-                    // Just ensure the fields are ready
-                }
-            });
-        }
+        // Recurring template and pattern are applied server-side on submit.
     });
 </script>
 {% endblock %}

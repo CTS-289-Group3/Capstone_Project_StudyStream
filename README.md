@@ -100,6 +100,25 @@ The command populates sample:
 - work shifts and recurring work-shift templates
 - personal events and recurring personal events
 
+### 5) Recompute workload density forecast
+
+The workload engine now computes a 4-week forecast (GREEN/YELLOW/RED), detects deadline clusters, and saves results to `WorkloadAnalysis`.
+
+Run it manually:
+
+```bash
+# Recompute for all active users (default 4 weeks)
+python manage.py run_workload_analysis
+
+# Recompute for a single user
+python manage.py run_workload_analysis --user-id 1
+
+# Recompute a different horizon
+python manage.py run_workload_analysis --weeks 6
+```
+
+For nightly automation, schedule this command with your OS scheduler (Windows Task Scheduler, cron, etc.).
+
 ## Pages
 
 | URL | Description |

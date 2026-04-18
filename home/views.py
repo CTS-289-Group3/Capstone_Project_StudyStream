@@ -7,6 +7,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.dateparse import parse_datetime
 
 from accounts.models import Assignment, Course, Profile, Semester, Tag
 from core.models import (
@@ -26,6 +27,8 @@ from .forms import (
     RecurringWorkShiftForm,
     WorkShiftForm,
 )
+from .workload_config import DASHBOARD_WIDGETS, STATUS_COLORS, WORKLOAD_DENSITY_COLORS
+from .workload_engine import recompute_and_persist_workload
 
 
 def _parse_weekdays(raw_weekdays):
@@ -226,7 +229,6 @@ def home_view(request):
     profile_avatar_text = (profile.avatar_text[:1].upper() if profile and profile.avatar_text else profile_display_name[:1].upper())
     now = timezone.now()
     week_end = now + timedelta(days=7)
-
     semesters = list(
         Semester.objects.filter(user=user).values('id', 'name', 'is_active', 'start_date', 'end_date')
     )
@@ -254,18 +256,28 @@ def home_view(request):
         assignments_data.append(
             {
                 'id': assignment.id,
+                'assignment_id': str(assignment.assignment_id),
                 'title': assignment.title,
+                'description': assignment.description,
                 'course_id': assignment.course_id,
                 'course_code': assignment.course.course_code,
                 'course_name': assignment.course.course_name,
                 'course_color': assignment.course.color_hex,
                 'due_date': assignment.due_date.isoformat(),
+                'due_time': assignment.due_time,
                 'estimated_hours': float(assignment.estimated_hours) if assignment.estimated_hours is not None else None,
                 'status': assignment.status,
-                'priority': assignment.priority,
-                'completion_pct': assignment.completion_pct,
-                'is_major': assignment.is_major,
+                'priority': assignment.priority_level,
+                'priority_level': assignment.priority_level,
+                'completion_pct': assignment.completion_percentage,
+                'completion_percentage': assignment.completion_percentage,
+                'is_major': assignment.is_major_project,
+                'is_major_project': assignment.is_major_project,
                 'assignment_type': assignment.assignment_type,
+                'canvas_link': assignment.canvas_link,
+                'rubric_link': assignment.rubric_link,
+                'submission_link': assignment.submission_link,
+                'contributes_to_workload': assignment.contributes_to_workload,
                 'subtask_count': assignment.subtasks.count(),
                 'subtask_done': assignment.subtasks.filter(status='complete').count(),
                 'tags': [
@@ -288,14 +300,22 @@ def home_view(request):
     active_courses = Course.objects.filter(user=user, semester__is_active=True).count()
 
     work_shifts_data = []
-    for shift in WorkShift.objects.filter(user=user).order_by('shift_date', 'start_time'):
+    for shift in WorkShift.objects.filter(user=user).order_by('shift_start'):
         work_shifts_data.append({
             'id': shift.id,
-            'title': shift.job_title or 'Work Shift',
+            'shift_id': str(shift.shift_id),
+            'title': shift.employer_name or shift.job_title or 'Work Shift',
+            'employer_name': shift.employer_name or shift.job_title,
             'shift_date': shift.shift_date.isoformat(),
             'start_time': shift.start_time.strftime('%H:%M'),
             'end_time': shift.end_time.strftime('%H:%M'),
+            'shift_start': shift.shift_start.isoformat() if shift.shift_start else None,
+            'shift_end': shift.shift_end.isoformat() if shift.shift_end else None,
+            'duration_hours': shift.duration_hours,
             'location': shift.location,
+            'is_confirmed': shift.is_confirmed,
+            'is_recurring': shift.is_recurring,
+            'recurrence_pattern': shift.recurrence_pattern,
             'color_hex': shift.color_hex or '#10b981',
         })
 
@@ -336,6 +356,11 @@ def home_view(request):
         })
     personal_events_data.sort(key=lambda e: (e['event_date'], e['start_time'] or ''))
 
+    workload_data = recompute_and_persist_workload(user, weeks=4)
+    workload_summary = workload_data["summary"]
+    workload_alerts = workload_data["alerts"]
+    workload_forecast = workload_data["forecast"]
+
     context = {
         'user': user,
         'profile_display_name': profile_display_name,
@@ -353,6 +378,12 @@ def home_view(request):
             'overdue': overdue,
             'active_courses': active_courses,
         },
+        'workload_summary_json': json.dumps(workload_summary, cls=DjangoJSONEncoder),
+        'workload_alerts_json': json.dumps(workload_alerts, cls=DjangoJSONEncoder),
+        'workload_forecast_json': json.dumps(workload_forecast, cls=DjangoJSONEncoder),
+        'workload_density_colors_json': json.dumps(WORKLOAD_DENSITY_COLORS, cls=DjangoJSONEncoder),
+        'status_colors_json': json.dumps(STATUS_COLORS, cls=DjangoJSONEncoder),
+        'dashboard_widgets_json': json.dumps(DASHBOARD_WIDGETS, cls=DjangoJSONEncoder),
     }
     return render(request, 'home/home.html', context)
 
@@ -506,12 +537,27 @@ def add_work_shift(request):
         if form.is_valid():
             shift = form.save(commit=False)
             shift.user = request.user
+            shift.job_title = shift.employer_name
             
             # If using a recurring template, auto-fill the shift times and location
             if form.cleaned_data.get("shift_type") == "recurring" and form.cleaned_data.get("recurring_template"):
                 template = form.cleaned_data.get("recurring_template")
-                shift.start_time = template.start_time
-                shift.end_time = template.end_time
+
+                base_start = timezone.localtime(shift.shift_start)
+                base_end = timezone.localtime(shift.shift_end)
+                tz = timezone.get_current_timezone()
+
+                start_dt = timezone.make_aware(
+                    datetime.combine(base_start.date(), template.start_time),
+                    tz,
+                )
+                end_dt = timezone.make_aware(
+                    datetime.combine(base_end.date(), template.end_time),
+                    tz,
+                )
+                shift.shift_start = start_dt
+                shift.shift_end = end_dt
+
                 if not shift.location:  # Only use template location if user didn't specify one
                     shift.location = template.location
                 
@@ -521,7 +567,12 @@ def add_work_shift(request):
                 
                 if recurrence_pattern and recurrence_end_date:
                     # Generate shifts for the recurrence period
-                    current_date = shift.shift_date
+                    local_start = timezone.localtime(shift.shift_start)
+                    local_end = timezone.localtime(shift.shift_end)
+                    current_date = local_start.date()
+
+                    start_time_value = local_start.time().replace(microsecond=0)
+                    end_time_value = local_end.time().replace(microsecond=0)
                     
                     # Determine the increment days based on pattern
                     if recurrence_pattern == "weekly":
@@ -533,15 +584,27 @@ def add_work_shift(request):
                     
                     # Create all recurring shifts
                     while current_date <= recurrence_end_date:
+                        new_shift_start = timezone.make_aware(
+                            datetime.combine(current_date, start_time_value),
+                            timezone.get_current_timezone(),
+                        )
+                        new_shift_end = timezone.make_aware(
+                            datetime.combine(current_date, end_time_value),
+                            timezone.get_current_timezone(),
+                        )
+
                         new_shift = WorkShift(
                             user=request.user,
+                            employer_name=shift.employer_name,
                             job_title=shift.job_title,
-                            shift_date=current_date,
-                            start_time=shift.start_time,
-                            end_time=shift.end_time,
+                            shift_start=new_shift_start,
+                            shift_end=new_shift_end,
                             location=shift.location,
                             notes=shift.notes,
                             color_hex=shift.color_hex,
+                            is_confirmed=True,
+                            is_recurring=True,
+                            recurrence_pattern=f"{recurrence_pattern}_{current_date.strftime('%A').lower()}",
                         )
                         new_shift.save()
                         
@@ -560,6 +623,8 @@ def add_work_shift(request):
             else:
                 # One-time shift
                 shift.save()
+
+            recompute_and_persist_workload(request.user, weeks=4)
             
             return redirect("dashboard")
     else:
@@ -789,24 +854,76 @@ def work_shift_edit(request, shift_id):
     """Edit a work shift via API. Returns JSON."""
     work_shift = get_object_or_404(WorkShift, pk=shift_id, user=request.user)
     if request.method == 'POST':
-        work_shift.job_title = request.POST.get('job_title', work_shift.job_title).strip()
-        work_shift.shift_date = request.POST.get('shift_date', work_shift.shift_date)
-        work_shift.start_time = request.POST.get('start_time', work_shift.start_time)
-        work_shift.end_time = request.POST.get('end_time', work_shift.end_time)
+        employer_name = request.POST.get('employer_name', request.POST.get('job_title', work_shift.employer_name)).strip()
+        work_shift.employer_name = employer_name
+        work_shift.job_title = employer_name
+
+        shift_start_raw = request.POST.get('shift_start', '').strip()
+        shift_end_raw = request.POST.get('shift_end', '').strip()
+
+        if shift_start_raw and shift_end_raw:
+            parsed_start = parse_datetime(shift_start_raw)
+            parsed_end = parse_datetime(shift_end_raw)
+            if parsed_start and parsed_end:
+                if timezone.is_naive(parsed_start):
+                    parsed_start = timezone.make_aware(parsed_start, timezone.get_current_timezone())
+                if timezone.is_naive(parsed_end):
+                    parsed_end = timezone.make_aware(parsed_end, timezone.get_current_timezone())
+                work_shift.shift_start = parsed_start
+                work_shift.shift_end = parsed_end
+        else:
+            work_shift.shift_date = request.POST.get('shift_date', work_shift.shift_date)
+            work_shift.start_time = request.POST.get('start_time', work_shift.start_time)
+            work_shift.end_time = request.POST.get('end_time', work_shift.end_time)
+
         work_shift.location = request.POST.get('location', '').strip()
         work_shift.notes = request.POST.get('notes', '').strip()
+        work_shift.is_confirmed = request.POST.get('is_confirmed', 'on').lower() in {'1', 'true', 'yes', 'on'}
+        work_shift.is_recurring = request.POST.get('is_recurring', '').lower() in {'1', 'true', 'yes', 'on'}
+        work_shift.recurrence_pattern = request.POST.get('recurrence_pattern', work_shift.recurrence_pattern).strip()
         work_shift.color_hex = request.POST.get('color_hex', work_shift.color_hex)
         work_shift.save()
-        return JsonResponse({'success': True, 'id': work_shift.id})
+        recompute_and_persist_workload(request.user, weeks=4)
+        return JsonResponse({
+            'success': True,
+            'id': work_shift.id,
+            'shift': {
+                'id': work_shift.id,
+                'shift_id': str(work_shift.shift_id),
+                'title': work_shift.employer_name or work_shift.job_title or 'Work Shift',
+                'job_title': work_shift.job_title,
+                'employer_name': work_shift.employer_name,
+                'shift_date': work_shift.shift_date.isoformat(),
+                'start_time': work_shift.start_time.strftime('%H:%M') if work_shift.start_time else None,
+                'end_time': work_shift.end_time.strftime('%H:%M') if work_shift.end_time else None,
+                'shift_start': work_shift.shift_start.isoformat() if work_shift.shift_start else None,
+                'shift_end': work_shift.shift_end.isoformat() if work_shift.shift_end else None,
+                'duration_hours': work_shift.duration_hours,
+                'location': work_shift.location,
+                'notes': work_shift.notes,
+                'is_confirmed': work_shift.is_confirmed,
+                'is_recurring': work_shift.is_recurring,
+                'recurrence_pattern': work_shift.recurrence_pattern,
+                'color_hex': work_shift.color_hex,
+            },
+        })
     # GET — return data for edit form
     return JsonResponse({
         'id': work_shift.id,
+        'shift_id': str(work_shift.shift_id),
         'job_title': work_shift.job_title,
+        'employer_name': work_shift.employer_name,
         'shift_date': work_shift.shift_date.isoformat(),
         'start_time': work_shift.start_time.isoformat() if work_shift.start_time else None,
         'end_time': work_shift.end_time.isoformat() if work_shift.end_time else None,
+        'shift_start': work_shift.shift_start.isoformat() if work_shift.shift_start else None,
+        'shift_end': work_shift.shift_end.isoformat() if work_shift.shift_end else None,
+        'duration_hours': work_shift.duration_hours,
         'location': work_shift.location,
         'notes': work_shift.notes,
+        'is_confirmed': work_shift.is_confirmed,
+        'is_recurring': work_shift.is_recurring,
+        'recurrence_pattern': work_shift.recurrence_pattern,
         'color_hex': work_shift.color_hex,
     })
 
@@ -817,5 +934,6 @@ def work_shift_delete(request, shift_id):
     work_shift = get_object_or_404(WorkShift, pk=shift_id, user=request.user)
     if request.method == 'POST':
         work_shift.delete()
+        recompute_and_persist_workload(request.user, weeks=4)
         return JsonResponse({'success': True})
     return JsonResponse({'success': False, 'error': 'Method not allowed'}, status=405)
