@@ -3001,7 +3001,10 @@ function renderWeekCal() {
   const monLabel = base.toLocaleDateString('en-US',{month:'short',day:'numeric'});
   const sunDate  = new Date(base); sunDate.setDate(base.getDate()+6);
   const sunLabel = sunDate.toLocaleDateString('en-US',{month:'short',day:'numeric'});
-  $('calLabel').textContent = `${monLabel} – ${sunLabel}`;
+  const d = new Date(Date.UTC(base.getFullYear(), base.getMonth(), base.getDate()));
+  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+  const isoWeek = Math.ceil((((d - new Date(Date.UTC(d.getUTCFullYear(),0,1))) / 86400000) + 1) / 7);
+  $('calLabel').textContent = `${monLabel} – ${sunLabel}  ·  Wk ${isoWeek}`;
 
   grid.style.gridTemplateColumns = '52px repeat(7,1fr)';
   grid.innerHTML = '';

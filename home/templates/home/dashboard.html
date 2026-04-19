@@ -723,6 +723,7 @@
                     </div>
                 </details>
             </div>
+            <div id="fc-week-banner" style="display:none;text-align:right;font-size:13px;font-weight:700;color:var(--muted,#888);padding:0 4px 6px;"></div>
             <div id="calendar"></div>
         </div>
 
@@ -829,6 +830,14 @@
 
             const calendarEl = document.getElementById('calendar');
             const events = JSON.parse(document.getElementById('calendar-events-data').textContent);
+
+            function getISOWeekNumber(date) {
+                const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+                d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+                const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+                return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+            }
+
             const calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
                 headerToolbar: {
@@ -840,7 +849,17 @@
                 eventColor: '#007DC5',
                 eventBorderColor: 'transparent',
                 eventTextColor: '#ffffff',
-                events: events
+                events: events,
+                datesSet: function(info) {
+                    const banner = document.getElementById('fc-week-banner');
+                    if (!banner) return;
+                    if (info.view.type === 'timeGridWeek') {
+                        banner.textContent = 'Week\u00a0' + getISOWeekNumber(info.start);
+                        banner.style.display = 'block';
+                    } else {
+                        banner.style.display = 'none';
+                    }
+                }
             });
             calendar.render();
         });
