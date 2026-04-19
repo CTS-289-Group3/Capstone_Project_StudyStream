@@ -1,201 +1,79 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recurring Personal Events</title>
+    <title>Recurring Personal Events – StudyStream</title>
+    <script>document.documentElement.setAttribute("data-theme",localStorage.getItem("ss-theme")||"dark");</script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --blue-dark: #034EA2;
-            --bg: #F4F7FB;
-            --surface: #FFFFFF;
-            --text: #1A2540;
-            --muted: #6B7A99;
-            --border: #E4EAF4;
-            --shadow: 0 2px 16px rgba(3,78,162,0.08);
-            --radius: 14px;
-        }
-
-        * { box-sizing: border-box; }
-
-        body {
-            margin: 0;
-            font-family: 'DM Sans', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            padding: 28px 16px;
-        }
-
-        .ss-wrap { max-width: 980px; margin: 0 auto; }
-
-        .ss-card {
-            background: var(--surface);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            padding: 24px;
-        }
-
-        .ss-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 16px;
-        }
-
-        h1 {
-            margin: 0;
-            font-family: 'Nunito', sans-serif;
-            font-size: 28px;
-            color: var(--blue-dark);
-        }
-
-        .ss-sub {
-            margin: 8px 0 0;
-            color: var(--muted);
-            font-size: 14px;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 999px;
-            padding: 10px 16px;
-            font-size: 14px;
-            font-weight: 700;
-            text-decoration: none;
-            cursor: pointer;
-            border: none;
-        }
-
-        .btn-primary { background: var(--blue-dark); color: #fff; }
-
-        .btn-secondary {
-            background: #fff;
-            color: var(--blue-dark);
-            border: 1px solid var(--border);
-        }
-
-        .ss-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 14px;
-        }
-
-        th, td {
-            border-bottom: 1px solid var(--border);
-            text-align: left;
-            padding: 10px 8px;
-            font-size: 14px;
-            vertical-align: top;
-        }
-
-        th {
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            color: var(--muted);
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 999px;
-            font-size: 11px;
-            font-weight: 700;
-        }
-
-        .badge-on { background: #EAF7EE; color: #1B6A2A; }
-        .badge-off { background: #F2F4F8; color: #66758A; }
-
-        .link {
-            color: var(--blue-dark);
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 13px;
-        }
-
-        .link:hover { text-decoration: underline; }
-
-        .delete-btn {
-            border: none;
-            background: transparent;
-            color: #9D1C1C;
-            font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
-            padding: 0;
-        }
-
-        .delete-btn:hover { text-decoration: underline; }
-
-        .ss-empty { margin-top: 12px; color: var(--muted); font-size: 14px; }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=DM+Sans:wght@400;500;600&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="{% static 'accounts/images/logo_icon.svg' %}">
+    <link rel="stylesheet" href="{% static 'accounts/css/ss-shared.css' %}">
 </head>
 <body>
-    <div class="ss-wrap">
-        <div class="ss-card">
-            <div class="ss-header">
-                <div>
-                    <h1>Recurring Personal Events</h1>
-                    <p class="ss-sub">Manage repeating personal events like Tue/Thu appointments, every-2-week items, and monthly reminders.</p>
-                </div>
-                <div class="ss-actions">
-                    <a href="{% url 'add_recurring_personal_event' %}" class="btn btn-primary">Add Recurring Event</a>
-                    <a href="{% url 'add_personal_event' %}" class="btn btn-secondary">Back to Add Personal Event</a>
-                </div>
-            </div>
-
-            {% if recurring_personal_events %}
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Title</th>
-                            <th>Pattern</th>
-                            <th>Start Date</th>
-                            <th>Location</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for event in recurring_personal_events %}
-                            <tr>
-                                <td>{{ event.title }}</td>
-                                <td>{{ event.get_recurrence_pattern_display }}</td>
-                                <td>{{ event.start_date }}</td>
-                                <td>{% if event.location %}{{ event.location }}{% else %}--{% endif %}</td>
-                                <td>
-                                    {% if event.is_active %}
-                                        <span class="badge badge-on">Active</span>
-                                    {% else %}
-                                        <span class="badge badge-off">Inactive</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <a href="{% url 'edit_recurring_personal_event' event.id %}" class="link">Edit</a>
-                                    <form method="post" action="{% url 'delete_recurring_personal_event' event.id %}" style="display:inline;">
-                                        {% csrf_token %}
-                                        <button type="submit" class="delete-btn">Delete</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <p class="ss-empty">No recurring personal events yet. Add one to build a repeating schedule.</p>
-            {% endif %}
-        </div>
+{% include "home/partials/navbar.html" with back_url="/home/dashboard/" %}
+    <div class="ss-banner">
+      <div class="ss-banner-flare"></div>
+      <div class="ss-banner-flare2"></div>
+      <div class="ss-banner-content">
+        <div class="ss-banner-eyebrow">Life · Recurring</div>
+        <div class="ss-banner-title">Recurring <span>Personal Events</span></div>
+        <div class="ss-banner-sub">Manage events that repeat on a schedule.</div>
+      </div>
+      <div class="ss-banner-wave">
+        <svg viewBox="0 0 1440 32" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="display:block;width:100%;height:32px;">
+          <path d="M0,16 C360,32 1080,0 1440,16 L1440,32 L0,32 Z" fill="var(--bg)"/>
+        </svg>
+      </div>
     </div>
+    <main class="ss-main-wide">
+      <div class="ss-card">
+        <div class="ss-card-header">
+          <div class="ss-card-title"><span class="dot dot-yellow"></span>Recurring Events</div>
+          <div style="display:flex;gap:8px;">
+            <a href="{% url 'add_recurring_personal_event' %}" class="btn-primary" style="font-size:13px;padding:8px 18px;">+ Add Recurring Event</a>
+            <a href="{% url 'add_personal_event' %}" class="ss-btn-sm">← Add Single Event</a>
+          </div>
+        </div>
+        {% if recurring_personal_events %}
+          {% for event in recurring_personal_events %}
+          <div class="ss-list-item">
+            <div class="ss-list-item-left">
+              <div style="font-size:20px;">🔁</div>
+              <div>
+                <div class="ss-list-item-name">{{ event.title }}</div>
+                <div class="ss-list-item-meta">
+                  {{ event.get_recurrence_pattern_display }}
+                  {% if event.start_time %} · ⏰ {{ event.start_time }}{% if event.end_time %} – {{ event.end_time }}{% endif %}{% endif %}
+                  {% if event.location %} · 📍 {{ event.location }}{% endif %}
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="ss-status-badge {% if event.is_active %}ss-status-active{% else %}ss-status-inactive{% endif %}">{% if event.is_active %}Active{% else %}Inactive{% endif %}</span>
+              <a href="{% url 'edit_recurring_personal_event' event.id %}" class="ss-btn-sm">Edit</a>
+              <form method="post" action="{% url 'delete_recurring_personal_event' event.id %}" style="display:inline;" onsubmit="return confirm('Delete this recurring event?')">
+                {% csrf_token %}
+                <button type="submit" class="ss-btn-sm ss-btn-danger">Delete</button>
+              </form>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <p class="ss-empty">No recurring personal events yet. Create one from the Add Personal Event form!</p>
+        {% endif %}
+      </div>
+    </main>
+
+    <div class="ss-footer-outer">
+      <footer class="ss-footer">
+        <div class="ss-footer-logo"><span class="w1">STUDY</span><span class="w2">STREAM</span></div>
+        <div class="ss-footer-copy">Less stress. More progress. © 2026</div>
+        <div class="ss-footer-links"><span>Privacy</span><span>Terms</span><span>Contact</span></div>
+      </footer>
+    </div>
+    <script src="{% static 'accounts/js/ss-shared.js' %}"></script>
 </body>
 </html>

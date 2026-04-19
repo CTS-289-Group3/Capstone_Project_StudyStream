@@ -1,200 +1,72 @@
-{% extends "accounts/base.html" %}
-
-{% block title %}Recurring Job Titles — StudyStream{% endblock %}
-
-{% block extra_head %}
-<style>
-    .ss-wrap {
-        max-width: 980px;
-        margin: 0 auto;
-        padding: 22px 16px 40px;
-    }
-
-    .ss-card {
-        background: var(--card);
-        border: 1px solid var(--card-border);
-        border-radius: 18px;
-        box-shadow: var(--shadow);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        padding: 24px;
-    }
-
-    .ss-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 12px;
-        flex-wrap: wrap;
-        margin-bottom: 16px;
-    }
-
-    h1 {
-        margin: 0;
-        font-family: 'Montserrat', sans-serif;
-        font-size: 28px;
-        color: var(--text);
-    }
-
-    .ss-sub {
-        margin: 8px 0 0;
-        color: var(--text2);
-        font-size: 14px;
-    }
-
-    .ss-actions {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-        flex-wrap: wrap;
-    }
-
-    .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 999px;
-        padding: 10px 16px;
-        font-size: 14px;
-        font-weight: 800;
-        text-decoration: none;
-        cursor: pointer;
-        border: none;
-    }
-
-    .btn-primary {
-        background: linear-gradient(135deg, var(--ss-blue), var(--ss-blue-deep));
-        color: #fff;
-        box-shadow: 0 6px 18px rgba(3, 78, 162, 0.28);
-    }
-
-    .btn-secondary {
-        background: transparent;
-        color: var(--text);
-        border: 1px solid var(--input-border);
-    }
-
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 14px;
-    }
-
-    th,
-    td {
-        border-bottom: 1px solid var(--card-border);
-        text-align: left;
-        padding: 10px 8px;
-        font-size: 14px;
-        color: var(--text);
-    }
-
-    th {
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        color: var(--text2);
-    }
-
-    .badge {
-        display: inline-block;
-        padding: 4px 8px;
-        border-radius: 999px;
-        font-size: 11px;
-        font-weight: 700;
-    }
-
-    .badge-on {
-        background: rgba(0, 176, 76, 0.18);
-        color: #4ade80;
-    }
-
-    .badge-off {
-        background: rgba(148, 163, 184, 0.16);
-        color: var(--text2);
-    }
-
-    .link {
-        color: var(--ss-blue-light);
-        text-decoration: none;
-        font-weight: 700;
-        font-size: 13px;
-    }
-
-    .link:hover {
-        text-decoration: underline;
-    }
-
-    .delete-btn {
-        border: none;
-        background: transparent;
-        color: #fca5a5;
-        font-size: 13px;
-        font-weight: 700;
-        cursor: pointer;
-        padding: 0;
-    }
-
-    .delete-btn:hover {
-        text-decoration: underline;
-    }
-
-    .ss-empty {
-        margin-top: 12px;
-        color: var(--text2);
-        font-size: 14px;
-    }
-</style>
-{% endblock %}
-
-{% block content %}
-<div class="ss-wrap">
-    <div class="ss-card">
-        <div class="ss-header">
-            <div>
-                <h1>Recurring Job Titles</h1>
-                <p class="ss-sub">Manage saved job titles for quick work-shift entry.</p>
-            </div>
-            <div class="ss-actions">
-                <a href="{% url 'add_recurring_job_title' %}" class="btn btn-primary">Add Job Title</a>
-                <a href="{% url 'add_work_shift' %}" class="btn btn-secondary">Back to Add Work Shift</a>
-            </div>
-        </div>
-
-        {% if recurring_job_titles %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>Job Title</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for job_title in recurring_job_titles %}
-                        <tr>
-                            <td>{{ job_title.title }}</td>
-                            <td>
-                                {% if job_title.is_active %}
-                                    <span class="badge badge-on">Active</span>
-                                {% else %}
-                                    <span class="badge badge-off">Inactive</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <a href="{% url 'edit_recurring_job_title' job_title.id %}" class="link">Edit</a>
-                                <form method="post" action="{% url 'delete_recurring_job_title' job_title.id %}" style="display:inline;">
-                                    {% csrf_token %}
-                                    <button type="submit" class="delete-btn">Delete</button>
-                                </form>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p class="ss-empty">No recurring job titles yet. Add one so users can pick it quickly.</p>
-        {% endif %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saved Job Titles – StudyStream</title>
+    <script>document.documentElement.setAttribute("data-theme",localStorage.getItem("ss-theme")||"dark");</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=DM+Sans:wght@400;500;600&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="{% static 'accounts/images/logo_icon.svg' %}">
+    <link rel="stylesheet" href="{% static 'accounts/css/ss-shared.css' %}">
+</head>
+<body>
+{% include "home/partials/navbar.html" with back_url="/home/dashboard/" %}
+    <div class="ss-banner">
+      <div class="ss-banner-flare"></div>
+      <div class="ss-banner-flare2"></div>
+      <div class="ss-banner-content">
+        <div class="ss-banner-eyebrow">Work · Roles</div>
+        <div class="ss-banner-title">Saved <span>Job Titles</span></div>
+        <div class="ss-banner-sub">Keep your role names consistent across all your shifts.</div>
+      </div>
+      <div class="ss-banner-wave">
+        <svg viewBox="0 0 1440 32" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="display:block;width:100%;height:32px;">
+          <path d="M0,16 C360,32 1080,0 1440,16 L1440,32 L0,32 Z" fill="var(--bg)"/>
+        </svg>
+      </div>
     </div>
-</div>
-{% endblock %}
+    <main class="ss-main-wide">
+      <div class="ss-card">
+        <div class="ss-card-header">
+          <div class="ss-card-title"><span class="dot dot-yellow"></span>Job Title Library</div>
+          <div style="display:flex;gap:8px;">
+            <a href="{% url 'add_recurring_job_title' %}" class="btn-primary" style="font-size:13px;padding:8px 18px;">+ Add Title</a>
+            <a href="{% url 'add_work_shift' %}" class="ss-btn-sm">← Add Work Shift</a>
+          </div>
+        </div>
+        {% if job_titles %}
+          {% for jt in job_titles %}
+          <div class="ss-list-item">
+            <div class="ss-list-item-left">
+              <div style="font-size:20px;">💼</div>
+              <div><div class="ss-list-item-name">{{ jt.title }}</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="ss-status-badge {% if jt.is_active %}ss-status-active{% else %}ss-status-inactive{% endif %}">{% if jt.is_active %}Active{% else %}Inactive{% endif %}</span>
+              <a href="{% url 'edit_recurring_job_title' jt.id %}" class="ss-btn-sm">Edit</a>
+              <form method="post" action="{% url 'delete_recurring_job_title' jt.id %}" style="display:inline;" onsubmit="return confirm('Delete this job title?')">
+                {% csrf_token %}
+                <button type="submit" class="ss-btn-sm ss-btn-danger">Delete</button>
+              </form>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <p class="ss-empty">No saved job titles yet. Add one to keep your shifts organized!</p>
+        {% endif %}
+      </div>
+    </main>
+
+    <div class="ss-footer-outer">
+      <footer class="ss-footer">
+        <div class="ss-footer-logo"><span class="w1">STUDY</span><span class="w2">STREAM</span></div>
+        <div class="ss-footer-copy">Less stress. More progress. © 2026</div>
+        <div class="ss-footer-links"><span>Privacy</span><span>Terms</span><span>Contact</span></div>
+      </footer>
+    </div>
+    <script src="{% static 'accounts/js/ss-shared.js' %}"></script>
+</body>
+</html>

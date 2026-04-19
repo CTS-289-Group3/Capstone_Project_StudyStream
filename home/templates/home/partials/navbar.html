@@ -1,0 +1,37 @@
+{% load static %}
+<div class="ss-nav-outer">
+  <nav class="ss-nav">
+    <div class="ss-nav-left">
+      <a href="{% url 'home' %}" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+        <img src="{% static 'accounts/images/logo_icon.svg' %}" alt="StudyStream" class="ss-nav-logo">
+        <span class="ss-nav-wordmark" style="color:#fff;">StudyStream</span>
+      </a>
+    </div>
+    <div class="ss-nav-right">
+      {% if back_url %}
+      <a href="{{ back_url }}" class="ss-nav-back">← Dashboard</a>
+      {% endif %}
+      <label class="ss-toggle" title="Toggle theme" aria-label="Toggle theme">
+        <input type="checkbox" id="themeToggle">
+        <span class="ss-toggle-track"><span class="sun">☀️</span><span class="moon">🌙</span><span class="ss-toggle-thumb"></span></span>
+      </label>
+      <div class="ss-user-menu" id="userMenu">
+        <button type="button" class="ss-user-trigger" id="userMenuTrigger">
+          <span class="ss-nav-avatar">{{ profile_avatar_text|default:request.user.username|slice:":1"|upper }}</span>
+          <span class="ss-user-name">{{ profile_display_name|default:request.user.username }}</span>
+          <span class="ss-user-caret">▾</span>
+        </button>
+        <div class="ss-user-dropdown" id="userMenuDropdown">
+          <div class="ss-dropdown-header">
+            <div class="ss-dropdown-label">Signed in as</div>
+            <div class="ss-dropdown-name">{{ profile_display_name|default:request.user.username }}</div>
+          </div>
+          <a href="{% url 'profile' %}" class="ss-dropdown-link"><span>✏️ Edit Profile</span><span>›</span></a>
+          <a href="{% url 'settings' %}" class="ss-dropdown-link"><span>⚙️ Settings</span><span>›</span></a>
+          <div class="ss-dropdown-divider"></div>
+          <a href="{% url 'logout' %}" class="ss-dropdown-link ss-dropdown-link--danger"><span>🚪 Sign out</span><span>›</span></a>
+        </div>
+      </div>
+    </div>
+  </nav>
+</div>

@@ -6,212 +6,156 @@
 {% block extra_head %}
 <style>
   .auth-wrap {
-    flex: 1;
-    display: flex; align-items: center; justify-content: center;
-    padding: 48px 24px 64px;
-    min-height: calc(100vh - 76px);
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    padding: 48px 24px 64px; min-height: calc(100vh - 76px);
   }
-
   .auth-card {
     width: 100%; max-width: 940px;
     display: grid; grid-template-columns: 1fr 1fr;
     border-radius: 28px; overflow: hidden;
-    background: var(--card);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    background: var(--card); backdrop-filter: blur(24px);
     border: 1px solid var(--card-border);
     box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,0.05);
     animation: cardIn 0.55s cubic-bezier(0.22,1,0.36,1) both;
   }
-
   @keyframes cardIn {
     from { opacity:0; transform:translateY(28px) scale(0.97); }
     to   { opacity:1; transform:translateY(0) scale(1); }
   }
-
   .auth-left {
     position: relative; overflow: hidden;
-    background:
-      radial-gradient(circle at 25% 25%, rgba(252,175,23,0.15), transparent 55%),
+    background: radial-gradient(circle at 25% 25%, rgba(252,175,23,0.15), transparent 55%),
       radial-gradient(circle at 80% 80%, rgba(0,125,197,0.18), transparent 55%),
       linear-gradient(150deg, #0a1628 0%, #0d1f38 100%);
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
     padding: 52px 36px; gap: 20px;
   }
-
-  [data-theme="light"] .auth-left {
-    background:
-      radial-gradient(circle at 25% 25%, rgba(252,175,23,0.18), transparent 55%),
-      radial-gradient(circle at 80% 80%, rgba(0,125,197,0.14), transparent 55%),
-      linear-gradient(150deg, #dceeff 0%, #e8f4fc 100%);
+  .auth-left-flare {
+    position: absolute; top: 28%; left: -10%; width: 120%; height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(252,175,23,0.5) 35%, rgba(83,183,232,0.6) 65%, transparent 100%);
+    transform: rotate(-2deg); filter: blur(1px); pointer-events: none;
   }
-
+  .auth-left-flare2 {
+    position: absolute; top: 68%; left: -10%; width: 120%; height: 1px;
+    background: linear-gradient(90deg, transparent 10%, rgba(83,183,232,0.3) 50%, transparent 90%);
+    transform: rotate(-1.5deg); pointer-events: none;
+  }
   .auth-left::before {
-    content: ''; position: absolute;
-    width: 280px; height: 280px; border-radius: 50%;
-    background: var(--ss-yellow); opacity: 0.07;
-    top: -80px; left: -80px;
+    content: ''; position: absolute; width: 280px; height: 280px; border-radius: 50%;
+    background: #FCAF17; opacity: 0.07; top: -80px; left: -80px;
     animation: blobA 8s ease-in-out infinite;
   }
-
   .auth-left::after {
-    content: ''; position: absolute;
-    width: 200px; height: 200px; border-radius: 50%;
-    background: var(--ss-blue); opacity: 0.08;
-    bottom: -60px; right: -50px;
+    content: ''; position: absolute; width: 200px; height: 200px; border-radius: 50%;
+    background: #007DC5; opacity: 0.08; bottom: -60px; right: -50px;
     animation: blobB 10s ease-in-out infinite;
   }
-
   @keyframes blobA { 0%,100%{transform:translate(0,0) scale(1);} 50%{transform:translate(12px,10px) scale(1.05);} }
   @keyframes blobB { 0%,100%{transform:translate(0,0) scale(1);} 50%{transform:translate(-10px,-8px) scale(1.06);} }
-
-  .logo-for-dark  { display: block; }
-  .logo-for-light { display: none;  }
-  [data-theme="light"] .logo-for-dark  { display: none; }
-  [data-theme="light"] .logo-for-light { display: block; }
-
   .auth-logo {
     width: 100%; max-width: 200px; height: auto;
     position: relative; z-index: 1;
     filter: drop-shadow(0 14px 28px rgba(3,78,162,0.30));
     animation: logoFloat 6s ease-in-out infinite;
   }
-
   @keyframes logoFloat { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} }
-
   .auth-tagline {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 15px; font-weight: 800;
-    color: var(--ss-blue-light); text-align: center;
-    position: relative; z-index: 1; line-height: 1.4;
+    font-family: 'Montserrat', sans-serif; font-size: 15px; font-weight: 800;
+    color: #53B7E8; text-align: center; position: relative; z-index: 1; line-height: 1.4;
   }
-
-  [data-theme="light"] .auth-tagline { color: var(--ss-blue-deep); }
-  .auth-tagline .y { color: var(--ss-yellow); }
-
+  .auth-tagline .y { color: #FCAF17; }
   .auth-features {
     list-style: none; display: flex; flex-direction: column;
     gap: 8px; position: relative; z-index: 1; width: 100%;
   }
-
   .auth-features li {
     display: flex; align-items: center; gap: 8px;
-    font-size: 12px; font-weight: 700; color: var(--text2);
+    font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.75);
   }
-
   .auth-features li::before {
-    content: '✓';
-    width: 18px; height: 18px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--ss-green), #8DC63F);
+    content: '✓'; width: 18px; height: 18px; border-radius: 50%;
+    background: linear-gradient(135deg, #10b981, #059669);
     color: #fff; font-size: 10px;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
   }
-
   .auth-right {
-    padding: 44px 44px;
-    display: flex; flex-direction: column; justify-content: center;
-    overflow-y: auto;
+    padding: 44px 44px; display: flex; flex-direction: column;
+    justify-content: center; overflow-y: auto; background: var(--card);
   }
-
+  [data-theme="light"] .auth-right { background: #ffffff !important; }
   .auth-eyebrow {
-    display: inline-block;
-    font-size: 11px; font-weight: 800;
+    display: inline-block; font-size: 11px; font-weight: 800;
     letter-spacing: 0.12em; text-transform: uppercase;
-    color: var(--ss-blue); background: rgba(0,125,197,0.10);
+    color: var(--blue); background: rgba(0,125,197,0.10);
     border: 1px solid rgba(0,125,197,0.16);
-    border-radius: 999px; padding: 5px 12px;
-    margin-bottom: 12px; width: fit-content;
+    border-radius: 999px; padding: 5px 12px; margin-bottom: 12px; width: fit-content;
   }
-
   .auth-heading {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 26px; font-weight: 900;
+    font-family: 'Montserrat', sans-serif; font-size: 26px; font-weight: 900;
     color: var(--text); line-height: 1.15; margin-bottom: 5px;
   }
-
-  .auth-heading .y { color: var(--ss-yellow); }
-
-  .auth-sub { font-size: 13px; color: var(--muted); margin-bottom: 22px; }
-
+  [data-theme="light"] .auth-heading { color: #1A2540 !important; }
+  .auth-heading .y { color: #FCAF17; }
+  .auth-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 22px; }
+  [data-theme="light"] .auth-sub { color: #5a6e8a !important; }
   .auth-form { display: flex; flex-direction: column; gap: 12px; }
-
   .auth-field { display: flex; flex-direction: column; gap: 4px; }
-
   .auth-field label {
-    font-size: 11px; font-weight: 800;
-    letter-spacing: 0.06em; text-transform: uppercase; color: var(--text2);
+    font-size: 11px; font-weight: 800; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--text2);
   }
-
+  [data-theme="light"] .auth-field label { color: #3d5070 !important; }
   .auth-field input {
-    font-family: 'Nunito', sans-serif;
-    font-size: 14px; font-weight: 600;
+    font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 600;
     padding: 11px 16px; border-radius: 12px;
     border: 1.8px solid var(--input-border);
     background: var(--input-bg); color: var(--text); outline: none;
     transition: border-color 0.22s, box-shadow 0.22s, background 0.22s;
   }
-
-  .auth-field input:focus {
-    border-color: var(--ss-blue); box-shadow: var(--glow); background: var(--card);
+  [data-theme="light"] .auth-field input {
+    background: #f4f8fe !important; border-color: #d0dcf0 !important; color: #1A2540 !important;
   }
-
+  .auth-field input:focus { border-color: var(--blue); box-shadow: var(--glow); background: var(--surface); }
+  [data-theme="light"] .auth-field input:focus { background: #ffffff !important; }
   .auth-field input.is-err { border-color: #ef4444; }
   .auth-field-err { font-size: 11px; font-weight: 700; color: #f87171; }
-  .auth-help { font-size: 11px; color: var(--muted); margin-top: 2px; line-height: 1.4; }
-
+  .auth-help { font-size: 11px; color: var(--text-muted); margin-top: 2px; line-height: 1.4; }
+  [data-theme="light"] .auth-help { color: #5a6e8a !important; }
   .auth-submit {
-    font-family: 'Nunito', sans-serif;
-    font-size: 14px; font-weight: 900;
-    padding: 13px; border: none; border-radius: 999px;
-    color: #fff;
-    background: linear-gradient(135deg, var(--ss-blue), var(--ss-blue-deep));
-    cursor: pointer;
-    box-shadow: 0 8px 24px rgba(3,78,162,0.30);
-    transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.18s;
-    margin-top: 4px;
+    font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 900;
+    padding: 13px; border: none; border-radius: 999px; color: #fff;
+    background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+    cursor: pointer; box-shadow: 0 8px 24px rgba(3,78,162,0.30);
+    transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.18s; margin-top: 4px;
   }
-
   .auth-submit:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(3,78,162,0.42); }
-  .auth-submit:active { transform: translateY(0); }
-
-  .auth-div {
-    display: flex; align-items: center; gap: 10px;
-    font-size: 11px; color: var(--muted);
-  }
-
-  .auth-div::before, .auth-div::after {
-    content: ''; flex: 1; height: 1px; background: var(--card-border);
-  }
-
-  .auth-cta { text-align: center; font-size: 13px; color: var(--muted); }
-  .auth-cta a { font-weight: 800; color: var(--ss-blue); }
-  .auth-cta a:hover { color: var(--ss-blue-light); }
-
+  .auth-div { display: flex; align-items: center; gap: 10px; font-size: 11px; color: var(--text-muted); }
+  .auth-div::before, .auth-div::after { content: ''; flex: 1; height: 1px; background: var(--card-border); }
+  .auth-cta { text-align: center; font-size: 13px; color: var(--text-muted); }
+  .auth-cta a { font-weight: 800; color: var(--blue); }
+  .auth-cta a:hover { color: #53B7E8; }
+  [data-theme="light"] .auth-cta { color: #5a6e8a !important; }
   .auth-wave { width: 100%; display: block; margin-top: -2px; }
-
-  .auth-band {
-    background: linear-gradient(135deg, var(--ss-yellow), var(--ss-yellow2));
-    padding: 18px 36px; text-align: center;
+  .auth-band { background: linear-gradient(135deg, #FCAF17, #FFDD00); padding: 18px 36px; text-align: center; }
+  .auth-band-text { font-family: 'Montserrat', sans-serif; font-size: 18px; font-weight: 900; color: #0d1520; }
+  .auth-band-text span { color: #034EA2; }
+  [data-theme="light"] .auth-left {
+    background: radial-gradient(circle at 25% 25%, rgba(252,175,23,0.18), transparent 55%),
+      radial-gradient(circle at 80% 80%, rgba(0,125,197,0.15), transparent 55%),
+      linear-gradient(150deg, #dbeafe 0%, #eff6ff 100%) !important;
   }
-
-  .auth-band-text {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 18px; font-weight: 900; color: var(--ss-ink);
-  }
-
-  .auth-band-text span { color: var(--ss-blue-deep); }
-
+  [data-theme="light"] .auth-left-flare { opacity: 0.4; }
+  [data-theme="light"] .auth-tagline { color: #1A2540 !important; }
+  [data-theme="light"] .auth-tagline .y { color: #e08c00 !important; }
+  [data-theme="light"] .auth-band { background: linear-gradient(135deg, #FCAF17, #FFDD00); }
+  [data-theme="light"] .auth-band-text { color: #1A2540; }
+  [data-theme="light"] .auth-band-text span { color: #034EA2; }
+  [data-theme="light"] .auth-features li { color: #3d5070 !important; }
   @media (max-width: 800px) {
     .auth-card { grid-template-columns: 1fr; }
     .auth-left { padding: 28px 20px; }
-    .logo-for-dark  { display: block; }
-  .logo-for-light { display: none;  }
-  [data-theme="light"] .logo-for-dark  { display: none; }
-  [data-theme="light"] .logo-for-light { display: block; }
-
-  .auth-logo { max-width: 140px; }
+    .auth-logo { max-width: 140px; }
     .auth-features { display: none; }
     .auth-right { padding: 28px 22px; }
   }
@@ -221,18 +165,16 @@
 {% block content %}
 <div class="auth-wrap">
   <div class="auth-card">
-
     <div class="auth-left">
-      <!-- Use SVG horizontal logo in brand panel — single logo works on both themes -->
+      <div class="auth-left-flare"></div>
+      <div class="auth-left-flare2"></div>
       <img class="auth-logo" src="{% static 'accounts/images/logo_horizontal_v1.svg' %}" alt="StudyStream" style="max-width:200px;">
-      <div class="auth-tagline">
-        Stay organized.<br><span class="y">Stay ahead.</span>
-      </div>
+      <div class="auth-tagline">Stay organized.<br><span class="y">Stay ahead.</span></div>
       <ul class="auth-features">
         <li>Task breakdown &amp; subtasks</li>
         <li>Time-blocking calendar</li>
         <li>Conflict detection alerts</li>
-        <li>Group project collaboration</li>
+        <li>Work shifts + personal goals</li>
       </ul>
     </div>
 
@@ -243,11 +185,8 @@
 
       <form method="post" class="auth-form">
         {% csrf_token %}
-
         {% if form.non_field_errors %}
-          <div class="ss-alert ss-alert-error">
-            {% for e in form.non_field_errors %}{{ e }}{% endfor %}
-          </div>
+          <div class="ss-alert ss-alert-error">{% for e in form.non_field_errors %}{{ e }}{% endfor %}</div>
         {% endif %}
 
         <div class="auth-field">
@@ -273,9 +212,7 @@
           <input type="password" id="{{ form.password1.id_for_label }}" name="password1"
                  placeholder="Create a strong password" autocomplete="new-password"
                  class="{% if form.password1.errors %}is-err{% endif %}" required>
-          {% if form.password1.help_text %}
-            <span class="auth-help">{{ form.password1.help_text|safe }}</span>
-          {% endif %}
+          {% if form.password1.help_text %}<span class="auth-help">{{ form.password1.help_text|safe }}</span>{% endif %}
           {% for e in form.password1.errors %}<span class="auth-field-err">{{ e }}</span>{% endfor %}
         </div>
 
@@ -292,7 +229,6 @@
         <div class="auth-cta">Already have an account? <a href="{% url 'login' %}">Sign in</a></div>
       </form>
     </div>
-
   </div>
 </div>
 

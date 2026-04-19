@@ -23,12 +23,7 @@ urlpatterns = [
     path('dashboard/recurring-job-titles/add/', views.add_recurring_job_title, name='add_recurring_job_title'),
     path('dashboard/recurring-job-titles/<int:title_id>/edit/', views.edit_recurring_job_title, name='edit_recurring_job_title'),
     path('dashboard/recurring-job-titles/<int:title_id>/delete/', views.delete_recurring_job_title, name='delete_recurring_job_title'),
-    
-    # API endpoints for personal event editing
-    path('api/personal-events/<int:event_id>/edit/', views.personal_event_edit, name='personal_event_edit'),
-    path('api/personal-events/<int:event_id>/delete/', views.personal_event_delete, name='personal_event_delete'),
-    
-    # API endpoints for work shift editing
-    path('api/work-shifts/<int:shift_id>/edit/', views.work_shift_edit, name='work_shift_edit'),
-    path('api/work-shifts/<int:shift_id>/delete/', views.work_shift_delete, name='work_shift_delete'),
+    path('dashboard/api/work-shifts/<int:shift_id>/', views.work_shift_detail_json, name='work_shift_detail_json'),
+    path('dashboard/api/work-shifts/<int:shift_id>/edit/', views.work_shift_edit_json, name='work_shift_edit_json'),
+    path('dashboard/api/work-shifts/<int:shift_id>/delete/', views.work_shift_delete_json, name='work_shift_delete_json'),
 ]

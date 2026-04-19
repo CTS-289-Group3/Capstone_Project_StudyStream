@@ -1,376 +1,140 @@
+{% extends "accounts/base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Profile – StudyStream</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+{% block title %}My Profile — StudyStream{% endblock %}
 
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --ss-yellow: #FCAF17;
-      --ss-yellow-bright: #FFDD00;
-      --ss-blue: #007DC5;
-      --ss-blue-deep: #034EA2;
-      --ss-ink: #231F20;
-      --ss-soft: #f6f8fc;
-      --ss-line: #dfe7f2;
-      --ss-text: #445064;
-      --ss-white: #ffffff;
-    }
-
-    body {
-      font-family: 'Nunito', Arial, sans-serif;
-      background: #ffffff;
-      color: var(--ss-ink);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    a { text-decoration: none; }
-
-    /* NAV */
-    .ss-nav {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 18px 38px;
-      background: rgba(255,255,255,0.96);
-      border-bottom: 1px solid #edf1f7;
-      position: relative;
-      top: 0;
-      z-index: 20;
-      backdrop-filter: blur(10px);
-    }
-
-    .ss-logo img { height: 48px; width: auto; display: block; }
-
-    .ss-nav-links {
-      display: flex;
-      align-items: center;
-      gap: 28px;
-      font-size: 15px;
-      font-weight: 700;
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-    }
-
-    .ss-nav-links a { color: var(--ss-blue-deep); transition: 0.2s ease; }
-    .ss-nav-links a:hover { color: var(--ss-yellow); }
-
-    .ss-nav-actions { display: flex; gap: 12px; align-items: center; }
-
-    .ss-btn-ghost, .ss-btn-solid {
-      font-family: 'Nunito', sans-serif;
-      font-size: 14px;
-      padding: 10px 18px;
-      border-radius: 999px;
-      cursor: pointer;
-      font-weight: 700;
-    }
-
-    .ss-btn-ghost {
-      border: 1.8px solid var(--ss-blue);
-      color: var(--ss-blue);
-      background: transparent;
-    }
-
-    .ss-btn-solid {
-      border: none;
-      color: #fff;
-      background: linear-gradient(135deg, var(--ss-blue), var(--ss-blue-deep));
-      box-shadow: 0 10px 22px rgba(3,78,162,0.18);
-    }
-
-    /* MAIN */
-    .ss-main {
-      flex: 1;
-      background:
-        radial-gradient(circle at top left, rgba(255,221,0,0.18), transparent 28%),
-        radial-gradient(circle at bottom right, rgba(0,125,197,0.14), transparent 26%),
-        linear-gradient(160deg, #ffffff 0%, #f5f9ff 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 60px 38px;
-    }
-
-    .ss-profile-wrapper {
-      max-width: 640px;
-      width: 100%;
-      background: #fff;
-      border-radius: 28px;
-      border: 1px solid var(--ss-line);
-      box-shadow: 0 30px 60px rgba(3,78,162,0.10), 0 8px 18px rgba(0,125,197,0.06);
-      overflow: hidden;
-    }
-
-    .ss-profile-header {
-      background:
-        radial-gradient(circle at 30% 30%, rgba(255,221,0,0.28), transparent 55%),
-        radial-gradient(circle at 80% 80%, rgba(0,125,197,0.22), transparent 50%),
-        linear-gradient(150deg, #eaf4fc 0%, #f0f6ff 100%);
-      padding: 36px 44px;
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
-
-    .ss-avatar {
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--ss-blue), var(--ss-blue-deep));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Montserrat', sans-serif;
-      font-size: 26px;
-      font-weight: 800;
-      color: #fff;
-      flex-shrink: 0;
-    }
-
-    .ss-profile-header-text h1 {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 24px;
-      font-weight: 800;
-      color: var(--ss-blue-deep);
-    }
-
-    .ss-profile-header-text h1 span { color: var(--ss-yellow); }
-
-    .ss-profile-header-text p {
-      font-size: 13px;
-      color: #66758a;
-      margin-top: 4px;
-    }
-
-    .ss-profile-body { padding: 36px 44px; }
-
-    .ss-form { display: flex; flex-direction: column; gap: 20px; }
-
-    .ss-field { display: flex; flex-direction: column; gap: 6px; }
-
-    .ss-field label {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--ss-text);
-    }
-
-    .ss-field input,
-    .ss-field textarea {
-      font-family: 'Nunito', sans-serif;
-      font-size: 14px;
-      padding: 12px 16px;
-      border: 1.8px solid var(--ss-line);
-      border-radius: 12px;
-      background: var(--ss-soft);
-      color: var(--ss-ink);
-      outline: none;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
-      resize: vertical;
-    }
-
-    .ss-field input:focus,
-    .ss-field textarea:focus {
-      border-color: var(--ss-blue);
-      box-shadow: 0 0 0 3px rgba(0,125,197,0.12);
-      background: #fff;
-    }
-
-    .ss-submit {
-      font-family: 'Nunito', sans-serif;
-      font-size: 15px;
-      font-weight: 800;
-      padding: 14px;
-      border: none;
-      border-radius: 999px;
-      color: #fff;
-      background: linear-gradient(135deg, var(--ss-blue), var(--ss-blue-deep));
-      cursor: pointer;
-      box-shadow: 0 10px 24px rgba(3,78,162,0.22);
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-    }
-
-    .ss-submit:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 14px 28px rgba(3,78,162,0.28);
-    }
-
-    .ss-back {
-      display: block;
-      text-align: center;
-      margin-top: 16px;
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--ss-blue);
-    }
-
-    .ss-back:hover { color: var(--ss-blue-deep); }
-
-    .ss-success {
-      background: #f1fff3;
-      border: 1.5px solid #b8e3bf;
-      border-radius: 10px;
-      padding: 10px 14px;
-      font-size: 13px;
-      color: #1f7a33;
-    }
-
-    /* WAVE */
-    .ss-wave { width: 100%; display: block; margin-top: -1px; }
-
-    /* TAGLINE BAND */
-    .ss-band {
-      background: linear-gradient(135deg, var(--ss-yellow), var(--ss-yellow-bright));
-      padding: 20px 32px;
-      text-align: center;
-    }
-
-    .ss-band-text {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 20px;
-      font-weight: 800;
-      color: var(--ss-ink);
-    }
-
-    .ss-band-text span { color: var(--ss-blue-deep); }
-
-    /* FOOTER */
-    .ss-footer {
-      background: #1d2735;
-      padding: 22px 38px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 18px;
-      flex-wrap: wrap;
-    }
-
-    .ss-footer-logo {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 18px;
-      font-weight: 800;
-    }
-
-    .ss-footer-logo span:first-child { color: var(--ss-yellow); }
-    .ss-footer-logo span:last-child { color: #56b4f0; }
-
-    .ss-footer-copy, .ss-footer-links {
-      font-size: 12px;
-      color: rgba(255,255,255,0.62);
-    }
-
-    .ss-footer-links { display: flex; gap: 16px; }
-
-    @media (max-width: 520px) {
-      .ss-main { padding: 32px 16px; }
-      .ss-profile-header, .ss-profile-body { padding: 28px 24px; }
-    }
-  </style>
-</head>
-<body>
-
-  <!-- NAV -->
-  <div class="ss-nav">
-    <div class="ss-logo">
-      <img src="{% static 'accounts/images/logo2.png' %}" alt="StudyStream logo">
-    </div>
-    <div class="ss-nav-links">
-      <a href="{% url 'home' %}">Home</a>
-      <a href="{% url 'dashboard' %}">Dashboard</a>
-    </div>
-    <div class="ss-nav-actions">
-      <a class="ss-btn-ghost" href="{% url 'logout' %}">Sign out</a>
+{% block nav_actions %}
+  <a href="{% url 'dashboard' %}" class="ss-nav-back">Dashboard</a>
+  <div class="ss-user-menu" id="userMenu">
+    <button type="button" class="ss-user-trigger" id="userMenuTrigger" aria-haspopup="true" aria-expanded="false">
+      <span class="ss-nav-avatar">{% if profile.avatar_text %}{{ profile.avatar_text|slice:':1'|upper }}{% elif profile.display_name %}{{ profile.display_name|slice:':1'|upper }}{% else %}{{ request.user.username|slice:':1'|upper }}{% endif %}</span>
+      <span class="ss-user-name">{% if profile.display_name %}{{ profile.display_name }}{% else %}{{ request.user.username }}{% endif %}</span>
+      <span class="ss-user-caret">▼</span>
+    </button>
+    <div class="ss-user-dropdown">
+      <div class="ss-dropdown-header">
+        <div class="ss-dropdown-label">Signed in as</div>
+        <div class="ss-dropdown-name">{% if profile.display_name %}{{ profile.display_name }}{% else %}{{ request.user.username }}{% endif %}</div>
+      </div>
+      <a href="{% url 'profile' %}" class="ss-dropdown-link"><span>Edit Profile</span><span>›</span></a>
+      <a href="{% url 'settings' %}" class="ss-dropdown-link"><span>Settings</span><span>›</span></a>
+      <a href="{% url 'logout' %}" class="ss-dropdown-link"><span>Sign out</span><span>›</span></a>
     </div>
   </div>
+{% endblock %}
 
-  <!-- MAIN -->
-  <main class="ss-main">
-    <div class="ss-profile-wrapper">
+{% block extra_head %}
+<style>
+  /* Profile-specific anamorphic enhancements */
+  .profile-avatar-ring {
+    width: 88px; height: 88px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Nunito', sans-serif; font-size: 32px; font-weight: 900;
+    color: #fff; flex-shrink: 0;
+    box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--blue), 0 12px 36px rgba(3,78,162,0.40);
+    position: relative;
+  }
+  .profile-avatar-ring::after {
+    content: ''; position: absolute; inset: -6px; border-radius: 50%;
+    border: 1.5px solid rgba(83,183,232,0.25);
+    animation: ringPulse 3s ease-in-out infinite;
+  }
+  @keyframes ringPulse {
+    0%,100% { transform: scale(1); opacity: 0.6; }
+    50% { transform: scale(1.08); opacity: 1; }
+  }
+  .profile-name-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(252,175,23,0.10); border: 1px solid rgba(252,175,23,0.22);
+    border-radius: 999px; padding: 3px 10px;
+    font-size: 11px; font-weight: 800; color: #FCAF17;
+    letter-spacing: 0.08em; text-transform: uppercase; margin-top: 6px;
+  }
+</style>
+{% endblock %}
 
-      <div class="ss-profile-header">
-        <div class="ss-avatar">{% if profile.avatar_text %}{{ profile.avatar_text|slice:':1'|upper }}{% elif profile.display_name %}{{ profile.display_name|slice:':1'|upper }}{% else %}{{ request.user.username|slice:':1'|upper }}{% endif %}</div>
-        <div class="ss-profile-header-text">
-          <h1>{% if profile.display_name %}{{ profile.display_name }}{% else %}{{ request.user.username }}{% endif %}<span>'s Profile</span></h1>
-          <p>{{ request.user.email }}</p>
-        </div>
+{% block content %}
+<div class="ss-banner">
+  <div class="ss-banner-flare"></div>
+  <div class="ss-banner-flare2"></div>
+  <div class="ss-banner-content">
+    <div class="ss-banner-eyebrow">Account · Identity</div>
+    <div class="ss-banner-title">Your <span>Profile</span></div>
+    <div class="ss-banner-sub">Customize how you appear across StudyStream.</div>
+  </div>
+  <div class="ss-banner-wave">
+    <svg viewBox="0 0 1440 32" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="display:block;width:100%;height:32px;">
+      <path d="M0,16 C360,32 1080,0 1440,16 L1440,32 L0,32 Z" fill="var(--bg)"/>
+    </svg>
+  </div>
+</div>
+
+<main class="ss-main" style="max-width:700px;">
+  <div class="ss-card" style="padding:0;overflow:hidden;">
+
+    <div class="ss-profile-header" style="padding:32px 40px;display:flex;align-items:center;gap:24px;">
+      <div class="profile-avatar-ring">
+        {% if profile.avatar_text %}{{ profile.avatar_text|slice:':1'|upper }}{% elif profile.display_name %}{{ profile.display_name|slice:':1'|upper }}{% else %}{{ request.user.username|slice:':1'|upper }}{% endif %}
       </div>
+      <div>
+        <div class="ss-profile-header-name">
+          {% if profile.display_name %}{{ profile.display_name }}{% else %}{{ request.user.username }}{% endif %}<span>'s Profile</span>
+        </div>
+        <div class="ss-profile-header-email">{{ request.user.email }}</div>
+        <div class="profile-name-badge">✦ StudyStream Member</div>
+      </div>
+    </div>
 
-      <div class="ss-profile-body">
-        <form method="post" class="ss-form">
-          {% csrf_token %}
+    <div style="padding:32px 40px;">
+      <form method="post" class="ss-form">
+        {% csrf_token %}
 
-          {% if messages %}
-            {% for message in messages %}
-              <div class="ss-success">{{ message }}</div>
-            {% endfor %}
-          {% endif %}
+        {% if messages %}
+          {% for message in messages %}
+            <div class="ss-success-msg">✓ {{ message }}</div>
+          {% endfor %}
+        {% endif %}
 
+        <div class="ss-form-row">
           <div class="ss-field">
             <label for="id_display_name">Display Name</label>
-            <input type="text" id="id_display_name" name="display_name" maxlength="50" placeholder="e.g. tessaB" value="{{ form.display_name.value|default:'' }}">
+            <input type="text" id="id_display_name" name="display_name" maxlength="50"
+                   placeholder="e.g. tessaB" value="{{ form.display_name.value|default:'' }}">
           </div>
-
           <div class="ss-field">
-            <label for="id_avatar_text">Avatar Letter</label>
-            <input type="text" id="id_avatar_text" name="avatar_text" maxlength="2" placeholder="e.g. T" value="{{ form.avatar_text.value|default:'' }}">
+            <label for="id_avatar_text">Avatar Letter(s)</label>
+            <input type="text" id="id_avatar_text" name="avatar_text" maxlength="2"
+                   placeholder="e.g. T" value="{{ form.avatar_text.value|default:'' }}">
           </div>
+        </div>
 
+        <div class="ss-form-row ss-single">
           <div class="ss-field">
             <label for="id_bio">Bio</label>
-            <textarea id="id_bio" name="bio" rows="3" placeholder="Tell us a little about yourself...">{{ form.bio.value|default:'' }}</textarea>
+            <textarea id="id_bio" name="bio" rows="3" placeholder="Tell us about yourself...">{{ form.bio.value|default:'' }}</textarea>
           </div>
+        </div>
 
+        <div class="ss-form-row">
           <div class="ss-field">
             <label for="id_major">Major</label>
-            <input type="text" id="id_major" name="major" placeholder="e.g. Computer Science" value="{{ form.major.value|default:'' }}">
+            <input type="text" id="id_major" name="major" placeholder="e.g. Computer Science"
+                   value="{{ form.major.value|default:'' }}">
           </div>
-
           <div class="ss-field">
             <label for="id_year">Year</label>
-            <input type="text" id="id_year" name="year" placeholder="e.g. Sophomore" value="{{ form.year.value|default:'' }}">
+            <input type="text" id="id_year" name="year" placeholder="e.g. Sophomore"
+                   value="{{ form.year.value|default:'' }}">
           </div>
+        </div>
 
-          <button type="submit" class="ss-submit">Save Profile →</button>
-        </form>
-
-        <a class="ss-back" href="{% url 'dashboard' %}">← Back to Dashboard</a>
-      </div>
-
+        <div style="display:flex;gap:12px;margin-top:8px;">
+          <button type="submit" class="btn-primary">Save Profile →</button>
+          <a href="{% url 'dashboard' %}" class="btn-secondary">← Back to Dashboard</a>
+        </div>
+      </form>
     </div>
-  </main>
-
-  <!-- WAVE -->
-  <svg class="ss-wave" viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
-    <path d="M0,34 C280,68 1040,0 1440,34 L1440,60 L0,60 Z" fill="#FCAF17" opacity="0.9"/>
-    <path d="M0,44 C380,10 1080,56 1440,38 L1440,60 L0,60 Z" fill="#FFDD00" opacity="0.55"/>
-  </svg>
-
-  <!-- TAGLINE BAND -->
-  <div class="ss-band">
-    <div class="ss-band-text">Less stress. <span>More progress.</span></div>
   </div>
-
-  <!-- FOOTER -->
-  <footer class="ss-footer">
-    <div class="ss-footer-logo"><span>STUDY</span><span>STREAM</span></div>
-    <div class="ss-footer-copy">© 2025 StudyStream. All rights reserved.</div>
-    <div class="ss-footer-links">
-      <span>Privacy</span>
-      <span>Terms</span>
-      <span>Contact</span>
-    </div>
-  </footer>
-
-</body>
-</html>
+</main>
+{% endblock %}

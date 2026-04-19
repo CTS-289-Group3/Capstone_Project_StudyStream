@@ -1,42 +1,153 @@
-{% extends 'accounts/base.html' %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings – StudyStream</title>
+    <script>document.documentElement.setAttribute("data-theme",localStorage.getItem("ss-theme")||"dark");</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=DM+Sans:wght@400;500;600&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="{% static 'accounts/images/logo_icon.svg' %}">
+    <link rel="stylesheet" href="{% static 'accounts/css/ss-shared.css' %}">
+</head>
+<body>
 
-{% block title %}Settings - StudyStream{% endblock %}
-
-{% block nav_actions %}
-  <a class="ss-btn ss-btn-ghost" href="{% url 'dashboard' %}">Dashboard</a>
-  <a class="ss-btn ss-btn-solid" href="{% url 'logout' %}">Sign out</a>
-{% endblock %}
-
-{% block content %}
-<section style="position:relative;z-index:1;max-width:900px;margin:0 auto;padding:32px 24px 48px;">
-  <div class="glass" style="padding:28px;border-radius:24px;display:grid;gap:20px;">
-    <div>
-      <h1 style="font-family:'Montserrat',sans-serif;font-size:28px;font-weight:800;line-height:1.1;">Account Settings</h1>
-      <p style="margin-top:8px;color:var(--text2);font-size:15px;">Manage how your account appears across StudyStream.</p>
+    <div class="ss-nav-outer">
+      <nav class="ss-nav">
+        <div class="ss-nav-left">
+          <a href="{% url 'home' %}" style="display:flex;align-items:center;text-decoration:none;">
+            <img src="{% static 'accounts/images/logo_icon.svg' %}" alt="StudyStream" class="ss-nav-logo">
+          </a>
+        </div>
+        <div class="ss-nav-right">
+          <a href="{% url 'dashboard' %}" class="ss-nav-back">Dashboard</a>
+          <label class="ss-toggle" title="Toggle theme" aria-label="Toggle theme">
+            <input type="checkbox" id="themeToggle">
+            <span class="ss-toggle-track"><span class="sun">☀️</span><span class="moon">🌙</span><span class="ss-toggle-thumb"></span></span>
+          </label>
+        </div>
+      </nav>
     </div>
 
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;">
-      <div class="glass" style="padding:18px;">
-        <div style="font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;">Display Name</div>
-        <div style="margin-top:6px;font-size:20px;font-weight:800;">{% if profile.display_name %}{{ profile.display_name }}{% else %}{{ request.user.username }}{% endif %}</div>
+    <div class="ss-banner">
+      <div class="ss-banner-flare"></div>
+      <div class="ss-banner-flare2"></div>
+      <div class="ss-banner-content">
+        <div class="ss-banner-eyebrow">Account · Preferences</div>
+        <div class="ss-banner-title">App <span>Settings</span></div>
+        <div class="ss-banner-sub">Control your account preferences and display options.</div>
       </div>
-      <div class="glass" style="padding:18px;">
-        <div style="font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;">Avatar Letter</div>
-        <div style="margin-top:6px;font-size:20px;font-weight:800;">{% if profile.avatar_text %}{{ profile.avatar_text|slice:':1'|upper }}{% else %}{{ request.user.username|slice:':1'|upper }}{% endif %}</div>
-      </div>
-      <div class="glass" style="padding:18px;">
-        <div style="font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;">Email</div>
-        <div style="margin-top:6px;font-size:20px;font-weight:800;word-break:break-word;">{{ request.user.email }}</div>
+      <div class="ss-banner-wave">
+        <svg viewBox="0 0 1440 32" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="display:block;width:100%;height:32px;">
+          <path d="M0,16 C360,32 1080,0 1440,16 L1440,32 L0,32 Z" fill="var(--bg)"/>
+        </svg>
       </div>
     </div>
 
-    <div class="glass" style="padding:22px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;">
-      <div>
-        <div style="font-size:18px;font-weight:800;">Profile Appearance</div>
-        <p style="margin-top:6px;color:var(--text2);font-size:14px;">Edit your avatar letter, display name, bio, major, and year.</p>
+    <main class="ss-main" style="max-width:680px;">
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="ss-success-msg" style="margin-bottom:16px;">✓ {{ message }}</div>
+        {% endfor %}
+      {% endif %}
+
+      <!-- Theme Setting -->
+      <div class="ss-card" style="margin-bottom:16px;">
+        <div class="ss-card-header">
+          <div class="ss-card-title"><span class="dot dot-yellow"></span>Appearance</div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;">
+          <div>
+            <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;color:var(--text);">Dark / Light Mode</div>
+            <div style="font-size:13px;color:var(--text-muted);margin-top:3px;">Toggle between dark and light themes. Your preference is saved automatically.</div>
+          </div>
+          <label class="ss-toggle" style="width:56px;height:30px;" title="Toggle theme">
+            <input type="checkbox" id="themeToggle2">
+            <span class="ss-toggle-track" style="width:56px;height:30px;"><span class="sun" style="left:6px;">☀️</span><span class="moon" style="right:6px;">🌙</span><span class="ss-toggle-thumb" style="width:22px;height:22px;top:3px;left:3px;"></span></span>
+          </label>
+        </div>
       </div>
-      <a class="ss-btn ss-btn-solid" href="{% url 'profile' %}">Edit Profile</a>
+
+      <!-- Account Setting -->
+      <div class="ss-card" style="margin-bottom:16px;">
+        <div class="ss-card-header">
+          <div class="ss-card-title"><span class="dot dot-blue"></span>Account</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
+            <div>
+              <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;color:var(--text);">Username</div>
+              <div style="font-size:13px;color:var(--text-muted);">{{ request.user.username }}</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
+            <div>
+              <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;color:var(--text);">Email</div>
+              <div style="font-size:13px;color:var(--text-muted);">{{ request.user.email|default:"Not set" }}</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;">
+            <div>
+              <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;color:var(--text);">Profile</div>
+              <div style="font-size:13px;color:var(--text-muted);">Edit your display name, avatar, bio, major and year.</div>
+            </div>
+            <a href="{% url 'profile' %}" class="ss-btn-sm">Edit Profile</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="ss-card">
+        <div class="ss-card-header">
+          <div class="ss-card-title"><span class="dot dot-green"></span>Quick Links</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <a href="{% url 'recurring_shift_list' %}" style="display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:10px;background:var(--input-bg);border:1px solid var(--border);color:var(--text);transition:border-color 0.2s,background 0.2s;" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">
+            <span style="font-weight:700;">💼 Recurring Shifts</span><span style="color:var(--text-muted);">›</span>
+          </a>
+          <a href="{% url 'recurring_location_list' %}" style="display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:10px;background:var(--input-bg);border:1px solid var(--border);color:var(--text);transition:border-color 0.2s,background 0.2s;" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">
+            <span style="font-weight:700;">📍 Saved Locations</span><span style="color:var(--text-muted);">›</span>
+          </a>
+          <a href="{% url 'recurring_job_title_list' %}" style="display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:10px;background:var(--input-bg);border:1px solid var(--border);color:var(--text);transition:border-color 0.2s,background 0.2s;" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">
+            <span style="font-weight:700;">🏷 Saved Job Titles</span><span style="color:var(--text-muted);">›</span>
+          </a>
+          <a href="{% url 'recurring_personal_event_list' %}" style="display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:10px;background:var(--input-bg);border:1px solid var(--border);color:var(--text);transition:border-color 0.2s,background 0.2s;" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">
+            <span style="font-weight:700;">🔁 Recurring Personal Events</span><span style="color:var(--text-muted);">›</span>
+          </a>
+        </div>
+        <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
+          <a href="{% url 'logout' %}" class="btn-secondary" style="width:100%;justify-content:center;border-color:rgba(239,68,68,0.3);color:#ef4444;">Sign Out</a>
+        </div>
+      </div>
+    </main>
+
+    <div class="ss-footer-outer">
+      <footer class="ss-footer">
+        <div class="ss-footer-logo"><span class="w1">STUDY</span><span class="w2">STREAM</span></div>
+        <div class="ss-footer-copy">Less stress. More progress. © 2026</div>
+        <div class="ss-footer-links"><span>Privacy</span><span>Terms</span><span>Contact</span></div>
+      </footer>
     </div>
-  </div>
-</section>
-{% endblock %}
+
+    <script src="{% static 'accounts/js/ss-shared.js' %}"></script>
+    <script>
+    // Sync the second toggle in settings panel with themeToggle
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggle2 = document.getElementById('themeToggle2');
+        const toggle1 = document.getElementById('themeToggle');
+        if (!toggle2) return;
+        const theme = localStorage.getItem('ss-theme') || 'dark';
+        toggle2.checked = (theme === 'light');
+        toggle2.addEventListener('change', function() {
+            const next = this.checked ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('ss-theme', next);
+            if (toggle1) toggle1.checked = this.checked;
+        });
+    });
+    </script>
+</body>
+</html>

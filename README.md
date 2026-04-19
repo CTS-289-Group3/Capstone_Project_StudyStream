@@ -25,17 +25,10 @@ python -m venv .venv
 .venv\Scripts\Activate.ps1
 ```
 
-### 2) Install Dependencies
+### 2) Install Django
 
 ```bash
-pip install -r requirements.txt
-```
-
-If you add a new package later, install it once in your virtual environment and update `requirements.txt` so everyone can keep using the same command:
-
-```bash
-pip install <package-name>
-pip freeze > requirements.txt
+pip install django
 ```
 
 ### 3) Run Django setup commands
@@ -57,48 +50,6 @@ python manage.py runserver
 ```
 
 Then open: http://127.0.0.1:8000/
-
-### 4) Populate demo data for testing
-
-Instead of manually creating semesters, courses, assignments, work shifts, and events every time, you can load a reusable demo dataset with one command:
-
-```bash
-python manage.py seed_demo_data --fresh
-```
-
-Default demo login:
-
-```text
-Username: tessab
-Password: StudyStream123!
-Email: tessab_seed@gmail.com
-```
-
-Useful options:
-
-```bash
-# Seed a different test account
-python manage.py seed_demo_data --username qa_user --password TestPass123! --email qa@example.com --fresh
-
-# Merge demo data into an existing user without clearing current records first
-python manage.py seed_demo_data --username qa_user --password TestPass123!
-```
-
-If you just want the default seeded test account, run:
-
-```bash
-python manage.py seed_demo_data --fresh
-```
-
-That will create or refresh the default `tessab` test login with the current saved semester, course, assignment, event, and work-shift style dataset.
-
-The command populates sample:
-
-- profile data
-- semesters and courses
-- assignments, subtasks, tags, and time blocks
-- work shifts and recurring work-shift templates
-- personal events and recurring personal events
 
 ## Pages
 

@@ -3,10 +3,7 @@
 
 {% block title %}Dashboard — StudyStream{% endblock %}
 
-{% block nav_links %}
-  <a href="{% url 'home' %}">Home</a>
-  <a href="#" class="active">Dashboard</a>
-{% endblock %}
+
 
 {% block nav_actions %}
   <details class="ss-user-menu">
@@ -500,6 +497,60 @@ body.modal-open { overflow:hidden; }
   .form-row { grid-template-columns:1fr; }
   .ss-user-chip-name { display:none; }
 }
+/* ── Academic accordion ── */
+.ac-sem-accordion { border:1px solid var(--card-border); border-radius:12px; margin-bottom:8px; overflow:hidden; transition:border-color 0.18s; }
+.ac-sem-accordion[open] { border-color:rgba(0,125,197,0.28); }
+.ac-sem-header { list-style:none; display:flex; align-items:center; gap:7px; padding:10px 12px; cursor:pointer; background:var(--input-bg); user-select:none; transition:background 0.15s; }
+.ac-sem-header::-webkit-details-marker { display:none; }
+.ac-sem-header:hover { background:var(--card-border); }
+.ac-sem-chevron { font-size:9px; color:var(--muted); transition:transform 0.2s ease; flex-shrink:0; }
+.ac-sem-accordion[open] .ac-sem-chevron { transform:rotate(90deg); }
+.ac-sem-name { font-size:13px; font-weight:800; color:var(--text); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.ac-course-pill { font-size:10px; font-weight:700; color:var(--muted); flex-shrink:0; }
+.ac-courses-body { padding:8px 12px 10px; display:flex; flex-direction:column; gap:4px; }
+.ac-course-row { display:flex; align-items:center; gap:8px; padding:7px 8px; border-radius:9px; transition:background 0.13s; }
+.ac-course-row:hover { background:var(--input-bg); }
+.ac-course-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+.ac-course-name { font-size:12px; font-weight:700; color:var(--text); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.ac-course-count { font-size:10px; font-weight:600; color:var(--muted); flex-shrink:0; }
+.ac-no-courses { font-size:11px; color:var(--muted); padding:4px 0 2px; font-style:italic; }
+.ac-add-course-link { color:var(--blue); font-weight:700; cursor:pointer; text-decoration:underline; font-style:normal; }
+.ac-add-course-btn { margin-top:6px; font-size:11px; font-weight:700; color:var(--blue); background:none; border:1.5px dashed var(--input-border); border-radius:8px; padding:6px; cursor:pointer; width:100%; transition:border-color 0.15s,background 0.15s; }
+.ac-add-course-btn:hover { border-color:var(--blue); background:rgba(0,125,197,0.06); }
+.ac-pick-btn { display:flex; align-items:center; gap:14px; width:100%; padding:16px 18px; border-radius:14px; background:var(--input-bg); border:1.5px solid var(--card-border); cursor:pointer; text-align:left; margin-bottom:10px; transition:border-color 0.18s,background 0.18s,transform 0.18s cubic-bezier(0.34,1.56,0.64,1); }
+.ac-pick-btn:hover { border-color:var(--blue); background:rgba(0,125,197,0.06); transform:translateY(-2px); }
+.ac-pick-btn:last-child { margin-bottom:0; }
+.ac-pick-icon { font-size:26px; flex-shrink:0; }
+.ac-pick-label { font-size:14px; font-weight:800; color:var(--text); line-height:1.2; }
+.ac-pick-sub { font-size:11px; font-weight:600; color:var(--muted); margin-top:2px; }
+
+/* ── Academic accordion ── */
+.ac-sem-accordion{border:1px solid var(--card-border);border-radius:12px;margin-bottom:8px;overflow:hidden;transition:border-color .18s}
+.ac-sem-accordion[open]{border-color:rgba(0,125,197,.28)}
+.ac-sem-header{list-style:none;display:flex;align-items:center;gap:7px;padding:10px 12px;cursor:pointer;background:var(--input-bg);user-select:none;transition:background .15s}
+.ac-sem-header::-webkit-details-marker{display:none}
+.ac-sem-header:hover{background:var(--card-border)}
+.ac-sem-chevron{font-size:9px;color:var(--muted);transition:transform .2s ease;flex-shrink:0}
+.ac-sem-accordion[open] .ac-sem-chevron{transform:rotate(90deg)}
+.ac-sem-name{font-size:13px;font-weight:800;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ac-course-pill{font-size:10px;font-weight:700;color:var(--muted);flex-shrink:0}
+.ac-courses-body{padding:8px 12px 10px;display:flex;flex-direction:column;gap:4px}
+.ac-course-row{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:9px;transition:background .13s}
+.ac-course-row:hover{background:var(--input-bg)}
+.ac-course-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.ac-course-name{font-size:12px;font-weight:700;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ac-course-count{font-size:10px;font-weight:600;color:var(--muted);flex-shrink:0}
+.ac-no-courses{font-size:11px;color:var(--muted);padding:4px 0 2px;font-style:italic}
+.ac-add-course-link{color:var(--blue);font-weight:700;cursor:pointer;text-decoration:underline;font-style:normal}
+.ac-add-course-btn{margin-top:6px;font-size:11px;font-weight:700;color:var(--blue);background:none;border:1.5px dashed var(--input-border);border-radius:8px;padding:6px;cursor:pointer;width:100%;transition:border-color .15s,background .15s}
+.ac-add-course-btn:hover{border-color:var(--blue);background:rgba(0,125,197,.06)}
+.ac-pick-btn{display:flex;align-items:center;gap:14px;width:100%;padding:16px 18px;border-radius:14px;background:var(--input-bg);border:1.5px solid var(--card-border);cursor:pointer;text-align:left;margin-bottom:10px;transition:border-color .18s,background .18s,transform .18s cubic-bezier(.34,1.56,.64,1)}
+.ac-pick-btn:hover{border-color:var(--blue);background:rgba(0,125,197,.06);transform:translateY(-2px)}
+.ac-pick-btn:last-child{margin-bottom:0}
+.ac-pick-icon{font-size:26px;flex-shrink:0}
+.ac-pick-label{font-size:14px;font-weight:800;color:var(--text);line-height:1.2}
+.ac-pick-sub{font-size:11px;font-weight:600;color:var(--muted);margin-top:2px}
+
 </style>
 {% endblock %}
 
@@ -596,22 +647,19 @@ body.modal-open { overflow:hidden; }
   <!-- SIDEBAR -->
   <aside class="dash-sidebar">
 
-    <!-- Semesters -->
-    <div class="g-card">
-      <div class="g-card-title">
-        🗓 Semesters
-        <button class="ss-btn ss-btn-solid" onclick="openSemesterModal()" style="margin-left:auto;font-size:11px;padding:5px 12px;">+ Add</button>
+    <!-- Academic: unified semester + course card -->
+    <div class="g-card" id="academicCard">
+      <div class="g-card-title" style="margin-bottom:12px;">
+        🎓 Academic
+        <button class="ss-btn ss-btn-solid" onclick="openAcademicAdd()" style="margin-left:auto;font-size:11px;padding:5px 12px;">+ Add</button>
       </div>
-      <div id="semesterList"></div>
-    </div>
-
-    <!-- My Courses -->
-    <div class="g-card">
-      <div class="g-card-title">
-        🎓 My Courses
-        <button class="ss-btn ss-btn-solid" onclick="openCourseModal()" style="margin-left:auto;font-size:11px;padding:5px 12px;">+ Add</button>
+      <div id="academicEmpty" style="display:none;text-align:center;padding:16px 8px;">
+        <div style="font-size:28px;margin-bottom:8px;">📚</div>
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">Set up your semester first</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.5;">Add a semester, then add courses inside it.</div>
+        <button class="ss-btn ss-btn-solid" onclick="openSemesterModal()" style="font-size:12px;padding:8px 18px;width:100%;">📅 Add Semester</button>
       </div>
-      <div id="courseList"></div>
+      <div id="academicList"></div>
     </div>
 
     <!-- Tags -->
@@ -687,9 +735,43 @@ body.modal-open { overflow:hidden; }
   </div><!-- end dash-main -->
 </div><!-- end dash-wrap -->
 
-<!-- ═══════════════════════════════════════════
-     MODAL: SEMESTER
-═══════════════════════════════════════════ -->
+<!-- MODAL: Academic Pick -->
+<div class="modal-overlay" id="academicPickModal">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-title">📚 What do you want to add?</div>
+    <button class="ac-pick-btn" onclick="closeModal('academicPickModal');openSemesterModal();">
+      <span class="ac-pick-icon">📅</span>
+      <div><div class="ac-pick-label">New Semester</div><div class="ac-pick-sub">e.g. Fall 2026, Spring 2027</div></div>
+    </button>
+    <button class="ac-pick-btn" onclick="closeModal('academicPickModal');openCourseModal();">
+      <span class="ac-pick-icon">🎓</span>
+      <div><div class="ac-pick-label">New Course</div><div class="ac-pick-sub">Add to an existing semester</div></div>
+    </button>
+    <div class="modal-footer">
+      <button class="ss-btn ss-btn-ghost" onclick="closeModal('academicPickModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Academic Pick -->
+<div class="modal-overlay" id="academicPickModal">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-title">📚 What do you want to add?</div>
+    <button class="ac-pick-btn" onclick="closeModal('academicPickModal');openSemesterModal();">
+      <span class="ac-pick-icon">📅</span>
+      <div><div class="ac-pick-label">New Semester</div><div class="ac-pick-sub">e.g. Fall 2026, Spring 2027</div></div>
+    </button>
+    <button class="ac-pick-btn" onclick="closeModal('academicPickModal');openCourseModal();">
+      <span class="ac-pick-icon">&#127979;</span>
+      <div><div class="ac-pick-label">New Course</div><div class="ac-pick-sub">Add to an existing semester</div></div>
+    </button>
+    <div class="modal-footer">
+      <button class="ss-btn ss-btn-ghost" onclick="closeModal('academicPickModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: SEMESTER -->
 <div class="modal-overlay" id="semesterModal">
   <div class="modal">
     <div class="modal-title">🗓 <span id="semModalTitle">Add Semester</span></div>
@@ -901,162 +983,6 @@ body.modal-open { overflow:hidden; }
   </div>
 </div>
 
-<!-- PERSONAL EVENT VIEW MODAL (read-only) -->
-<div class="modal-overlay" id="personalEventViewModal">
-  <div class="modal" style="max-width:520px;">
-    <div class="modal-title">📅 <span id="pevTitle">Event</span></div>
-    <input type="hidden" id="pevViewId">
-    <div id="pevBody" style="display:flex;flex-direction:column;gap:14px;">
-      <div id="pevDatetime" style="background:var(--input-bg);border-radius:12px;padding:12px;">
-        <div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Date & Time</div>
-        <div id="pevDatetimeValue" style="font-size:13px;font-weight:700;color:var(--text);"></div>
-      </div>
-      <div id="pevLocation" style="display:none;background:var(--input-bg);border-radius:12px;padding:12px;">
-        <div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">📍 Location</div>
-        <div id="pevLocationValue" style="font-size:13px;color:var(--text);"></div>
-      </div>
-      <div id="pevDesc" style="font-size:14px;line-height:1.7;color:var(--text2);"></div>
-    </div>
-    <div class="modal-footer">
-      <button class="ss-btn ss-btn-ghost" onclick="closeModal('personalEventViewModal')">Close</button>
-      <div style="display:flex;gap:8px;margin-left:auto;">
-        <button class="ss-btn" id="pevDeleteBtn" onclick="" style="background:rgba(239,68,68,.18);border:1px solid rgba(239,68,68,.3);color:#f87171;">🗑 Delete</button>
-        <button class="ss-btn ss-btn-solid" id="pevEditBtn" onclick="">✏️ Edit</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- WORK SHIFT VIEW MODAL (read-only) -->
-<div class="modal-overlay" id="workShiftViewModal">
-  <div class="modal" style="max-width:520px;">
-    <div class="modal-title">💼 <span id="wsvTitle">Shift</span></div>
-    <input type="hidden" id="wsvViewId">
-    <div id="wsvBody" style="display:flex;flex-direction:column;gap:14px;">
-      <div id="wsvJobTitle" style="display:none;background:var(--input-bg);border-radius:12px;padding:12px;">
-        <div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Job Title</div>
-        <div id="wsvJobTitleValue" style="font-size:13px;font-weight:700;color:var(--text);"></div>
-      </div>
-      <div id="wsvDateTime" style="background:var(--input-bg);border-radius:12px;padding:12px;">
-        <div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Date & Time</div>
-        <div id="wsvDateTimeValue" style="font-size:13px;font-weight:700;color:var(--text);"></div>
-      </div>
-      <div id="wsvLocation" style="display:none;background:var(--input-bg);border-radius:12px;padding:12px;">
-        <div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">📍 Location</div>
-        <div id="wsvLocationValue" style="font-size:13px;color:var(--text);"></div>
-      </div>
-      <div id="wsvNotes" style="display:none;font-size:14px;line-height:1.7;color:var(--text2);background:var(--input-bg);border-radius:12px;padding:12px;"></div>
-    </div>
-    <div class="modal-footer">
-      <button class="ss-btn ss-btn-ghost" onclick="closeModal('workShiftViewModal')">Close</button>
-      <div style="display:flex;gap:8px;margin-left:auto;">
-        <button class="ss-btn" id="wsvDeleteBtn" onclick="" style="background:rgba(239,68,68,.18);border:1px solid rgba(239,68,68,.3);color:#f87171;">🗑 Delete</button>
-        <button class="ss-btn ss-btn-solid" id="wsvEditBtn" onclick="">✏️ Edit</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════
-     MODAL: PERSONAL EVENT EDIT
-═══════════════════════════════════════════ -->
-<div class="modal-overlay" id="personalEventModal">
-  <div class="modal">
-    <div class="modal-title">📅 <span id="peModalTitle">Edit Personal Event</span></div>
-    <input type="hidden" id="peEditId">
-    <div class="form-group">
-      <label class="form-label">Title *</label>
-      <input class="form-input" id="peTitle" placeholder="Event title…">
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Date *</label>
-        <input class="form-input" type="date" id="peDate">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Color</label>
-        <div class="color-picker-row" id="peColorPicker"></div>
-        <input type="hidden" id="peColorVal" value="#FCAF17">
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Start Time</label>
-        <input class="form-input" type="time" id="peStartTime">
-      </div>
-      <div class="form-group">
-        <label class="form-label">End Time</label>
-        <input class="form-input" type="time" id="peEndTime">
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Location</label>
-      <input class="form-input" id="peLocation" placeholder="Where?">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Description</label>
-      <textarea class="form-textarea" id="peDescription" placeholder="Notes…"></textarea>
-    </div>
-    <div class="modal-footer">
-      <button class="ss-btn ss-btn-ghost" onclick="closeModal('personalEventModal')">Cancel</button>
-      <div style="display:flex;gap:8px;margin-left:auto;">
-        <button class="ss-btn" id="peDeleteBtn" onclick="" style="background:rgba(239,68,68,.18);border:1px solid rgba(239,68,68,.3);color:#f87171;">🗑 Delete</button>
-        <button class="ss-btn ss-btn-solid" onclick="savePersonalEvent()">Save Event</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════
-     MODAL: WORK SHIFT EDIT
-═══════════════════════════════════════════ -->
-<div class="modal-overlay" id="workShiftModal">
-  <div class="modal">
-    <div class="modal-title">💼 <span id="wsModalTitle">Edit Work Shift</span></div>
-    <input type="hidden" id="wsEditId">
-    <div class="form-group">
-      <label class="form-label">Job Title</label>
-      <input class="form-input" id="wsJobTitle" placeholder="Job title…">
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Date *</label>
-        <input class="form-input" type="date" id="wsDate">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Color</label>
-        <div class="color-picker-row" id="wsColorPicker"></div>
-        <input type="hidden" id="wsColorVal" value="#10b981">
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Start Time *</label>
-        <input class="form-input" type="time" id="wsStartTime">
-      </div>
-      <div class="form-group">
-        <label class="form-label">End Time *</label>
-        <input class="form-input" type="time" id="wsEndTime">
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Location</label>
-      <input class="form-input" id="wsLocation" placeholder="Where?">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Notes</label>
-      <textarea class="form-textarea" id="wsNotes" placeholder="Notes…"></textarea>
-    </div>
-    <div class="modal-footer">
-      <button class="ss-btn ss-btn-ghost" onclick="closeModal('workShiftModal')">Cancel</button>
-      <div style="display:flex;gap:8px;margin-left:auto;">
-        <button class="ss-btn" id="wsDeleteBtn" onclick="" style="background:rgba(239,68,68,.18);border:1px solid rgba(239,68,68,.3);color:#f87171;">🗑 Delete</button>
-        <button class="ss-btn ss-btn-solid" onclick="saveWorkShift()">Save Shift</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 
 <script>
 /* ═════════════════════════════════════════════
@@ -1083,42 +1009,6 @@ function localDateStr(d) {
   const m = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
   return `${y}-${m}-${day}`;
-}
-
-function hourFromTimeStr(t) {
-  return t ? parseInt(t.split(':')[0], 10) : 0;
-}
-
-function minuteFromTimeStr(t) {
-  return t ? parseInt(t.split(':')[1], 10) : 0;
-}
-
-function timedEventCoversHour(startTime, endTime, hour) {
-  const sh = hourFromTimeStr(startTime);
-  const eh = hourFromTimeStr(endTime);
-  const em = minuteFromTimeStr(endTime);
-  return sh <= hour && (eh > hour || (eh === hour && em > 0));
-}
-
-function assignmentCoversHour(a, hour) {
-  const start = parseLocalDate(a.due_date);
-  if (Number.isNaN(start.getTime())) return false;
-
-  const rawHours = parseFloat(a.estimated_hours);
-  const durationHours = Number.isFinite(rawHours) && rawHours > 0 ? rawHours : 1;
-  const end = new Date(start.getTime() + durationHours * 60 * 60 * 1000);
-
-  const slotStart = new Date(start);
-  slotStart.setHours(hour, 0, 0, 0);
-  const slotEnd = new Date(slotStart.getTime() + 60 * 60 * 1000);
-  return start < slotEnd && end > slotStart;
-}
-
-function formatEventTimeRange(startTime, endTime) {
-  if (!startTime) return '';
-  const start = formatTime12(startTime);
-  if (!endTime) return start;
-  return `${start}-${formatTime12(endTime)}`;
 }
 
 function url(template, id) {
@@ -1200,8 +1090,6 @@ function buildColorPicker(containerId, hiddenId, defaultColor='#3b82f6') {
 
 buildColorPicker('courseColorPicker', 'courseColorVal');
 buildColorPicker('asgNewTagColorPicker', 'asgNewTagColorVal');
-buildColorPicker('peColorPicker', 'peColorVal', '#FCAF17');
-buildColorPicker('wsColorPicker', 'wsColorVal', '#10b981');
 if (!$('asgNewTagColorVal')) {
   const h = document.createElement('input');
   h.type = 'hidden'; h.id = 'asgNewTagColorVal'; h.value = '#3b82f6';
@@ -1209,258 +1097,67 @@ if (!$('asgNewTagColorVal')) {
 }
 
 /* ═════════════════════════════════════════════
-   PERSONAL EVENT VIEW MODAL
-═════════════════════════════════════════════ */
-async function openPersonalEventView(eventId) {
-  if (eventId === undefined || eventId === null || eventId === '') {
-    alert('This is a recurring generated event. Edit the recurring event from the recurring events page.');
-    window.location.href = '/home/dashboard/recurring-personal-events/';
-    return;
-  }
-  const res = await fetch(`/home/api/personal-events/${eventId}/edit/`);
-  const data = await res.json();
-  if (!data.id) { alert('Could not load event.'); return; }
-
-  $('pevViewId').value = data.id;
-  $('pevTitle').textContent = data.title;
-
-  const d = new Date(data.event_date + 'T00:00:00');
-  const dateStr = d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-  let timeStr = '';
-  if (data.start_time) {
-    const start = formatTime12(data.start_time.substring(0, 5));
-    const end = data.end_time ? formatTime12(data.end_time.substring(0, 5)) : '';
-    timeStr = end ? ` · ${start}–${end}` : ` · ${start}`;
-  }
-  $('pevDatetimeValue').textContent = dateStr + timeStr;
-
-  if (data.location) {
-    $('pevLocation').style.display = 'block';
-    $('pevLocationValue').textContent = data.location;
-  } else {
-    $('pevLocation').style.display = 'none';
-  }
-
-  if (data.description) {
-    $('pevDesc').innerHTML = `<div style="background:var(--input-bg);border-radius:12px;padding:14px;">${data.description}</div>`;
-  } else {
-    $('pevDesc').innerHTML = '<div style="color:var(--muted);font-size:13px;font-style:italic;">No description.</div>';
-  }
-
-  $('pevEditBtn').onclick = () => { closeModal('personalEventViewModal'); editPersonalEvent(data.id); };
-  $('pevDeleteBtn').onclick = () => { closeModal('personalEventViewModal'); deletePersonalEvent(data.id); };
-
-  openModal('personalEventViewModal');
-}
-
-async function editPersonalEvent(eventId) {
-  const res = await fetch(`/home/api/personal-events/${eventId}/edit/`);
-  const data = await res.json();
-  if (!data.id) { alert('Could not load event.'); return; }
-
-  $('peEditId').value = data.id;
-  $('peTitle').value = data.title;
-  $('peDate').value = data.event_date;
-  $('peStartTime').value = data.start_time ? data.start_time.substring(0, 5) : '';
-  $('peEndTime').value = data.end_time ? data.end_time.substring(0, 5) : '';
-  $('peLocation').value = data.location || '';
-  $('peDescription').value = data.description || '';
-  buildColorPicker('peColorPicker', 'peColorVal', data.color_hex);
-  $('peModalTitle').textContent = 'Edit Personal Event';
-
-  $('peDeleteBtn').onclick = () => deletePersonalEvent(data.id);
-  openModal('personalEventModal');
-}
-
-/* ═════════════════════════════════════════════
-   PERSONAL EVENT MODAL
-═════════════════════════════════════════════ */
-async function editPersonalEvent(eventId) {
-  const res = await fetch(`/home/api/personal-events/${eventId}/edit/`);
-  const data = await res.json();
-  if (!data.id) { alert('Could not load event.'); return; }
-
-  $('peEditId').value = data.id;
-  $('peTitle').value = data.title;
-  $('peDate').value = data.event_date;
-  $('peStartTime').value = data.start_time ? data.start_time.substring(0, 5) : '';
-  $('peEndTime').value = data.end_time ? data.end_time.substring(0, 5) : '';
-  $('peLocation').value = data.location || '';
-  $('peDescription').value = data.description || '';
-  buildColorPicker('peColorPicker', 'peColorVal', data.color_hex);
-  $('peModalTitle').textContent = 'Edit Personal Event';
-
-  $('peDeleteBtn').onclick = () => deletePersonalEvent(data.id);
-  openModal('personalEventModal');
-}
-
-async function savePersonalEvent() {
-  const id = $('peEditId').value;
-  if (!id) { alert('No event ID.'); return; }
-  
-  const body = {
-    title: $('peTitle').value.trim(),
-    event_date: $('peDate').value,
-    start_time: $('peStartTime').value,
-    end_time: $('peEndTime').value,
-    location: $('peLocation').value.trim(),
-    description: $('peDescription').value.trim(),
-    color_hex: $('peColorVal').value,
-  };
-  
-  if (!body.title) { alert('Title is required.'); return; }
-  if (!body.event_date) { alert('Date is required.'); return; }
-
-  const data = await api(`/home/api/personal-events/${id}/edit/`, 'POST', body);
-  if (data.success) {
-    const idx = state.personalEvents.findIndex(e => e.id == id);
-    if (idx > -1) state.personalEvents[idx] = { ...state.personalEvents[idx], ...body, id: parseInt(id) };
-    closeModal('personalEventModal');
-    closeModal('personalEventViewModal');
-    renderCalendar();
-    renderSidebarUpcoming();
-  } else alert(data.error || 'Error saving event.');
-}
-
-async function deletePersonalEvent(eventId) {
-  if (!confirm('Delete this event?')) return;
-  const data = await api(`/home/api/personal-events/${eventId}/delete/`, 'POST');
-  if (data.success) {
-    state.personalEvents = state.personalEvents.filter(e => e.id !== eventId);
-    closeModal('personalEventModal');
-    closeModal('personalEventViewModal');
-    renderCalendar();
-    renderSidebarUpcoming();
-  } else alert(data.error || 'Error deleting event.');
-}
-
-/* ═════════════════════════════════════════════
-   WORK SHIFT VIEW MODAL
-═════════════════════════════════════════════ */
-async function openWorkShiftView(shiftId) {
-  const res = await fetch(`/home/api/work-shifts/${shiftId}/edit/`);
-  const data = await res.json();
-  if (!data.id) { alert('Could not load shift.'); return; }
-
-  $('wsvViewId').value = data.id;
-  $('wsvTitle').textContent = data.job_title || 'Work Shift';
-
-  if (data.job_title) {
-    $('wsvJobTitle').style.display = 'block';
-    $('wsvJobTitleValue').textContent = data.job_title;
-  } else {
-    $('wsvJobTitle').style.display = 'none';
-  }
-
-  const d = new Date(data.shift_date + 'T00:00:00');
-  const dateStr = d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-  const start = formatTime12(data.start_time.substring(0, 5));
-  const end = formatTime12(data.end_time.substring(0, 5));
-  $('wsvDateTimeValue').textContent = `${dateStr} · ${start}–${end}`;
-
-  if (data.location) {
-    $('wsvLocation').style.display = 'block';
-    $('wsvLocationValue').textContent = data.location;
-  } else {
-    $('wsvLocation').style.display = 'none';
-  }
-
-  if (data.notes) {
-    $('wsvNotes').style.display = 'block';
-    $('wsvNotes').innerHTML = `<div><div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Notes</div><div>${data.notes}</div></div>`;
-  } else {
-    $('wsvNotes').style.display = 'none';
-  }
-
-  $('wsvEditBtn').onclick = () => { closeModal('workShiftViewModal'); editWorkShift(data.id); };
-  $('wsvDeleteBtn').onclick = () => { closeModal('workShiftViewModal'); deleteWorkShift(data.id); };
-
-  openModal('workShiftViewModal');
-}
-
-/* ═════════════════════════════════════════════
-   WORK SHIFT EDIT MODAL
-═════════════════════════════════════════════ */
-async function editWorkShift(shiftId) {
-  const res = await fetch(`/home/api/work-shifts/${shiftId}/edit/`);
-  const data = await res.json();
-  if (!data.id) { alert('Could not load shift.'); return; }
-
-  $('wsEditId').value = data.id;
-  $('wsJobTitle').value = data.job_title || '';
-  $('wsDate').value = data.shift_date;
-  $('wsStartTime').value = data.start_time ? data.start_time.substring(0, 5) : '';
-  $('wsEndTime').value = data.end_time ? data.end_time.substring(0, 5) : '';
-  $('wsLocation').value = data.location || '';
-  $('wsNotes').value = data.notes || '';
-  buildColorPicker('wsColorPicker', 'wsColorVal', data.color_hex);
-  $('wsModalTitle').textContent = 'Edit Work Shift';
-
-  $('wsDeleteBtn').onclick = () => deleteWorkShift(data.id);
-  openModal('workShiftModal');
-}
-
-async function saveWorkShift() {
-  const id = $('wsEditId').value;
-  if (!id) { alert('No shift ID.'); return; }
-  
-  const body = {
-    job_title: $('wsJobTitle').value.trim(),
-    shift_date: $('wsDate').value,
-    start_time: $('wsStartTime').value,
-    end_time: $('wsEndTime').value,
-    location: $('wsLocation').value.trim(),
-    notes: $('wsNotes').value.trim(),
-    color_hex: $('wsColorVal').value,
-  };
-  
-  if (!body.shift_date) { alert('Date is required.'); return; }
-  if (!body.start_time) { alert('Start time is required.'); return; }
-  if (!body.end_time) { alert('End time is required.'); return; }
-
-  const data = await api(`/home/api/work-shifts/${id}/edit/`, 'POST', body);
-  if (data.success) {
-    const idx = state.workShifts.findIndex(s => s.id == id);
-    if (idx > -1) state.workShifts[idx] = { ...state.workShifts[idx], ...body, id: parseInt(id) };
-    closeModal('workShiftModal');
-     closeModal('workShiftViewModal');
-    renderCalendar();
-    renderSidebarUpcoming();
-  } else alert(data.error || 'Error saving shift.');
-}
-
-async function deleteWorkShift(shiftId) {
-  if (!confirm('Delete this shift?')) return;
-  const data = await api(`/home/api/work-shifts/${shiftId}/delete/`, 'POST');
-  if (data.success) {
-    state.workShifts = state.workShifts.filter(s => s.id !== shiftId);
-    closeModal('workShiftModal');
-   closeModal('workShiftViewModal');
-    renderCalendar();
-    renderSidebarUpcoming();
-  } else alert(data.error || 'Error deleting shift.');
-}
-
-/* ═════════════════════════════════════════════
    SEMESTERS
 ═════════════════════════════════════════════ */
-function renderSemesters() {
-  const el = $('semesterList');
-  if (!el) return;
+function renderSemesters() { renderAcademic(); }
+
+function renderAcademic() {
+  var list  = document.getElementById('academicList');
+  var empty = document.getElementById('academicEmpty');
+  if (!list || !empty) return;
   if (!state.semesters.length) {
-    el.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px 0;">No semesters yet.</div>';
+    list.innerHTML = '';
+    empty.style.display = 'block';
     return;
   }
-  el.innerHTML = state.semesters.map(s => `
-    <div class="sem-item">
-      <span style="flex:1;">${s.name}</span>
-      ${s.is_active ? '<span class="sem-badge">ACTIVE</span>' : ''}
-      <div class="sem-item-actions">
-        <button class="icon-btn" onclick="editSemester(${s.id})" title="Edit">✏️</button>
-        <button class="icon-btn danger" onclick="deleteSemester(${s.id},'${s.name}')" title="Delete">🗑</button>
-      </div>
-    </div>
-  `).join('');
+  empty.style.display = 'none';
+  var html = '';
+  state.semesters.forEach(function(sem) {
+    var semCourses = state.courses.filter(function(c) {
+      return c['semester__id'] === sem.id;
+    });
+    var isActive = !!sem.is_active;
+    // Escape for use inside a JS string that's inside an HTML onclick attribute
+    var safeName = sem.name.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    var coursesHtml = '';
+    if (semCourses.length) {
+      semCourses.forEach(function(c) {
+        var pending = state.assignments.filter(function(a) {
+          return a.course_id === c.id && a.status !== 'complete';
+        }).length;
+        var safeCode = c.course_code.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+        coursesHtml +=
+          '<div class="ac-course-row">'
+          + '<span class="ac-course-dot" style="background:' + c.color_hex + '"></span>'
+          + '<span class="ac-course-name">' + c.course_code + '</span>'
+          + '<span class="ac-course-count">' + pending + ' pending</span>'
+          + '<div class="sem-item-actions">'
+          + '<button class="icon-btn" onclick="event.stopPropagation();editCourse(' + c.id + ')" title="Edit">&#9999;</button>'
+          + '<button class="icon-btn danger" onclick="event.stopPropagation();deleteCourse(' + c.id + ',&#39;' + safeCode + '&#39;)" title="Delete">&#128465;</button>'
+          + '</div></div>';
+      });
+    } else {
+      coursesHtml =
+        '<div class="ac-no-courses">No courses yet &mdash; '
+        + '<span class="ac-add-course-link" onclick="openCourseForSem(' + sem.id + ',&#39;' + safeName + '&#39;)">add one</span>'
+        + '</div>';
+    }
+    html +=
+      '<details class="ac-sem-accordion"' + (isActive ? ' open' : '') + '>'
+      + '<summary class="ac-sem-header">'
+      + '<span class="ac-sem-chevron">&#9654;</span>'
+      + '<span class="ac-sem-name">' + sem.name + '</span>'
+      + (isActive ? '<span class="sem-badge">ACTIVE</span>' : '')
+      + '<span class="ac-course-pill">' + semCourses.length + ' course' + (semCourses.length !== 1 ? 's' : '') + '</span>'
+      + '<div class="sem-item-actions" onclick="event.stopPropagation()">'
+      + '<button class="icon-btn" onclick="editSemester(' + sem.id + ')" title="Edit semester">&#9999;</button>'
+      + '<button class="icon-btn danger" onclick="deleteSemester(' + sem.id + ',&#39;' + safeName + '&#39;)" title="Delete">&#128465;</button>'
+      + '</div></summary>'
+      + '<div class="ac-courses-body">' + coursesHtml
+      + '<button class="ac-add-course-btn" onclick="openCourseForSem(' + sem.id + ',&#39;' + safeName + '&#39;)">+ Add course</button>'
+      + '</div></details>';
+  });
+  list.innerHTML = html;
 }
 
 function openSemesterModal(edit=false) {
@@ -1538,29 +1235,9 @@ function populateCourseModalSemDropdown() {
   sel.innerHTML = state.semesters.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
 }
 
-function renderCourses() {
-  const el = $('courseList');
-  if (!el) return;
-  if (!state.courses.length) {
-    el.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px 0;">No courses yet.</div>';
-    return;
-  }
-  el.innerHTML = state.courses.map(c => {
-    const due = state.assignments.filter(a => a.course_id === c.id && a.status !== 'complete').length;
-    return `
-    <div class="class-item">
-      <div class="class-dot" style="background:${c.color_hex}"></div>
-      <span class="class-name">${c.course_code}</span>
-      <span class="class-count" style="font-size:10px;">${due} pending</span>
-      <div class="sem-item-actions">
-        <button class="icon-btn" onclick="editCourse(${c.id})" title="Edit">✏️</button>
-        <button class="icon-btn danger" onclick="deleteCourse(${c.id},'${c.course_code}')" title="Delete">🗑</button>
-      </div>
-    </div>`;
-  }).join('');
-}
+function renderCourses() { renderAcademic(); }
 
-function openCourseModal() {
+function openCourseModal(preSemId) {
   $('courseModalTitle').textContent = 'Add Course';
   $('courseEditId').value = '';
   $('courseCode').value = '';
@@ -1569,8 +1246,31 @@ function openCourseModal() {
   $('courseMeetTimes').value = '';
   $('courseCanvas').value = '';
   populateCourseModalSemDropdown();
+  if (preSemId) $('courseSemester').value = preSemId;
   buildColorPicker('courseColorPicker','courseColorVal');
   openModal('courseModal');
+}
+
+function openCourseForSem(semId, semName) {
+  $('courseModalTitle').textContent = 'Add Course to ' + semName;
+  $('courseEditId').value = '';
+  $('courseCode').value = '';
+  $('courseName').value = '';
+  $('courseProfessor').value = '';
+  $('courseMeetTimes').value = '';
+  $('courseCanvas').value = '';
+  populateCourseModalSemDropdown();
+  $('courseSemester').value = semId;
+  buildColorPicker('courseColorPicker','courseColorVal');
+  openModal('courseModal');
+}
+
+function openAcademicAdd() {
+  if (!state.semesters.length) {
+    openSemesterModal();
+  } else {
+    openModal('academicPickModal');
+  }
 }
 
 function editCourse(id) {
@@ -2202,14 +1902,12 @@ function renderWeekCal() {
       cell.className = 'week-cell';
 
       const asgs = getAssignmentsByDate(dateStr);
-      const slotAsgs = asgs.filter(a => assignmentCoversHour(a, h));
+      const slotAsgs = asgs.filter(a => parseLocalDate(a.due_date).getHours() === h);
 
       const pevents = getPersonalEventsByDate(dateStr);
       const slotPersonal = pevents.filter(pe => {
-        if (pe.start_time && pe.end_time) {
-          return timedEventCoversHour(pe.start_time, pe.end_time, h);
-        }
-        return hourFromTimeStr(pe.start_time) === h;
+        const ph = pe.start_time ? parseInt(pe.start_time.split(':')[0], 10) : 0;
+        return ph === h;
       });
 
       // Highlight full shift duration across all covered hour blocks.
@@ -2239,15 +1937,13 @@ function renderWeekCal() {
         cell.style.borderLeft = `3px solid ${personalHex}`;
       }
 
-      // Show assignment label only at start hour.
-      const startAsgs = slotAsgs.filter(a => parseLocalDate(a.due_date).getHours() === h);
-      startAsgs.forEach(a => {
+      // Show assignments due on this day (at any hour)
+      slotAsgs.forEach(a => {
         const ev = document.createElement('div');
         ev.className = 'cal-event';
         ev.style.cssText = `background:${a.course_color};`;
         const dueTime = parseLocalDate(a.due_date).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
-        const durationLabel = a.estimated_hours ? ` · ${a.estimated_hours}h` : '';
-        const asgDetail = `Start ${dueTime}${durationLabel}${a.course_code ? ' · ' + a.course_code : ''}`;
+        const asgDetail = `Due ${dueTime}${a.course_code ? ' · ' + a.course_code : ''}`;
         ev.innerHTML = `<div class="cal-event-title">${a.title}</div><div class="cal-event-detail">${asgDetail}</div>`;
         ev.title = `${a.title} — ${asgDetail}`;
         ev.onclick = () => openTaskView(a.id);
@@ -2260,29 +1956,23 @@ function renderWeekCal() {
         if (sh === h) {
           const ev = document.createElement('div');
           ev.className = 'cal-event';
-          ev.style.cssText = `background:${s.color_hex};cursor:pointer;`;
+          ev.style.cssText = `background:${s.color_hex};`;
           const shiftDetail = `${formatTime12(s.start_time)}–${formatTime12(s.end_time)}${s.location ? ' · ' + s.location : ''}`;
           ev.innerHTML = `<div class="cal-event-title">${s.title}</div><div class="cal-event-detail">${shiftDetail}</div>`;
-          ev.title = `${s.title} — ${shiftDetail} (click to edit)`;
-           ev.onclick = () => openWorkShiftView(s.id);
+          ev.title = `${s.title} — ${shiftDetail}`;
           cell.appendChild(ev);
         }
       });
 
-      // Show personal event label only at start hour.
-      const startPersonal = slotPersonal.filter(pe => hourFromTimeStr(pe.start_time) === h);
-      startPersonal.forEach(pe => {
+      // Show personal events starting in this hour (or all-day at hour 0)
+      slotPersonal.forEach(pe => {
         const ev = document.createElement('div');
         ev.className = 'cal-event';
-        ev.style.cssText = `background:${pe.color_hex || '#FCAF17'};color:#1A2540;${pe.id ? 'cursor:pointer;' : ''}`;
+        ev.style.cssText = `background:${pe.color_hex || '#FCAF17'};color:#1A2540;`;
         const peTime = pe.start_time ? formatTime12(pe.start_time) : '';
-        const peEnd = pe.end_time ? formatTime12(pe.end_time) : '';
-        const peRange = peTime && peEnd ? `${peTime}–${peEnd}` : peTime;
-        const peDetail = [peRange, pe.location].filter(Boolean).join(' · ');
-        const recurringBadge = pe.recurrence_label ? ` · ${pe.recurrence_label}` : '';
-        ev.innerHTML = `<div class="cal-event-title">${pe.title}</div>${peDetail || recurringBadge ? '<div class="cal-event-detail">' + [peDetail, recurringBadge].filter(Boolean).join('') + '</div>' : ''}`;
-        ev.title = `${pe.title}${peDetail ? ' — ' + peDetail : ''}${pe.recurrence_label ? ' · ' + pe.recurrence_label : ''}${pe.id ? ' (click to view)' : ''}`;
-        if (pe.id) ev.onclick = () => openPersonalEventView(pe.id);
+        const peDetail = [peTime, pe.location].filter(Boolean).join(' · ');
+        ev.innerHTML = `<div class="cal-event-title">${pe.title}</div>${peDetail ? '<div class="cal-event-detail">' + peDetail + '</div>' : ''}`;
+        ev.title = `${pe.title}${peDetail ? ' — ' + peDetail : ''}`;
         cell.appendChild(ev);
       });
 
@@ -2346,17 +2036,12 @@ function renderMonthCal() {
 
     const shifts = getWorkShiftsByDate(dateStr);
     shifts.forEach(s => {
-       html += `<div class="month-event" style="background:${s.color_hex};cursor:pointer;" title="${s.title} ${s.start_time}–${s.end_time} (click to edit)" onclick="event.stopPropagation();openWorkShiftView(${s.id})">${s.title}</div>`;
+      html += `<div class="month-event" style="background:${s.color_hex};" title="${s.title} ${s.start_time}–${s.end_time}">${s.title}</div>`;
     });
 
     const pevents = getPersonalEventsByDate(dateStr);
     pevents.forEach(pe => {
-      const peRange = formatEventTimeRange(pe.start_time, pe.end_time);
-      const recur = pe.recurrence_label ? ` · ${pe.recurrence_label}` : '';
-      const peLabel = peRange ? `${pe.title} · ${peRange}${recur}` : `${pe.title}${recur}`;
-      const peClick = pe.id ? `onclick="event.stopPropagation();openPersonalEventView(${pe.id})"` : '';
-      const peCursor = pe.id ? 'cursor:pointer;' : '';
-      html += `<div class="month-event" style="background:${pe.color_hex || '#FCAF17'};color:#1A2540;${peCursor}" title="${peLabel}${pe.id ? ' (click to view)' : ''}" ${peClick}>${peLabel}</div>`;
+      html += `<div class="month-event" style="background:${pe.color_hex || '#FCAF17'};color:#1A2540;" title="${pe.title}${pe.start_time ? ' ' + pe.start_time : ''}">${pe.title}</div>`;
     });
 
     cell.innerHTML = html;
@@ -2384,15 +2069,18 @@ function renderDayCal() {
   hours.forEach(h => {
     const label = h === 0 ? '12 AM' : h < 12 ? `${h} AM` : h === 12 ? '12 PM' : `${h-12} PM`;
 
-    const slotAsgs = dayAsgs.filter(a => assignmentCoversHour(a, h));
+    const slotAsgs = dayAsgs.filter(a => parseLocalDate(a.due_date).getHours() === h);
 
-    const slotShifts = dayShifts.filter(s => timedEventCoversHour(s.start_time, s.end_time, h));
+    const slotShifts = dayShifts.filter(s => {
+      const sh = parseInt(s.start_time.split(':')[0], 10);
+      const eh = parseInt(s.end_time.split(':')[0], 10);
+      const em = parseInt(s.end_time.split(':')[1], 10);
+      return sh <= h && (eh > h || (eh === h && em > 0));
+    });
 
     const slotPersonal = dayPersonal.filter(pe => {
-      if (pe.start_time && pe.end_time) {
-        return timedEventCoversHour(pe.start_time, pe.end_time, h);
-      }
-      return hourFromTimeStr(pe.start_time) === h;
+      const ph = pe.start_time ? parseInt(pe.start_time.split(':')[0], 10) : 0;
+      return ph === h;
     });
 
     // Tint row if a shift covers this hour
@@ -2406,28 +2094,20 @@ function renderDayCal() {
     const startShifts = slotShifts.filter(s => parseInt(s.start_time.split(':')[0], 10) === h);
     const shiftHtml = startShifts.map(s => {
       const shiftDetail = `${formatTime12(s.start_time)}–${formatTime12(s.end_time)}${s.location ? ' · ' + s.location : ''}`;
-      const tip = `${s.title} — ${shiftDetail} (click to edit)`;
-       return `<div class="day-event" style="background:${s.color_hex};cursor:pointer;" onclick="openWorkShiftView(${s.id})" title="${tip}"><div class="day-event-title">${s.title}</div><div class="day-event-detail">${shiftDetail}</div></div>`;
+      const tip = `${s.title} — ${shiftDetail}`;
+      return `<div class="day-event" style="background:${s.color_hex};" title="${tip}"><div class="day-event-title">${s.title}</div><div class="day-event-detail">${shiftDetail}</div></div>`;
     }).join('');
 
-    const startPersonal = slotPersonal.filter(pe => hourFromTimeStr(pe.start_time) === h);
-    const personalHtml = startPersonal.map(pe => {
+    const personalHtml = slotPersonal.map(pe => {
       const peTime = pe.start_time ? formatTime12(pe.start_time) : '';
-      const peEnd = pe.end_time ? formatTime12(pe.end_time) : '';
-      const peRange = peTime && peEnd ? `${peTime}–${peEnd}` : peTime;
-      const peDetail = [peRange, pe.location].filter(Boolean).join(' · ');
-      const recur = pe.recurrence_label ? ` · ${pe.recurrence_label}` : '';
-      const tip = `${pe.title}${peDetail ? ' — ' + peDetail : ''}${recur}${pe.id ? ' (click to view)' : ''}`;
-      const click = pe.id ? `onclick="openPersonalEventView(${pe.id})"` : '';
-      const cursor = pe.id ? 'cursor:pointer;' : '';
-      return `<div class="day-event" style="background:${pe.color_hex || '#FCAF17'};color:#1A2540;${cursor}" ${click} title="${tip}"><div class="day-event-title">${pe.title}</div>${peDetail || recur ? '<div class="day-event-detail" style="color:#1A2540;">' + [peDetail, recur].filter(Boolean).join('') + '</div>' : ''}</div>`;
+      const peDetail = [peTime, pe.location].filter(Boolean).join(' · ');
+      const tip = `${pe.title}${peDetail ? ' — ' + peDetail : ''}`;
+      return `<div class="day-event" style="background:${pe.color_hex || '#FCAF17'};color:#1A2540;" title="${tip}"><div class="day-event-title">${pe.title}</div>${peDetail ? '<div class="day-event-detail" style="color:#1A2540;">' + peDetail + '</div>' : ''}</div>`;
     }).join('');
 
-    const startAsgs = slotAsgs.filter(a => parseLocalDate(a.due_date).getHours() === h);
-    const asgHtml = startAsgs.map(a => {
+    const asgHtml = slotAsgs.map(a => {
       const dueTime = parseLocalDate(a.due_date).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
-      const durationLabel = a.estimated_hours ? ` · ${a.estimated_hours}h` : '';
-      const asgDetail = `Start ${dueTime}${durationLabel}${a.course_code ? ' · ' + a.course_code : ''}`;
+      const asgDetail = `Due ${dueTime}${a.course_code ? ' · ' + a.course_code : ''}`;
       return `<div class="day-event clickable" style="background:${a.course_color};" onclick="openTaskView(${a.id})" title="${a.title} — click to view"><div class="day-event-title">${a.title}</div><div class="day-event-detail">${asgDetail}</div></div>`;
     }).join('');
 
@@ -2530,9 +2210,6 @@ function renderSidebarUpcoming() {
       const recur = e.recurrence_label ? ` 🔁` : '';
       const sub = e.location ? `<br>📍 ${e.location}` : '';
       return {
-        id: e.id,
-        recurringId: e.recurring_id,
-        kind: 'personal',
         dt: localDateTime(e.event_date, e.start_time, true),
         color: e.color_hex || '#FCAF17',
         title: e.title,
@@ -2541,18 +2218,12 @@ function renderSidebarUpcoming() {
     });
 
   const shiftItems = state.workShifts
-    .filter(s => {
-      const startDt = localDateTime(s.shift_date, s.start_time);
-      const endDt = s.end_time ? localDateTime(s.shift_date, s.end_time) : startDt;
-      return endDt >= now;
-    })
+    .filter(s => localDateTime(s.shift_date, s.end_time) >= now)
     .map(s => {
       const d = new Date(s.shift_date + 'T00:00:00');
       const dateStr = `${DAY[d.getDay()]}, ${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
       const sub = s.location ? `<br>📍 ${s.location}` : '';
       return {
-        id: s.id,
-        kind: 'shift',
         dt: localDateTime(s.shift_date, s.start_time),
         color: s.color_hex || '#10B981',
         title: s.title,
@@ -2560,16 +2231,9 @@ function renderSidebarUpcoming() {
       };
     });
 
-  const sortedCombined = [...eventItems, ...shiftItems].sort((a, b) => a.dt - b.dt);
-  let combined = sortedCombined.slice(0, 6);
-
-  // Keep a shift visible when one is upcoming, even if personal events occupy the first 6 slots.
-  if (shiftItems.length && !combined.some(item => item.kind === 'shift')) {
-    const firstShift = [...shiftItems].sort((a, b) => a.dt - b.dt)[0];
-    combined = [...combined.slice(0, Math.max(combined.length - 1, 0)), firstShift]
-      .sort((a, b) => a.dt - b.dt)
-      .slice(0, 6);
-  }
+  const combined = [...eventItems, ...shiftItems]
+    .sort((a, b) => a.dt - b.dt)
+    .slice(0, 6);
 
   const countEl = $('sidebarUpcomingCount');
   if (countEl) countEl.textContent = combined.length ? `${combined.length} upcoming` : '';
@@ -2577,24 +2241,13 @@ function renderSidebarUpcoming() {
     el.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px 0;">No upcoming events.</div>';
     return;
   }
-  el.innerHTML = combined.map(item => {
-    let clickHandler = '';
-    let cursorStyle = '';
-    if (item.kind === 'personal' && item.id) {
-      clickHandler = `onclick="openPersonalEventView(${item.id})"`;
-      cursorStyle = 'cursor:pointer;';
-    } else if (item.kind === 'shift' && item.id) {
-      clickHandler = `onclick="openWorkShiftView(${item.id})"`;
-      cursorStyle = 'cursor:pointer;';
-    }
-    return `<div class="sb-event-item" style="${cursorStyle}" ${clickHandler}>
-      <div class="sb-event-dot" style="background:${item.color};"></div>
-      <div class="sb-event-info">
-        <div class="sb-event-title">${item.title}</div>
-        <div class="sb-event-meta">${item.meta}</div>
-      </div>
-    </div>`;
-  }).join('');
+  el.innerHTML = combined.map(item => `<div class="sb-event-item">
+    <div class="sb-event-dot" style="background:${item.color};"></div>
+    <div class="sb-event-info">
+      <div class="sb-event-title">${item.title}</div>
+      <div class="sb-event-meta">${item.meta}</div>
+    </div>
+  </div>`).join('');
 }
 
 /* ═════════════════════════════════════════════
@@ -2602,8 +2255,7 @@ function renderSidebarUpcoming() {
 ═════════════════════════════════════════════ */
 populateCourseModalSemDropdown();
 populateAsgCourseDropdown();
-renderSemesters();
-renderCourses();
+renderAcademic();
 renderTagChips();
 renderAsgTagSelector();
 renderTasks();

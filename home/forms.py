@@ -100,36 +100,6 @@ class PersonalEventForm(forms.ModelForm):
 
 
 class WorkShiftForm(forms.ModelForm):
-    shift_type = forms.ChoiceField(
-        choices=[
-            ("one_time", "One-time shift"),
-            ("recurring", "Recurring shift template"),
-        ],
-        initial="one_time",
-        required=True,
-        label="Shift Type",
-        widget=forms.RadioSelect,
-    )
-    recurring_template = forms.ModelChoiceField(
-        queryset=RecurringWorkShift.objects.none(),
-        required=False,
-        label="Select Recurring Template",
-    )
-    recurrence_pattern = forms.ChoiceField(
-        choices=[
-            ("weekly", "Weekly"),
-            ("biweekly", "Every 2 Weeks"),
-            ("monthly", "Monthly"),
-        ],
-        required=False,
-        label="Repeat Pattern",
-    )
-    recurrence_end_date = forms.DateField(
-        required=False,
-        label="End Date (optional)",
-        widget=forms.DateInput(attrs={"type": "date"}),
-    )
-
     class Meta:
         model = WorkShift
         fields = ["job_title", "shift_date", "start_time", "end_time", "location", "notes", "color_hex"]
@@ -140,21 +110,11 @@ class WorkShiftForm(forms.ModelForm):
             "color_hex": forms.HiddenInput(),
         }
 
-    def __init__(self, user=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if user:
-            self.fields["recurring_template"].queryset = RecurringWorkShift.objects.filter(
-                user=user, is_active=True
-            ).order_by("name")
-
 
 class RecurringWorkShiftForm(forms.ModelForm):
     class Meta:
         model = RecurringWorkShift
-        fields = ["name", "start_time", "end_time", "location", "recurrence_pattern", "is_active"]
-        labels = {
-            "recurrence_pattern": "Frequency",
-        }
+        fields = ["name", "start_time", "end_time", "location", "is_active"]
         widgets = {
             "start_time": forms.TimeInput(attrs={"type": "time"}),
             "end_time": forms.TimeInput(attrs={"type": "time"}),

@@ -38,22 +38,11 @@ class WorkShift(models.Model):
 
 
 class RecurringWorkShift(models.Model):
-    RECUR_WEEKLY = "weekly"
-    RECUR_BIWEEKLY = "biweekly"
-    RECUR_MONTHLY = "monthly"
-
-    RECUR_CHOICES = [
-        (RECUR_WEEKLY, "Weekly"),
-        (RECUR_BIWEEKLY, "Every 2 Weeks"),
-        (RECUR_MONTHLY, "Monthly"),
-    ]
-
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     start_time = models.TimeField()
     end_time = models.TimeField()
     location = models.CharField(max_length=200, blank=True)
-    recurrence_pattern = models.CharField(max_length=20, choices=RECUR_CHOICES, default=RECUR_WEEKLY)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
