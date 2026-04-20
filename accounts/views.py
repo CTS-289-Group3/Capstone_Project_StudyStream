@@ -126,13 +126,13 @@ def profile_view(request):
         profile.save(update_fields=['display_name', 'avatar_text'])
 
     if request.method == 'POST':
-        form = ProfileForm(request.POST, instance=profile)
+        form = ProfileForm(request.POST, instance=profile, user=request.user)
         if form.is_valid():
             form.save()
             messages.success(request, 'Profile updated successfully.')
             return redirect('/accounts/profile/')
     else:
-        form = ProfileForm(instance=profile)
+        form = ProfileForm(instance=profile, user=request.user)
     return render(request, 'accounts/profile.html', {'form': form, 'profile': profile})
 
 
@@ -541,6 +541,23 @@ def assignment_list_json(request):
     qs = Assignment.objects.filter(user=request.user).select_related('course').prefetch_related('tags', 'subtasks')
     data = []
     for a in qs:
+        subtasks = []
+        for st in a.subtasks.all().order_by('step_order'):
+            subtasks.append({
+                'id': st.id,
+                'subtask_id': str(st.subtask_id),
+                'title': st.title,
+                'description': st.description,
+                'status': st.status,
+                'step_order': st.step_order,
+                'sequence_order': st.step_order,
+                'due_date': st.due_date.isoformat() if st.due_date else None,
+                'due_time': st.due_time,
+                'estimated_hours': float(st.estimated_hours) if st.estimated_hours is not None else None,
+                'completion_percentage': st.completion_percentage,
+                'started_at': st.started_at.isoformat() if st.started_at else None,
+                'completed_at': st.completed_at.isoformat() if st.completed_at else None,
+            })
         data.append({
             'id': a.id,
             'assignment_id': str(a.assignment_id),
@@ -566,6 +583,7 @@ def assignment_list_json(request):
             'contributes_to_workload': a.contributes_to_workload,
             'subtask_count': a.subtasks.count(),
             'subtask_done': a.subtasks.filter(status='complete').count(),
+            'subtasks': subtasks,
             'tags': [{'id': t.id, 'name': t.name, 'color_hex': t.color_hex} for t in a.tags.all()],
         })
     return JsonResponse({'assignments': data})

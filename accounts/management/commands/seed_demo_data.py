@@ -139,21 +139,25 @@ class Command(BaseCommand):
                 "code": "CSC-113",
                 "name": "Artificial Intel. Fundamentals",
                 "color": "#DC143C",
+                "meeting_times": "MWF 9:00am-9:50am",
             },
             {
                 "code": "CSC-249",
                 "name": "Data Structures & Algorithms",
                 "color": "#1E90FF",
+                "meeting_times": "TR 11:00am-12:15pm",
             },
             {
                 "code": "CSC-289",
                 "name": "Programming Capstone",
                 "color": "#228B22",
+                "meeting_times": "MW 1:00pm-2:15pm",
             },
             {
                 "code": "NOS-125",
                 "name": "Linux/Unix Scripting",
                 "color": "#FFD700",
+                "meeting_times": "TR 2:30pm-3:45pm",
             },
         ]
 
@@ -168,7 +172,7 @@ class Command(BaseCommand):
                     "color_hex": spec["color"],
                     "professor_name": "",
                     "professor_email": "",
-                    "meeting_times": "",
+                    "meeting_times": spec["meeting_times"],
                     "canvas_url": "",
                     "syllabus_url": "",
                     "office_hours": "",

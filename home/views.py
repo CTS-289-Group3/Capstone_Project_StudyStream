@@ -253,6 +253,25 @@ def home_view(request):
 
     assignments_data = []
     for assignment in all_assignments.order_by('due_date'):
+        subtasks = []
+        for subtask in assignment.subtasks.all().order_by('step_order'):
+            subtasks.append(
+                {
+                    'id': subtask.id,
+                    'subtask_id': str(subtask.subtask_id),
+                    'title': subtask.title,
+                    'description': subtask.description,
+                    'status': subtask.status,
+                    'step_order': subtask.step_order,
+                    'sequence_order': subtask.step_order,
+                    'due_date': subtask.due_date.isoformat() if subtask.due_date else None,
+                    'due_time': subtask.due_time,
+                    'estimated_hours': float(subtask.estimated_hours) if subtask.estimated_hours is not None else None,
+                    'completion_percentage': subtask.completion_percentage,
+                    'started_at': subtask.started_at.isoformat() if subtask.started_at else None,
+                    'completed_at': subtask.completed_at.isoformat() if subtask.completed_at else None,
+                }
+            )
         assignments_data.append(
             {
                 'id': assignment.id,
@@ -280,6 +299,7 @@ def home_view(request):
                 'contributes_to_workload': assignment.contributes_to_workload,
                 'subtask_count': assignment.subtasks.count(),
                 'subtask_done': assignment.subtasks.filter(status='complete').count(),
+                'subtasks': subtasks,
                 'tags': [
                     {'id': tag.id, 'name': tag.name, 'color_hex': tag.color_hex}
                     for tag in assignment.tags.all()
@@ -390,66 +410,7 @@ def home_view(request):
 
 @login_required
 def dashboard(request):
-    today = timezone.localdate()
-    range_end = today + timedelta(days=90)
-
-    one_time_personal_events = PersonalEvent.objects.filter(user=request.user, event_date__gte=today)
-    recurring_personal_events = RecurringPersonalEvent.objects.filter(user=request.user, is_active=True)
-    work_shifts = WorkShift.objects.filter(user=request.user)
-
-    personal_events = []
-    for personal_event in one_time_personal_events:
-        personal_events.append(
-            {
-                "title": personal_event.title,
-                "event_date": personal_event.event_date,
-                "start_time": personal_event.start_time,
-                "end_time": personal_event.end_time,
-                "location": personal_event.location,
-                "recurrence_label": "",
-            }
-        )
-
-    personal_events.extend(
-        _generate_recurring_personal_occurrences(recurring_personal_events, today, range_end)
-    )
-    personal_events.sort(key=lambda item: (item["event_date"], item["start_time"] or time.min))
-
-    calendar_events = []
-
-    for event in personal_events:
-        if event.get("start_time") and event.get("end_time"):
-            calendar_events.append({
-                "title": event["title"],
-                "start": f"{event['event_date']}T{event['start_time']}",
-                "end": f"{event['event_date']}T{event['end_time']}",
-                "classNames": ["personal-event"],
-            })
-        else:
-            calendar_events.append({
-                "title": event["title"],
-                "start": str(event["event_date"]),
-                "allDay": True,
-                "classNames": ["personal-event"],
-            })
-
-    for shift in work_shifts:
-        calendar_events.append({
-            "title": f"Work: {shift.job_title}" if shift.job_title else "Work Shift",
-            "start": f"{shift.shift_date}T{shift.start_time}",
-            "end": f"{shift.shift_date}T{shift.end_time}",
-            "color": shift.color_hex or "#10b981",
-            "classNames": ["work-event"],
-        })
-
-    context = {
-        "calendar_events": calendar_events,
-        "total_events": len(calendar_events),
-        "personal_events": personal_events,
-        "work_shifts": work_shifts,
-    }
-
-    return render(request, "home/dashboard.html", context)
+    return redirect("/home/")
 
 
 @login_required
@@ -461,7 +422,7 @@ def add_personal_event(request):
                 form.save_recurring_event(request.user)
             else:
                 form.save_personal_event(request.user)
-            return redirect("dashboard")
+            return redirect("/home/")
     else:
         form = PersonalEventForm()
 
@@ -626,7 +587,7 @@ def add_work_shift(request):
 
             recompute_and_persist_workload(request.user, weeks=4)
             
-            return redirect("dashboard")
+            return redirect("/home/")
     else:
         form = WorkShiftForm(request.user)
 
@@ -802,6 +763,12 @@ def delete_recurring_job_title(request, title_id):
     if request.method == "POST":
         recurring_job_title.delete()
     return redirect("recurring_job_title_list")
+
+
+@login_required
+def workload_summary_api(request):
+    workload_data = recompute_and_persist_workload(request.user, weeks=4)
+    return JsonResponse(workload_data)
 
 
 # ════════════════════════════════════════════════════════════════════════════

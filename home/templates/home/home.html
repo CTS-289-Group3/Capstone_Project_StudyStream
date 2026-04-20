@@ -9,22 +9,22 @@
 {% endblock %}
 
 {% block nav_actions %}
-  <details class="ss-user-menu">
-    <summary class="ss-user-chip">
-      <div class="ss-avatar">{{ profile_avatar_text }}</div>
-      <span class="ss-user-chip-name">{{ profile_display_name }}</span>
-      <span class="ss-user-chip-caret">▼</span>
-    </summary>
-    <div class="ss-user-dropdown">
-      <div class="ss-user-dropdown-header">
-        <div class="ss-user-dropdown-label">Signed in as</div>
-        <div class="ss-user-dropdown-name">{{ profile_display_name }}</div>
+  <div class="ss-user-menu" id="userMenu">
+    <button type="button" class="ss-user-trigger" id="userMenuTrigger" aria-haspopup="true" aria-expanded="false">
+      <span class="ss-nav-avatar">{{ profile_avatar_text|default:request.user.username|slice:":1"|upper }}</span>
+      <span class="ss-user-name">{{ profile_display_name|default:request.user.username }}</span>
+      <span class="ss-user-caret">▾</span>
+    </button>
+    <div class="ss-user-dropdown" id="userMenuDropdown">
+      <div class="ss-dropdown-header">
+        <div class="ss-dropdown-label">Signed in as</div>
+        <div class="ss-dropdown-name">{{ profile_display_name|default:request.user.username }}</div>
       </div>
-      <a class="ss-user-dropdown-link" href="{% url 'profile' %}">Edit Profile</a>
-      <a class="ss-user-dropdown-link" href="{% url 'settings' %}">Settings</a>
-      <a class="ss-user-dropdown-link ss-user-dropdown-link-danger" href="{% url 'logout' %}">Sign out</a>
+      <a href="{% url 'profile' %}" class="ss-dropdown-link"><span>Edit Profile</span><span>›</span></a>
+      <a href="{% url 'settings' %}" class="ss-dropdown-link"><span>Settings</span><span>›</span></a>
+      <a href="{% url 'logout' %}" class="ss-dropdown-link ss-dropdown-link--danger"><span>Sign out</span><span>›</span></a>
     </div>
-  </details>
+  </div>
 {% endblock %}
 
 {% block extra_head %}
@@ -47,85 +47,6 @@
   --ss-soft-bubble-hover: #e3ecf7;
 }
 @keyframes dashIn { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
-
-.ss-user-menu {
-  position: relative;
-}
-.ss-user-menu summary {
-  list-style: none;
-}
-.ss-user-menu summary::-webkit-details-marker {
-  display: none;
-}
-.ss-user-chip {
-  cursor: pointer;
-  user-select: none;
-  padding-right: 12px;
-  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
-}
-.ss-user-chip:hover,
-.ss-user-menu[open] .ss-user-chip {
-  transform: translateY(-1px);
-  box-shadow: 0 12px 28px rgba(3,78,162,0.14);
-}
-.ss-user-chip-name {
-  white-space: nowrap;
-}
-.ss-user-chip-caret {
-  font-size: 11px;
-  color: var(--text2);
-  transition: transform 0.18s ease;
-}
-.ss-user-menu[open] .ss-user-chip-caret {
-  transform: rotate(180deg);
-}
-.ss-user-dropdown {
-  position: absolute;
-  top: calc(100% + 10px);
-  right: 0;
-  min-width: 220px;
-  background: var(--bg2);
-  border: 1px solid var(--card-border);
-  border-radius: 18px;
-  box-shadow: var(--shadow-lg);
-  padding: 10px;
-  z-index: 250;
-}
-.ss-user-dropdown-header {
-  padding: 10px 12px 12px;
-  border-bottom: 1px solid var(--card-border);
-  margin-bottom: 6px;
-}
-.ss-user-dropdown-label {
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text2);
-}
-.ss-user-dropdown-name {
-  margin-top: 4px;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 17px;
-  font-weight: 800;
-  color: var(--text);
-}
-.ss-user-dropdown-link {
-  display: block;
-  padding: 11px 12px;
-  border-radius: 12px;
-  color: var(--text);
-  font-size: 14px;
-  font-weight: 700;
-  transition: background 0.18s ease, color 0.18s ease;
-}
-.ss-user-dropdown-link:hover {
-  background: var(--input-bg);
-  color: var(--ss-blue-light);
-}
-.ss-user-dropdown-link-danger:hover {
-  color: #f87171;
-}
 
 .dash-header {
   grid-column: 1/-1;
@@ -1018,7 +939,7 @@ body.modal-open { overflow:hidden; }
   .summary-card { padding:12px; }
   .summary-metrics { grid-template-columns:1fr 1fr; width:100%; }
   .form-row { grid-template-columns:1fr; }
-  .ss-user-chip-name { display:none; }
+  .ss-user-name { display:none; }
 }
 </style>
 {% endblock %}
@@ -1697,6 +1618,20 @@ function assignmentCoversHour(a, hour) {
   return start < slotEnd && end > slotStart;
 }
 
+function subtaskCoversHour(st, hour) {
+  const start = parseLocalDate(st.due_date);
+  if (Number.isNaN(start.getTime())) return false;
+
+  const rawHours = parseFloat(st.estimated_hours);
+  const durationHours = Number.isFinite(rawHours) && rawHours > 0 ? rawHours : 1;
+  const end = new Date(start.getTime() + durationHours * 60 * 60 * 1000);
+
+  const slotStart = new Date(start);
+  slotStart.setHours(hour, 0, 0, 0);
+  const slotEnd = new Date(slotStart.getTime() + 60 * 60 * 1000);
+  return start < slotEnd && end > slotStart;
+}
+
 function formatEventTimeRange(startTime, endTime) {
   if (!startTime) return '';
   const start = formatTime12(startTime);
@@ -1717,6 +1652,20 @@ async function api(endpoint, method='POST', body={}) {
   fd.append('csrfmiddlewaretoken', CSRF);
   const res = await fetch(endpoint, { method, body: fd });
   return res.json();
+}
+
+async function refreshWorkloadData() {
+  const res = await fetch('/home/api/workload/summary/');
+  if (!res.ok) return false;
+  const data = await res.json();
+
+  Object.keys(workloadSummary).forEach((key) => delete workloadSummary[key]);
+  Object.assign(workloadSummary, data.summary || {});
+
+  workloadAlerts.splice(0, workloadAlerts.length, ...(data.alerts || []));
+  SS_DATA.workloadForecast = data.forecast || [];
+  renderWorkloadWidgets();
+  return true;
 }
 
 function openModal(id) {
@@ -2035,6 +1984,7 @@ async function saveWorkShift() {
      closeModal('workShiftViewModal');
     renderCalendar();
     renderSidebarUpcoming();
+    await refreshWorkloadData();
   } else alert(data.error || 'Error saving shift.');
 }
 
@@ -2047,6 +1997,7 @@ async function deleteWorkShift(shiftId) {
    closeModal('workShiftViewModal');
     renderCalendar();
     renderSidebarUpcoming();
+    await refreshWorkloadData();
   } else alert(data.error || 'Error deleting shift.');
 }
 
@@ -2133,6 +2084,7 @@ async function saveSemester() {
     renderSemesters();
     renderCourses();
     populateCourseModalSemDropdown();
+    await refreshWorkloadData();
   } else alert(data.error || 'Error saving semester.');
 }
 
@@ -2147,6 +2099,7 @@ async function deleteSemester(id, name) {
     renderTasks();
     renderCalendar();
     updateStats();
+    await refreshWorkloadData();
   }
 }
 
@@ -2251,6 +2204,7 @@ async function saveCourse() {
     renderCourses();
     populateAsgCourseDropdown();
     updateStats();
+    await refreshWorkloadData();
   } else alert(data.error || 'Error saving course.');
 }
 
@@ -2265,6 +2219,7 @@ async function deleteCourse(id, code) {
     renderCalendar();
     populateAsgCourseDropdown();
     updateStats();
+    await refreshWorkloadData();
   }
 }
 
@@ -2477,7 +2432,26 @@ function getUpcomingPlannerItems() {
       };
     });
 
-  return [...eventItems, ...shiftItems].sort((a, b) => a.dt - b.dt);
+  const subtaskItems = getScheduledSubtasks()
+    .filter(st => parseLocalDate(st.due_date) >= now)
+    .map(st => {
+      const d = parseLocalDate(st.due_date);
+      const dateStr = `${DAY[d.getDay()]}, ${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
+      const timeStr = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      const duration = st.estimated_hours ? ` · ${st.estimated_hours}h` : '';
+      return {
+        id: st.id,
+        kind: 'subtask',
+        kindLabel: 'Subtask',
+        dt: d,
+        color: st.course_color || '#007DC5',
+        title: st.title,
+        meta: `${dateStr} · ${timeStr}${duration}${st.assignment_title ? ` · ${st.assignment_title}` : ''}`,
+        onclick: `openTaskView(${st.assignment_id})`,
+      };
+    });
+
+  return [...eventItems, ...shiftItems, ...subtaskItems].sort((a, b) => a.dt - b.dt);
 }
 
 function getPlannerAllItems() {
@@ -2582,6 +2556,7 @@ async function cycleAssignmentStatus(id) {
   renderTasks();
   renderCalendar();
   updateStats();
+  await refreshWorkloadData();
 }
 
 async function toggleTaskDone(id, el) {
@@ -2595,6 +2570,7 @@ async function toggleTaskDone(id, el) {
     renderTasks();
     renderCalendar();
     updateStats();
+    await refreshWorkloadData();
   }
 }
 
@@ -2701,6 +2677,7 @@ async function saveAssignment() {
     renderCourses();
     renderCalendar();
     updateStats();
+    await refreshWorkloadData();
   } else alert(data.error || 'Error saving task.');
 }
 
@@ -2713,6 +2690,7 @@ async function deleteAssignment(id) {
     renderCourses();
     renderCalendar();
     updateStats();
+    await refreshWorkloadData();
   }
 }
 
@@ -2781,8 +2759,10 @@ async function refreshSubtaskPanel(asgId) {
     asg.subtask_count = json.subtasks.length;
     asg.subtask_done  = json.subtasks.filter(s => s.status==='complete').length;
     asg.completion_pct = json.completion_pct;
+    asg.subtasks = json.subtasks;
   }
   renderTasks();
+  renderCalendar();
 }
 
 async function toggleSubtask(stId, el, asgId) {
@@ -2955,8 +2935,26 @@ function renderCalendar() {
   else renderDayCal();
 }
 
+function getScheduledSubtasks() {
+  return state.assignments.flatMap(a =>
+    (a.subtasks || [])
+      .filter(st => st && st.due_date)
+      .map(st => ({
+        ...st,
+        assignment_id: a.id,
+        assignment_title: a.title,
+        course_code: a.course_code,
+        course_color: a.course_color,
+      }))
+  );
+}
+
 function getAssignmentsByDate(dateStr) {
   return state.assignments.filter(a => a.due_date && a.due_date.startsWith(dateStr));
+}
+
+function getSubtasksByDate(dateStr) {
+  return getScheduledSubtasks().filter(st => st.due_date && st.due_date.startsWith(dateStr));
 }
 
 function getWorkShiftsByDate(dateStr) {
@@ -3065,6 +3063,9 @@ function renderWeekCal() {
 
       const asgs = getAssignmentsByDate(dateStr);
       const slotAsgs = asgs.filter(a => assignmentCoversHour(a, h));
+      const subtasks = getSubtasksByDate(dateStr);
+      const slotSubtasks = subtasks.filter(st => subtaskCoversHour(st, h));
+      const slotSchool = [...slotAsgs, ...slotSubtasks];
 
       const pevents = getPersonalEventsByDate(dateStr);
       const slotPersonal = pevents.filter(pe => {
@@ -3086,13 +3087,13 @@ function renderWeekCal() {
         const baseHex = slotShifts[0].color_hex;
         cell.style.background = baseHex;
         cell.style.borderLeft = `3px solid ${baseHex}`;
-      } else if (slotAsgs.length && slotPersonal.length) {
-        const asgHex = slotAsgs[0].course_color || '#007DC5';
+      } else if (slotSchool.length && slotPersonal.length) {
+        const asgHex = slotSchool[0].course_color || '#007DC5';
         const personalHex = slotPersonal[0].color_hex || '#FCAF17';
         cell.style.background = `linear-gradient(135deg, ${asgHex}, ${personalHex})`;
         cell.style.borderLeft = `3px solid ${asgHex}`;
-      } else if (slotAsgs.length) {
-        const asgHex = slotAsgs[0].course_color || '#007DC5';
+      } else if (slotSchool.length) {
+        const asgHex = slotSchool[0].course_color || '#007DC5';
         cell.style.background = asgHex;
         cell.style.borderLeft = `3px solid ${asgHex}`;
       } else if (slotPersonal.length) {
@@ -3113,6 +3114,20 @@ function renderWeekCal() {
         ev.innerHTML = `<div class="cal-event-title">${a.title}</div><div class="cal-event-detail">${asgDetail}</div>`;
         ev.title = `${a.title} — ${asgDetail}`;
         ev.onclick = () => openTaskView(a.id);
+        cell.appendChild(ev);
+      });
+
+      const startSubtasks = slotSubtasks.filter(st => parseLocalDate(st.due_date).getHours() === h);
+      startSubtasks.forEach(st => {
+        const ev = document.createElement('div');
+        ev.className = 'cal-event';
+        ev.style.cssText = `background:${st.course_color};outline:1px dashed rgba(255,255,255,.55);`;
+        const startTime = parseLocalDate(st.due_date).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+        const durationLabel = st.estimated_hours ? ` · ${st.estimated_hours}h` : '';
+        const detail = `${st.assignment_title ? st.assignment_title + ' · ' : ''}${startTime}${durationLabel}`;
+        ev.innerHTML = `<div class="cal-event-title">↳ ${st.title}</div><div class="cal-event-detail">${detail}</div>`;
+        ev.title = `${st.title} — ${detail}`;
+        ev.onclick = () => openTaskView(st.assignment_id);
         cell.appendChild(ev);
       });
 
@@ -3191,6 +3206,7 @@ function renderMonthCal() {
     const dateStr = localDateStr(date);
     const isToday = date.toDateString() === today.toDateString();
     const asgs    = getAssignmentsByDate(dateStr);
+    const subtasks = getSubtasksByDate(dateStr);
 
     const cell = document.createElement('div');
     cell.className = 'month-cell' + (isToday ? ' today' : '');
@@ -3205,6 +3221,12 @@ function renderMonthCal() {
       html += `<div class="month-event" style="background:${a.course_color};cursor:pointer;" title="${a.title}" onclick="event.stopPropagation();openTaskView(${a.id})">${a.title}</div>`;
     });
     if (asgs.length > 2) html += `<div class="month-more">+${asgs.length-2} more</div>`;
+
+    subtasks.forEach(st => {
+      const d = parseLocalDate(st.due_date);
+      const label = `↳ ${st.title} · ${d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
+      html += `<div class="month-event" style="background:${st.course_color};outline:1px dashed rgba(255,255,255,.55);cursor:pointer;" title="${label}${st.assignment_title ? ' · ' + st.assignment_title : ''}" onclick="event.stopPropagation();openTaskView(${st.assignment_id})">${label}</div>`;
+    });
 
     const shifts = getWorkShiftsByDate(dateStr);
     shifts.forEach(s => {
@@ -3237,6 +3259,7 @@ function renderDayCal() {
 
   const dateStr     = localDateStr(target);
   const dayAsgs     = getAssignmentsByDate(dateStr);
+  const daySubtasks = getSubtasksByDate(dateStr);
   const dayShifts   = getWorkShiftsByDate(dateStr);
   const dayPersonal = getPersonalEventsByDate(dateStr);
 
@@ -3247,6 +3270,7 @@ function renderDayCal() {
     const label = h === 0 ? '12 AM' : h < 12 ? `${h} AM` : h === 12 ? '12 PM' : `${h-12} PM`;
 
     const slotAsgs = dayAsgs.filter(a => assignmentCoversHour(a, h));
+    const slotSubtasks = daySubtasks.filter(st => subtaskCoversHour(st, h));
 
     const slotShifts = dayShifts.filter(s => timedEventCoversHour(s.start_time, s.end_time, h));
 
@@ -3293,13 +3317,21 @@ function renderDayCal() {
       return `<div class="day-event clickable" style="background:${a.course_color};" onclick="openTaskView(${a.id})" title="${a.title} — click to view"><div class="day-event-title">${a.title}</div><div class="day-event-detail">${asgDetail}</div></div>`;
     }).join('');
 
+    const startSubtasks = slotSubtasks.filter(st => parseLocalDate(st.due_date).getHours() === h);
+    const subtaskHtml = startSubtasks.map(st => {
+      const dueTime = parseLocalDate(st.due_date).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+      const durationLabel = st.estimated_hours ? ` · ${st.estimated_hours}h` : '';
+      const detail = `${st.assignment_title ? st.assignment_title + ' · ' : ''}${dueTime}${durationLabel}`;
+      return `<div class="day-event clickable" style="background:${st.course_color};outline:1px dashed rgba(255,255,255,.55);" onclick="openTaskView(${st.assignment_id})" title="${st.title} — click to view"><div class="day-event-title">↳ ${st.title}</div><div class="day-event-detail">${detail}</div></div>`;
+    }).join('');
+
     html += `<div class="day-slot${slotShifts.length ? ' shift-slot' : ''}" ${slotStyle}>
       <div class="day-time">${label}</div>
-      <div class="day-events">${asgHtml}${shiftHtml}${personalHtml}</div>
+      <div class="day-events">${asgHtml}${subtaskHtml}${shiftHtml}${personalHtml}</div>
     </div>`;
   });
 
-  if (!dayAsgs.length && !dayShifts.length && !dayPersonal.length) {
+  if (!dayAsgs.length && !daySubtasks.length && !dayShifts.length && !dayPersonal.length) {
     html += `<div style="text-align:center;padding:32px;color:var(--muted);font-size:13px;font-weight:600;">Nothing scheduled today 🎉</div>`;
   }
   dv.innerHTML = html;
@@ -3308,6 +3340,7 @@ function renderDayCal() {
   // Prefer the first scheduled item; otherwise use current hour for today, or 7 AM for other days.
   const eventHours = [];
   dayAsgs.forEach(a => eventHours.push(parseLocalDate(a.due_date).getHours()));
+  daySubtasks.forEach(st => eventHours.push(parseLocalDate(st.due_date).getHours()));
   dayShifts.forEach(s => eventHours.push(parseInt(s.start_time.split(':')[0], 10)));
   dayPersonal.forEach(pe => eventHours.push(pe.start_time ? parseInt(pe.start_time.split(':')[0], 10) : 0));
 

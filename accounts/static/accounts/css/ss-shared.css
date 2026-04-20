@@ -831,13 +831,15 @@ html { scrollbar-color: var(--scrollbar, rgba(83,183,232,0.3)) transparent; }
     background: rgba(255,255,255,0.22) !important;
     border-color: rgba(255,255,255,0.4) !important;
 }
-[data-theme="light"] .ss-user-trigger {
-    border-color: rgba(3,78,162,0.3) !important;
-    color: #1A2540 !important;
-    background: rgba(3,78,162,0.07) !important;
+[data-theme="light"] .ss-nav .ss-user-trigger {
+    border-color: rgba(255,255,255,0.35) !important;
+    color: #fff !important;
+    background: rgba(255,255,255,0.12) !important;
 }
-[data-theme="light"] .ss-user-trigger:hover {
-    background: rgba(3,78,162,0.13) !important;
+[data-theme="light"] .ss-nav .ss-user-trigger:hover,
+[data-theme="light"] .ss-nav .ss-user-trigger[aria-expanded="true"] {
+    background: rgba(255,255,255,0.20) !important;
+    border-color: rgba(255,255,255,0.5) !important;
 }
-[data-theme="light"] .ss-user-name { color: #1A2540 !important; }
-[data-theme="light"] .ss-user-caret { color: #5a6e8a !important; }
+[data-theme="light"] .ss-nav .ss-user-name { color: #fff !important; }
+[data-theme="light"] .ss-nav .ss-user-caret { color: rgba(255,255,255,0.8) !important; }

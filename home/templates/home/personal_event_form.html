@@ -14,7 +14,7 @@
 </head>
 <body>
 
-{% include "home/partials/navbar.html" with back_url="/home/dashboard/" %}
+{% include "home/partials/navbar.html" with back_url="/home/" %}
 
     <div class="ss-banner">
       <div class="ss-banner-flare"></div>
@@ -126,7 +126,7 @@
 
           <div style="display:flex;gap:12px;margin-top:8px;">
             <button type="submit" class="btn-primary">Save Event →</button>
-            <a href="{% url 'dashboard' %}" class="btn-secondary">← Cancel</a>
+            <a href="/home/" class="btn-secondary">← Cancel</a>
           </div>
         </form>
       </div>
