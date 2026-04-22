@@ -4,7 +4,7 @@ from . import views
 
 urlpatterns = [
     path('', views.home_view, name='home'),
-    path('dashboard/', views.dashboard, name='dashboard'),
+    path('dashboard/', views.dashboard, name='home_dashboard_legacy'),
     path('dashboard/add/personal-event/', views.add_personal_event, name='add_personal_event'),
     path('dashboard/add/work-shift/', views.add_work_shift, name='add_work_shift'),
     path('dashboard/recurring-shifts/', views.recurring_shift_list, name='recurring_shift_list'),
@@ -25,10 +25,13 @@ urlpatterns = [
     path('dashboard/recurring-job-titles/<int:title_id>/delete/', views.delete_recurring_job_title, name='delete_recurring_job_title'),
     
     # API endpoints for personal event editing
+    path('api/workload/summary/', views.workload_summary_api, name='workload_summary_api'),
+    path('api/personal-events/', views.personal_event_list_json, name='personal_event_list_json'),
     path('api/personal-events/<int:event_id>/edit/', views.personal_event_edit, name='personal_event_edit'),
     path('api/personal-events/<int:event_id>/delete/', views.personal_event_delete, name='personal_event_delete'),
     
     # API endpoints for work shift editing
+    path('api/work-shifts/', views.work_shift_list_json, name='work_shift_list_json'),
     path('api/work-shifts/<int:shift_id>/edit/', views.work_shift_edit, name='work_shift_edit'),
     path('api/work-shifts/<int:shift_id>/delete/', views.work_shift_delete, name='work_shift_delete'),
 ]

@@ -61,6 +61,7 @@ urlpatterns = [
     # Subtasks
     path('api/assignments/<int:assignment_pk>/subtasks/', views.subtask_list_json, name='subtask_list_json'),
     path('api/assignments/<int:assignment_pk>/subtasks/create/', views.subtask_create, name='subtask_create'),
+    path('api/subtasks/<int:pk>/edit/', views.subtask_edit, name='subtask_edit'),
     path('api/subtasks/<int:pk>/toggle/', views.subtask_toggle, name='subtask_toggle'),
     path('api/subtasks/<int:pk>/delete/', views.subtask_delete, name='subtask_delete'),
 ]

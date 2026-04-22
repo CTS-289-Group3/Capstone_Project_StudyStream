@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.validators import MaxValueValidator, MinValueValidator
+import uuid
 
 
 # ─────────────────────────────────────────────────────────────
@@ -25,14 +27,14 @@ class Semester(models.Model):
 #  COURSE
 # ─────────────────────────────────────────────────────────────
 CLASS_COLORS = [
-    ('#ef4444', 'Red'),
-    ('#3b82f6', 'Blue'),
-    ('#8b5cf6', 'Purple'),
-    ('#10b981', 'Green'),
-    ('#f59e0b', 'Yellow'),
-    ('#f97316', 'Orange'),
-    ('#06b6d4', 'Teal'),
-    ('#ec4899', 'Pink'),
+    ('#DC143C', 'Crimson (Red Pin)'),
+    ('#1E90FF', 'Ocean (Blue Pin)'),
+    ('#228B22', 'Forest (Green Pin)'),
+    ('#FFD700', 'Sunflower (Yellow Pin)'),
+    ('#8B00FF', 'Violet (Purple Pin)'),
+    ('#FF8C00', 'Tangerine (Orange Pin)'),
+    ('#008080', 'Teal (Teal Pin)'),
+    ('#FF69B4', 'Rose (Pink Pin)'),
 ]
 
 class Course(models.Model):
@@ -40,13 +42,19 @@ class Course(models.Model):
     user            = models.ForeignKey(User, on_delete=models.CASCADE, related_name='courses')
     course_code     = models.CharField(max_length=20)
     course_name     = models.CharField(max_length=200)
-    color_hex       = models.CharField(max_length=7, default='#3b82f6')
+    color_hex       = models.CharField(max_length=7, choices=CLASS_COLORS, default='#1E90FF')
     professor_name  = models.CharField(max_length=100, blank=True)
     professor_email = models.EmailField(blank=True)
     office_hours    = models.TextField(blank=True)
     canvas_url      = models.URLField(blank=True)
     syllabus_url    = models.URLField(blank=True)
     meeting_times   = models.TextField(blank=True)
+    weekly_study_hours = models.DecimalField(
+        max_digits=4,
+        decimal_places=1,
+        default=0,
+        validators=[MinValueValidator(0), MaxValueValidator(168)],
+    )
     created_at      = models.DateTimeField(auto_now_add=True)
     updated_at      = models.DateTimeField(auto_now=True)
 
@@ -116,19 +124,23 @@ TYPE_CHOICES = [
 ]
 
 class Assignment(models.Model):
+    assignment_id   = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     course          = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='assignments')
     user            = models.ForeignKey(User, on_delete=models.CASCADE, related_name='assignments')
     title           = models.CharField(max_length=255)
     description     = models.TextField(blank=True)
-    assignment_type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='other')
+    assignment_type = models.CharField(max_length=50, choices=TYPE_CHOICES, default='other')
     due_date        = models.DateTimeField()
-    estimated_hours = models.DecimalField(max_digits=5, decimal_places=1, null=True, blank=True)
+    due_time        = models.CharField(max_length=20, blank=True)
+    estimated_hours = models.DecimalField(max_digits=4, decimal_places=1, null=True, blank=True)
     status          = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started')
-    priority        = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='medium')
-    is_major        = models.BooleanField(default=False)
-    completion_pct  = models.IntegerField(default=0)
+    priority_level  = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='medium')
+    is_major_project = models.BooleanField(default=False)
+    completion_percentage = models.IntegerField(default=0)
     canvas_link     = models.URLField(blank=True)
     rubric_link     = models.URLField(blank=True)
+    submission_link = models.URLField(blank=True)
+    contributes_to_workload = models.BooleanField(default=True)
     tags            = models.ManyToManyField(Tag, blank=True, related_name='assignments')
     started_at      = models.DateTimeField(null=True, blank=True)
     completed_at    = models.DateTimeField(null=True, blank=True)
@@ -146,33 +158,37 @@ class Assignment(models.Model):
         if subtasks.exists():
             done  = subtasks.filter(status='complete').count()
             total = subtasks.count()
-            self.completion_pct = int((done / total) * 100)
-            self.save(update_fields=['completion_pct'])
+            self.completion_percentage = int((done / total) * 100)
+            self.save(update_fields=['completion_percentage'])
 
 
 # ─────────────────────────────────────────────────────────────
 #  ASSIGNMENT SUBTASK
 # ─────────────────────────────────────────────────────────────
 class AssignmentSubtask(models.Model):
+    subtask_id      = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     assignment      = models.ForeignKey(Assignment, on_delete=models.CASCADE, related_name='subtasks')
     title           = models.CharField(max_length=255)
     description     = models.TextField(blank=True)
-    sequence_order  = models.IntegerField(default=0)
-    milestone_date  = models.DateTimeField(null=True, blank=True)
+    step_order      = models.IntegerField(default=0)
+    due_date        = models.DateTimeField(null=True, blank=True)
+    due_time        = models.CharField(max_length=20, blank=True)
     estimated_hours = models.DecimalField(max_digits=4, decimal_places=1, null=True, blank=True)
     status          = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started')
+    completion_percentage = models.IntegerField(default=0)
     started_at      = models.DateTimeField(null=True, blank=True)
     completed_at    = models.DateTimeField(null=True, blank=True)
     created_at      = models.DateTimeField(auto_now_add=True)
     updated_at      = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['sequence_order']
+        ordering = ['step_order']
 
     def __str__(self):
-        return f"Step {self.sequence_order}: {self.title}"
+        return f"Step {self.step_order}: {self.title}"
 
     def save(self, *args, **kwargs):
+        self.completion_percentage = 100 if self.status == 'complete' else 0
         super().save(*args, **kwargs)
         self.assignment.update_completion()
 
@@ -225,6 +241,32 @@ class Profile(models.Model):
     bio = models.TextField(blank=True)
     major = models.CharField(max_length=100, blank=True)
     year = models.CharField(max_length=20, blank=True)
+    sleep_hours_per_night = models.DecimalField(
+        max_digits=3,
+        decimal_places=1,
+        default=7.0,
+        validators=[MinValueValidator(0), MaxValueValidator(24)],
+    )
+    sleep_start_time = models.TimeField(null=True, blank=True)
+    sleep_end_time = models.TimeField(null=True, blank=True)
+    personal_time_hours_per_week = models.DecimalField(
+        max_digits=4,
+        decimal_places=1,
+        default=14.0,
+        validators=[MinValueValidator(0), MaxValueValidator(168)],
+    )
+    family_time_hours_per_week = models.DecimalField(
+        max_digits=4,
+        decimal_places=1,
+        default=0.0,
+        validators=[MinValueValidator(0), MaxValueValidator(168)],
+    )
+    commute_time_hours_per_week = models.DecimalField(
+        max_digits=4,
+        decimal_places=1,
+        default=0.0,
+        validators=[MinValueValidator(0), MaxValueValidator(168)],
+    )
 
     def __str__(self):
         return f'{self.user.username} Profile'

@@ -170,6 +170,20 @@
   .auth-submit:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(3,78,162,0.42); }
   .auth-submit:active { transform: translateY(0); }
 
+  .auth-error-banner {
+    background: rgba(239,68,68,0.12);
+    border: 1.5px solid rgba(239,68,68,0.45);
+    border-radius: 10px;
+    color: #ef4444;
+    font-size: 13px; font-weight: 600;
+    padding: 10px 14px;
+  }
+
+  .auth-field-error {
+    font-size: 12px; color: #ef4444; margin-top: 4px;
+    display: block;
+  }
+
   .auth-div {
     display: flex; align-items: center; gap: 10px;
     font-size: 11px; color: var(--muted);
@@ -233,16 +247,31 @@
       <form method="post" class="auth-form">
         {% csrf_token %}
 
+        {% if form.non_field_errors %}
+          <div class="auth-error-banner">
+            {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+          </div>
+        {% endif %}
+
         <div class="auth-field">
           <label for="id_username">Username</label>
           <input type="text" id="id_username" name="username"
-                 placeholder="Enter your username" autocomplete="username" required>
+                 placeholder="Enter your username" autocomplete="username"
+                 value="{{ form.username.value|default:'' }}"
+                 class="{% if form.username.errors %}is-err{% endif %}">
+          {% if form.username.errors %}
+            <span class="auth-field-error">{{ form.username.errors|join:", " }}</span>
+          {% endif %}
         </div>
 
         <div class="auth-field">
           <label for="id_password">Password</label>
           <input type="password" id="id_password" name="password"
-                 placeholder="Enter your password" autocomplete="current-password" required>
+                 placeholder="Enter your password" autocomplete="current-password"
+                 class="{% if form.password.errors %}is-err{% endif %}">
+          {% if form.password.errors %}
+            <span class="auth-field-error">{{ form.password.errors|join:", " }}</span>
+          {% endif %}
         </div>
 
         <a class="auth-forgot" href="{% url 'password_reset' %}">Forgot password?</a>

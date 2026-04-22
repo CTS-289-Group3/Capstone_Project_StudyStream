@@ -10,11 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
-from pathlib import Path
-from dotenv import load_dotenv
 import os
-
-load_dotenv()
+from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,10 +20,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = 'django-insecure-=-0asy4$o93r$x&7vvsi$w%8#f^2207oyhhm_o32yavsn+lkxf'
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -62,7 +62,9 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.csrf',
                 'django.template.context_processors.request',
+                'accounts.context_processors.profile_context',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
@@ -126,18 +128,36 @@ CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1:8000',
     'https://127.0.0.1:8000',
     'https://*.app.github.dev',
+    'http://*.app.github.dev',
+    'https://*.preview.app.github.dev',
+    'http://*.preview.app.github.dev',
+    'https://*.githubpreview.dev',
+    'http://*.githubpreview.dev',
 ]
 
-# Use env var in normal setups; fall back to a dev-only key for local runs.
-SECRET_KEY = os.getenv('SECRET_KEY') or 'django-insecure-dev-only-change-me'
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = f'StudyStream <{os.getenv("EMAIL_HOST_USER")}>'
+_forwarding_domain = os.getenv('GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN', '').strip()
+if _forwarding_domain:
+    CSRF_TRUSTED_ORIGINS.extend(
+        [
+            f'https://*.{_forwarding_domain}',
+            f'http://*.{_forwarding_domain}',
+        ]
+    )
 
-DOMAIN = 'opulent-garbanzo-x5xw7g4qjxvjcvvj6-8000.app.github.dev'
-USE_HTTPS_IN_EMAILS = True
+for _host_pattern in os.getenv('RAILS_DEVELOPMENT_HOSTS', '').split(','):
+    _host_pattern = _host_pattern.strip()
+    if not _host_pattern:
+        continue
+    host = _host_pattern if _host_pattern.startswith('.') else f'.{_host_pattern}'
+    CSRF_TRUSTED_ORIGINS.extend(
+        [
+            f'https://*{host}',
+            f'http://*{host}',
+        ]
+    )
+
+CSRF_TRUSTED_ORIGINS = list(dict.fromkeys(CSRF_TRUSTED_ORIGINS))
+
+# Default primary key field type
+# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

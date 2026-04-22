@@ -5,6 +5,7 @@ from .models import (
 	RecurringJobTitle,
 	RecurringWorkLocation,
 	RecurringWorkShift,
+	WorkloadAnalysis,
 	WorkShift,
 )
 from .models import Workspace
@@ -17,3 +18,4 @@ admin.site.register(RecurringPersonalEvent)
 admin.site.register(RecurringWorkLocation)
 admin.site.register(RecurringJobTitle)
 admin.site.register(Workspace)
+admin.site.register(WorkloadAnalysis)

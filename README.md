@@ -1,144 +1,127 @@
-# Capstone_Project_StudyStream
-StudyStream capstone project for group 3!
+# StudyStream
 
-> **Important:** After cloning and creating your `.venv`, you **must** run migrations before starting the server or you will get database errors.
-> ```bash
-> python manage.py migrate
-> ```
-> See [Step 3](#3-run-django-setup-commands) below for the full setup order.
+StudyStream is a Django-based student planning app for tracking semesters, courses, assignments, work shifts, and personal events, with workload analysis and forecasting.
 
-## Local setup
+Useful docs:
 
-### 1) Create and activate a virtual environment
+- [Project Structure Guide](docs/project-structure.md)
+- [Database ERD](docs/database-erd.md)
 
-From the project root:
+## Quick Start (Codespaces)
+
+1. Open the repository in GitHub Codespaces.
+2. In the terminal, run:
+
+```bash
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py seed_demo_data --fresh
+python manage.py runserver
+```
+
+3. Open port `8000` in the browser.
+
+Default seeded user:
+
+```text
+Username: tessab
+Password: StudyStream123!
+```
+
+## Local Setup
+
+### 1. Create and activate a virtual environment
+
+macOS/Linux:
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-On Windows (PowerShell):
+Windows PowerShell:
 
 ```powershell
 python -m venv .venv
 .venv\Scripts\Activate.ps1
 ```
 
-### 2) Install Dependencies
+### 2. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-If you add a new package later, install it once in your virtual environment and update `requirements.txt` so everyone can keep using the same command:
+### 3. Apply database migrations
 
 ```bash
-pip install <package-name>
-pip freeze > requirements.txt
+python manage.py migrate
 ```
 
-### 3) Run Django setup commands
-
-Use these in order when setting up the project for the first time:
+### 4. (Optional) Seed demo data
 
 ```bash
-# Run after creating or changing models
-python manage.py makemigrations
+python manage.py seed_demo_data --fresh
+```
 
-# Run after makemigrations to apply changes to the database
-python manage.py migrate
+### 5. Run the dev server
 
-# Run once to create an admin login account
-python manage.py createsuperuser
-
-# Run any time you want to start the development server
+```bash
 python manage.py runserver
 ```
 
-Then open: http://127.0.0.1:8000/
+Open: http://127.0.0.1:8000/
 
-### 4) Populate demo data for testing
+## Useful Commands
 
-Instead of manually creating semesters, courses, assignments, work shifts, and events every time, you can load a reusable demo dataset with one command:
-
-```bash
-python manage.py seed_demo_data --fresh
-```
-
-Default demo login:
-
-```text
-Username: tessab
-Password: StudyStream123!
-Email: tessab_seed@gmail.com
-```
-
-Useful options:
+### Workload analysis
 
 ```bash
-# Seed a different test account
+# Recompute workload forecast for all active users
+python manage.py run_workload_analysis
+
+# Recompute for one user
+python manage.py run_workload_analysis --user-id 1
+
+# Recompute a custom forecast horizon
+python manage.py run_workload_analysis --weeks 6
+```
+
+### Demo data
+
+```bash
+# Seed a custom account and reset existing data for that user
 python manage.py seed_demo_data --username qa_user --password TestPass123! --email qa@example.com --fresh
 
-# Merge demo data into an existing user without clearing current records first
+# Merge demo data into an existing user without clearing current records
 python manage.py seed_demo_data --username qa_user --password TestPass123!
 ```
 
-If you just want the default seeded test account, run:
-
-```bash
-python manage.py seed_demo_data --fresh
-```
-
-That will create or refresh the default `tessab` test login with the current saved semester, course, assignment, event, and work-shift style dataset.
-
-The command populates sample:
-
-- profile data
-- semesters and courses
-- assignments, subtasks, tags, and time blocks
-- work shifts and recurring work-shift templates
-- personal events and recurring personal events
-
-## Pages
+## Main Pages
 
 | URL | Description |
 |---|---|
 | `http://127.0.0.1:8000/` | Public landing page |
-| `http://127.0.0.1:8000/home/` | Assignment dashboard — Semesters, Courses, and Assignments |
-| `http://127.0.0.1:8000/dashboard/` | Work shifts and personal events calendar |
+| `http://127.0.0.1:8000/home/` | Main dashboard (planner, calendar, workload widgets) |
 | `http://127.0.0.1:8000/accounts/login/` | Sign in |
 | `http://127.0.0.1:8000/accounts/register/` | Create account |
-| `http://127.0.0.1:8000/accounts/profile/` | Edit profile |
+| `http://127.0.0.1:8000/accounts/profile/` | Profile |
+| `http://127.0.0.1:8000/accounts/settings/` | Settings and workload preferences |
 | `http://127.0.0.1:8000/admin/` | Django admin |
 
-## Academic tracking (new)
+## Core Features
 
-The assignment dashboard at `/home/` lets you:
+1. Semester and course management
+2. Assignment tracking with subtasks and tags
+3. Work shift and personal event scheduling
+4. Conflict detection with replace/suggest actions
+5. Workload forecasting (GREEN/YELLOW/RED), deadline cluster detection, and recommendations
 
-1. Create a **Semester** (e.g. Fall 2026) from the sidebar
-2. Add **Courses** under that semester — each gets a color used throughout the UI
-3. Add **Assignments** with a due date/time, type, priority, subtasks, and tags
-4. Track progress — stat cards for Due This Week, Completed, Overdue, and Active Courses update live after every change
+## API Endpoints (Assignments/Courses)
 
-## Database models
+All endpoints require login and are user-scoped.
 
-### `accounts` app
-- **Profile** — bio, major, year *(existing)*
-- **Semester** — academic term with start/end dates and active flag
-- **Course** — linked to a Semester; stores code, name, professor, Canvas URL, color
-- **Tag** — custom color labels for assignments
-- **Assignment** — due date/time, type, status, priority, subtasks, tags, completion %
-- **AssignmentSubtask** — ordered steps; auto-updates parent completion on save
-
-### `core` app *(existing)*
-- **WorkShift**, **PersonalEvent**, **RecurringWorkShift**, **RecurringWorkLocation**, **RecurringJobTitle**, **RecurringPersonalEvent**
-
-## Assignment API endpoints
-
-All require login and are scoped to the current user.
-
-```
+```text
 /accounts/api/semesters/                         GET
 /accounts/api/semesters/create/                  POST
 /accounts/api/semesters/<id>/edit/               POST

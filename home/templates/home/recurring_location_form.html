@@ -1,146 +1,57 @@
-{% extends "accounts/base.html" %}
-
-{% block title %}{{ page_title }} — StudyStream{% endblock %}
-
-{% block extra_head %}
-<style>
-    .ss-wrap {
-        max-width: 760px;
-        margin: 0 auto;
-        padding: 22px 16px 40px;
-        animation: formIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
-    }
-    @keyframes formIn {
-        from { opacity: 0; transform: translateY(8px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    .ss-back-row { margin-bottom: 12px; }
-    .ss-back-link {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        border-radius: 999px;
-        border: 1px solid var(--card-border);
-        background: var(--card);
-        color: var(--text);
-        padding: 8px 13px;
-        font-size: 13px;
-        font-weight: 800;
-        text-decoration: none;
-        transition: transform 0.16s ease, box-shadow 0.16s ease, color 0.16s ease;
-    }
-    .ss-back-link:hover {
-        transform: translateY(-1px);
-        color: var(--ss-blue-light);
-        box-shadow: 0 8px 24px rgba(3, 78, 162, 0.18);
-    }
-    .ss-card {
-        background: var(--card);
-        border: 1px solid var(--card-border);
-        border-radius: 18px;
-        box-shadow: var(--shadow);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        padding: 24px;
-    }
-    h1 {
-        margin: 0 0 8px;
-        font-family: 'Montserrat', sans-serif;
-        font-size: 28px;
-        color: var(--text);
-    }
-    .ss-sub {
-        margin: 0 0 20px;
-        color: var(--text2);
-        font-size: 14px;
-    }
-    .ss-form p { margin: 0 0 14px; }
-    .ss-form label {
-        display: block;
-        font-size: 13px;
-        font-weight: 700;
-        margin-bottom: 6px;
-        color: var(--text);
-    }
-    .ss-form input,
-    .ss-form textarea,
-    .ss-form select {
-        width: 100%;
-        font-family: inherit;
-        font-size: 14px;
-        border: 1px solid var(--input-border);
-        border-radius: 10px;
-        padding: 10px 12px;
-        background: var(--input-bg);
-        color: var(--text);
-    }
-    .ss-form select {
-        color-scheme: dark;
-    }
-    .ss-form select option {
-        background: var(--card);
-        color: var(--text);
-    }
-    .ss-form input:focus,
-    .ss-form textarea:focus,
-    .ss-form select:focus {
-        outline: none;
-        box-shadow: var(--glow);
-        border-color: var(--ss-blue-light);
-    }
-    .errorlist {
-        margin: 6px 0 0;
-        padding: 8px 10px;
-        list-style: none;
-        border-radius: 8px;
-        background: rgba(220, 38, 38, 0.14);
-        border: 1px solid rgba(220, 38, 38, 0.28);
-        color: #fca5a5;
-        font-size: 13px;
-    }
-    .ss-actions { display: flex; gap: 10px; margin-top: 18px; }
-    .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 999px;
-        padding: 10px 16px;
-        font-size: 14px;
-        font-weight: 800;
-        text-decoration: none;
-        cursor: pointer;
-        border: none;
-    }
-    .btn-primary {
-        background: linear-gradient(135deg, var(--ss-blue), var(--ss-blue-deep));
-        color: #fff;
-        box-shadow: 0 6px 18px rgba(3, 78, 162, 0.28);
-    }
-    .btn-secondary {
-        background: transparent;
-        color: var(--text);
-        border: 1px solid var(--input-border);
-    }
-</style>
-{% endblock %}
-
-{% block content %}
-<div class="ss-wrap">
-    <div class="ss-back-row">
-        <a href="{% url 'dashboard' %}" class="ss-back-link" aria-label="Back to dashboard">← Back to Dashboard</a>
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }} – StudyStream</title>
+    <script>document.documentElement.setAttribute("data-theme",localStorage.getItem("ss-theme")||"dark");</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=DM+Sans:wght@400;500;600&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="{% static 'accounts/images/logo_icon.svg' %}">
+    <link rel="stylesheet" href="{% static 'accounts/css/ss-shared.css' %}">
+</head>
+<body>
+{% include "home/partials/navbar.html" with back_url="/home/" %}
+    <div class="ss-banner">
+      <div class="ss-banner-flare"></div>
+      <div class="ss-banner-flare2"></div>
+      <div class="ss-banner-content">
+        <div class="ss-banner-eyebrow">Work · Places</div>
+        <div class="ss-banner-title"><span>{{ page_title }}</span></div>
+        <div class="ss-banner-sub">Save a location to quickly pick it when adding work shifts.</div>
+      </div>
+      <div class="ss-banner-wave">
+        <svg viewBox="0 0 1440 32" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="display:block;width:100%;height:32px;">
+          <path d="M0,16 C360,32 1080,0 1440,16 L1440,32 L0,32 Z" fill="var(--bg)"/>
+        </svg>
+      </div>
     </div>
-    <div class="ss-card">
-        <h1>{{ page_title }}</h1>
-        <p class="ss-sub">Save a reusable location that appears as a quick pick when adding work shifts.</p>
-
+    <main class="ss-main" style="max-width:560px;">
+      <div class="ss-card">
+        <div class="ss-card-header">
+          <div class="ss-card-title"><span class="dot dot-navy"></span>{{ page_title }}</div>
+          <a href="{% url 'recurring_location_list' %}" class="ss-btn-sm">← Back to Locations</a>
+        </div>
         <form method="post" class="ss-form">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <div class="ss-actions">
-                <button type="submit" class="btn btn-primary">{{ submit_label }}</button>
-                <a href="{% url 'recurring_location_list' %}" class="btn btn-secondary">Cancel</a>
-            </div>
+          {% csrf_token %}
+          {{ form.as_p }}
+          <div style="display:flex;gap:12px;margin-top:12px;">
+            <button type="submit" class="btn-primary">{{ submit_label }} →</button>
+            <a href="{% url 'recurring_location_list' %}" class="btn-secondary">Cancel</a>
+          </div>
         </form>
+      </div>
+    </main>
+
+    <div class="ss-footer-outer">
+      <footer class="ss-footer">
+        <div class="ss-footer-logo"><span class="w1">STUDY</span><span class="w2">STREAM</span></div>
+        <div class="ss-footer-copy">Less stress. More progress. © 2026</div>
+        <div class="ss-footer-links"><span>Privacy</span><span>Terms</span><span>Contact</span></div>
+      </footer>
     </div>
-</div>
-{% endblock %}
+    <script src="{% static 'accounts/js/ss-shared.js' %}"></script>
+</body>
+</html>

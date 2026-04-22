@@ -1,427 +1,190 @@
-{% extends "accounts/base.html" %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Personal Event – StudyStream</title>
+    <script>document.documentElement.setAttribute("data-theme",localStorage.getItem("ss-theme")||"dark");</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=DM+Sans:wght@400;500;600&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="{% static 'accounts/images/logo_icon.svg' %}">
+    <link rel="stylesheet" href="{% static 'accounts/css/ss-shared.css' %}">
+</head>
+<body>
 
-{% block title %}Add Personal Event — StudyStream{% endblock %}
+{% include "home/partials/navbar.html" with back_url="/home/" %}
 
-{% block extra_head %}
-<style>
-    .ss-wrap {
-        max-width: 760px;
-        margin: 0 auto;
-        padding: 22px 16px 40px;
-        animation: formIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
-    }
-
-    @keyframes formIn {
-        from { opacity: 0; transform: translateY(8px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    .ss-back-row {
-        margin-bottom: 12px;
-    }
-
-    .ss-back-link {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        border-radius: 999px;
-        border: 1px solid var(--card-border);
-        background: var(--card);
-        color: var(--text);
-        padding: 8px 13px;
-        font-size: 13px;
-        font-weight: 800;
-        text-decoration: none;
-        transition: transform 0.16s ease, box-shadow 0.16s ease, color 0.16s ease;
-    }
-
-    .ss-back-link:hover {
-        transform: translateY(-1px);
-        color: var(--ss-blue-light);
-        box-shadow: 0 8px 24px rgba(3, 78, 162, 0.18);
-    }
-
-    .ss-card {
-        background: var(--card);
-        border: 1px solid var(--card-border);
-        border-radius: 18px;
-        box-shadow: var(--shadow);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        padding: 24px;
-    }
-
-    h1 {
-        margin: 0 0 8px;
-        font-family: 'Montserrat', sans-serif;
-        font-size: 28px;
-        color: var(--text);
-    }
-
-    .ss-sub {
-        margin: 0 0 20px;
-        color: var(--text2);
-        font-size: 14px;
-    }
-
-    .ss-form p {
-        margin: 0 0 14px;
-    }
-
-    .ss-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 14px;
-    }
-
-    .ss-field {
-        margin-bottom: 14px;
-    }
-
-    .ss-field-full {
-        grid-column: 1 / -1;
-    }
-
-    .ss-recurring-toggle {
-        margin: 0 0 8px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 14px;
-        font-weight: 700;
-        color: var(--text);
-    }
-
-    .ss-recurring-box {
-        margin-top: 10px;
-        border: 1px solid var(--input-border);
-        border-radius: 10px;
-        padding: 12px;
-        background: var(--input-bg);
-    }
-
-    .ss-recurring-box.hidden {
-        display: none;
-    }
-
-    .ss-checkbox-list {
-        list-style: none;
-        margin: 6px 0 0;
-        padding: 0;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 6px 12px;
-    }
-
-    .ss-checkbox-list li label {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        margin-bottom: 0;
-        font-size: 13px;
-        font-weight: 500;
-    }
-
-    .ss-note {
-        margin-top: 6px;
-        font-size: 12px;
-        color: var(--text2);
-    }
-
-    .ss-form label {
-        display: block;
-        font-size: 13px;
-        font-weight: 700;
-        margin-bottom: 6px;
-        color: var(--text);
-    }
-
-    .ss-form input,
-    .ss-form textarea,
-    .ss-form select {
-        width: 100%;
-        font-family: inherit;
-        font-size: 14px;
-        border: 1px solid var(--input-border);
-        border-radius: 10px;
-        padding: 10px 12px;
-        background: var(--input-bg);
-        color: var(--text);
-    }
-
-    .ss-form select {
-        color-scheme: dark;
-    }
-
-    .ss-form select option {
-        background: var(--card);
-        color: var(--text);
-    }
-
-    .ss-form input:focus,
-    .ss-form textarea:focus,
-    .ss-form select:focus {
-        outline: none;
-        box-shadow: var(--glow);
-        border-color: var(--ss-blue-light);
-    }
-
-    .ss-form textarea {
-        min-height: 96px;
-        resize: vertical;
-    }
-
-    .errorlist {
-        margin: 6px 0 0;
-        padding: 8px 10px;
-        list-style: none;
-        border-radius: 8px;
-        background: rgba(220, 38, 38, 0.14);
-        border: 1px solid rgba(220, 38, 38, 0.28);
-        color: #fca5a5;
-        font-size: 13px;
-    }
-
-    .ss-actions {
-        display: flex;
-        gap: 10px;
-        margin-top: 18px;
-    }
-
-    .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 999px;
-        padding: 10px 16px;
-        font-size: 14px;
-        font-weight: 800;
-        text-decoration: none;
-        cursor: pointer;
-        border: none;
-    }
-
-    .btn-primary {
-        background: linear-gradient(135deg, var(--ss-blue), var(--ss-blue-deep));
-        color: #fff;
-        box-shadow: 0 6px 18px rgba(3, 78, 162, 0.28);
-    }
-
-    .btn-secondary {
-        background: transparent;
-        color: var(--text);
-        border: 1px solid var(--input-border);
-    }
-
-    .ss-manage-link {
-        margin-top: 12px;
-        font-size: 13px;
-        color: var(--ss-blue-light);
-        text-decoration: none;
-        font-weight: 700;
-        display: inline-block;
-    }
-
-    .ss-manage-link:hover {
-        text-decoration: underline;
-    }
-
-    .color-swatch {
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        cursor: pointer;
-        border: 3px solid transparent;
-        transition: border-color 0.15s, transform 0.15s;
-    }
-
-    .color-swatch.active {
-        border-color: var(--ss-blue-light);
-        transform: scale(1.18);
-    }
-
-    @media (max-width: 680px) {
-        .ss-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .ss-checkbox-list {
-            grid-template-columns: 1fr;
-        }
-    }
-</style>
-{% endblock %}
-
-{% block content %}
-<div class="ss-wrap">
-    <div class="ss-back-row">
-        <a href="{% url 'dashboard' %}" class="ss-back-link" aria-label="Back to dashboard">← Back to Dashboard</a>
+    <div class="ss-banner">
+      <div class="ss-banner-flare"></div>
+      <div class="ss-banner-flare2"></div>
+      <div class="ss-banner-content">
+        <div class="ss-banner-eyebrow">Life · Events</div>
+        <div class="ss-banner-title">Add <span>Personal Event</span></div>
+        <div class="ss-banner-sub">Create a one-time or recurring event — all in one form.</div>
+      </div>
+      <div class="ss-banner-wave">
+        <svg viewBox="0 0 1440 32" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="display:block;width:100%;height:32px;">
+          <path d="M0,16 C360,32 1080,0 1440,16 L1440,32 L0,32 Z" fill="var(--bg)"/>
+        </svg>
+      </div>
     </div>
 
-    <div class="ss-card">
-        <h1>Add Personal Event</h1>
-        <p class="ss-sub">Create a one-time or recurring personal event in one form.</p>
+    <main class="ss-main" style="max-width:820px;">
+      <div class="ss-card">
+        <div class="ss-card-header">
+          <div class="ss-card-title"><span class="dot dot-yellow"></span>Event Details</div>
+          <a href="{% url 'recurring_personal_event_list' %}" class="ss-btn-sm">Manage Recurring Events</a>
+        </div>
+
+        {% if form.non_field_errors %}
+          <div class="ss-form-errors">{{ form.non_field_errors }}</div>
+        {% endif %}
 
         <form method="post" class="ss-form">
-            {% csrf_token %}
+          {% csrf_token %}
 
-            <div class="ss-grid">
-                <div class="ss-field ss-field-full">
-                    {{ form.title.label_tag }}
-                    {{ form.title }}
-                    {{ form.title.errors }}
-                </div>
-
-                <div class="ss-field ss-field-full">
-                    {{ form.description.label_tag }}
-                    {{ form.description }}
-                    {{ form.description.errors }}
-                </div>
-
-                <div class="ss-field">
-                    {{ form.event_date.label_tag }}
-                    {{ form.event_date }}
-                    {{ form.event_date.errors }}
-                </div>
-
-                <div class="ss-field"></div>
-
-                <div class="ss-field">
-                    {{ form.start_time.label_tag }}
-                    {{ form.start_time }}
-                    {{ form.start_time.errors }}
-                </div>
-
-                <div class="ss-field">
-                    {{ form.end_time.label_tag }}
-                    {{ form.end_time }}
-                    {{ form.end_time.errors }}
-                </div>
-
-                <div class="ss-field ss-field-full">
-                    {{ form.location.label_tag }}
-                    {{ form.location }}
-                    {{ form.location.errors }}
-                </div>
-
-                <div class="ss-field ss-field-full">
-                    <label class="ss-recurring-toggle" for="id_recurring_enabled">
-                        {{ form.recurring_enabled }}
-                        <span>Yes, this repeats</span>
-                    </label>
-
-                    <div id="recurringOptions" class="ss-recurring-box hidden">
-                        <div class="ss-field">
-                            {{ form.recurrence_pattern.label_tag }}
-                            {{ form.recurrence_pattern }}
-                            {{ form.recurrence_pattern.errors }}
-                        </div>
-
-                        <div class="ss-field" id="weekdayField">
-                            {{ form.selected_weekdays.label_tag }}
-                            <ul class="ss-checkbox-list">
-                                {{ form.selected_weekdays }}
-                            </ul>
-                            {{ form.selected_weekdays.errors }}
-                        </div>
-
-                        <div class="ss-field" id="monthlyField">
-                            {{ form.monthly_day.label_tag }}
-                            {{ form.monthly_day }}
-                            {{ form.monthly_day.errors }}
-                            <div class="ss-note">Leave blank to use the day from event date.</div>
-                        </div>
-
-                        <div class="ss-field">
-                            <label class="ss-recurring-toggle" for="id_recurring_is_active">
-                                {{ form.recurring_is_active }}
-                                <span>Recurring event active</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
+          <div class="ss-form-row ss-single">
+            <div class="ss-field">
+              {{ form.title.label_tag }}
+              {{ form.title }}
+              {{ form.title.errors }}
             </div>
+          </div>
 
-            <div class="ss-field ss-field-full">
-                <label>Event Color</label>
-                <div id="peColorPicker" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;"></div>
-                {{ form.color_hex }}
+          <div class="ss-form-row ss-single">
+            <div class="ss-field">
+              {{ form.description.label_tag }}
+              {{ form.description }}
+              {{ form.description.errors }}
             </div>
+          </div>
 
-            <div class="ss-actions">
-                <button type="submit" class="btn btn-primary">Save Event</button>
-                <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancel</a>
+          <div class="ss-form-row">
+            <div class="ss-field">
+              {{ form.event_date.label_tag }}
+              {{ form.event_date }}
+              {{ form.event_date.errors }}
             </div>
-            <a href="{% url 'recurring_personal_event_list' %}" class="ss-manage-link">Manage recurring personal events</a>
+            <div class="ss-field">
+              {{ form.location.label_tag }}
+              {{ form.location }}
+              {{ form.location.errors }}
+            </div>
+          </div>
+
+          <div class="ss-form-row">
+            <div class="ss-field">
+              {{ form.start_time.label_tag }}
+              {{ form.start_time }}
+              {{ form.start_time.errors }}
+            </div>
+            <div class="ss-field">
+              {{ form.end_time.label_tag }}
+              {{ form.end_time }}
+              {{ form.end_time.errors }}
+            </div>
+          </div>
+
+          <div class="ss-field">
+            <label>Event Color</label>
+            <div class="ss-color-row" id="peColorPicker"></div>
+            {{ form.color_hex }}
+          </div>
+
+          <!-- Recurring Section -->
+          <div class="ss-field" style="border:1px solid var(--border);border-radius:14px;padding:16px;background:var(--input-bg);">
+            <label class="ss-recurring-toggle" for="id_recurring_enabled">
+              {{ form.recurring_enabled }}
+              <span>🔁 This event repeats</span>
+            </label>
+
+            <div id="recurringOptions" class="ss-recurring-box hidden" style="margin-top:12px;">
+              <div class="ss-form-row">
+                <div class="ss-field">
+                  {{ form.recurrence_pattern.label_tag }}
+                  {{ form.recurrence_pattern }}
+                  {{ form.recurrence_pattern.errors }}
+                </div>
+                <div class="ss-field" id="monthlyField">
+                  {{ form.monthly_day.label_tag }}
+                  {{ form.monthly_day }}
+                  {{ form.monthly_day.errors }}
+                  <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">Leave blank to use event date's day.</div>
+                </div>
+              </div>
+              <div class="ss-field" id="weekdayField">
+                {{ form.selected_weekdays.label_tag }}
+                <ul class="ss-checkbox-list">{{ form.selected_weekdays }}</ul>
+                {{ form.selected_weekdays.errors }}
+              </div>
+              <div class="ss-field" style="margin-top:10px;">
+                <label class="ss-recurring-toggle" for="id_recurring_is_active">
+                  {{ form.recurring_is_active }}
+                  <span>Keep recurring event active</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:12px;margin-top:8px;">
+            <button type="submit" class="btn-primary">Save Event →</button>
+            <a href="/home/" class="btn-secondary">← Cancel</a>
+          </div>
         </form>
-    </div>
-</div>
-{% endblock %}
+      </div>
+    </main>
 
-{% block extra_scripts %}
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
+    <div class="ss-footer-outer">
+      <footer class="ss-footer">
+        <div class="ss-footer-logo"><span class="w1">STUDY</span><span class="w2">STREAM</span></div>
+        <div class="ss-footer-copy">Less stress. More progress. © 2026</div>
+        <div class="ss-footer-links"><span>Privacy</span><span>Terms</span><span>Contact</span></div>
+      </footer>
+    </div>
+
+    <script src="{% static 'accounts/js/ss-shared.js' %}"></script>
+    <script>
+    (function() {
+      const PE_COLORS = ['#8B5CF6','#A855F7','#EC4899','#F43F5E','#06B6D4','#0EA5E9','#10B981','#F97316'];
+        const colorContainer = document.getElementById('peColorPicker');
+        const colorInput = document.getElementById('id_color_hex');
+      const currentColor = (colorInput && colorInput.value) ? colorInput.value : '#8B5CF6';
+        if (colorContainer && colorInput) {
+            PE_COLORS.forEach(hex => {
+                const s = document.createElement('div');
+                s.className = 'ss-swatch' + (hex.toLowerCase() === currentColor.toLowerCase() ? ' active' : '');
+                s.style.background = hex;
+                s.addEventListener('click', () => {
+                    colorContainer.querySelectorAll('.ss-swatch').forEach(x => x.classList.remove('active'));
+                    s.classList.add('active'); colorInput.value = hex;
+                });
+                colorContainer.appendChild(s);
+            });
+        }
+
         const recurringToggle = document.getElementById('id_recurring_enabled');
         const recurrencePattern = document.getElementById('id_recurrence_pattern');
         const recurringOptions = document.getElementById('recurringOptions');
         const weekdayField = document.getElementById('weekdayField');
         const monthlyField = document.getElementById('monthlyField');
 
-        function updateRecurringVisibility() {
-            if (!recurringToggle || !recurringOptions) {
-                return;
-            }
-
-            if (recurringToggle.checked) {
-                recurringOptions.classList.remove('hidden');
-            } else {
-                recurringOptions.classList.add('hidden');
-            }
+        function updateRecurring() {
+            if (!recurringToggle || !recurringOptions) return;
+            recurringToggle.checked ? recurringOptions.classList.remove('hidden') : recurringOptions.classList.add('hidden');
         }
-
         function updatePatternFields() {
-            if (!recurrencePattern || !weekdayField || !monthlyField) {
-                return;
-            }
-
-            const pattern = recurrencePattern.value;
-            const isWeekly = pattern === 'weekly' || pattern === 'biweekly';
-            const isMonthly = pattern === 'monthly';
-
-            weekdayField.style.display = isWeekly ? 'block' : 'none';
-            monthlyField.style.display = isMonthly ? 'block' : 'none';
+            if (!recurrencePattern) return;
+            const p = recurrencePattern.value;
+            if (weekdayField) weekdayField.style.display = (p === 'weekly' || p === 'biweekly') ? 'block' : 'none';
+            if (monthlyField) monthlyField.style.display = (p === 'monthly') ? 'block' : 'none';
         }
 
-        if (recurringToggle) {
-            recurringToggle.addEventListener('change', updateRecurringVisibility);
-        }
-
-        if (recurrencePattern) {
-            recurrencePattern.addEventListener('change', updatePatternFields);
-        }
-
-        updateRecurringVisibility();
-        updatePatternFields();
-
-        const PE_COLORS = ['#ef4444','#f97316','#f59e0b','#FCAF17','#10b981','#06b6d4','#3b82f6','#8b5cf6','#ec4899','#6b7280'];
-        const colorContainer = document.getElementById('peColorPicker');
-        const colorInput = document.getElementById('id_color_hex');
-        const currentColor = (colorInput && colorInput.value) ? colorInput.value : '#FCAF17';
-
-        if (colorContainer && colorInput) {
-            PE_COLORS.forEach(function(hex) {
-                const swatch = document.createElement('div');
-                swatch.className = 'color-swatch' + (hex.toLowerCase() === currentColor.toLowerCase() ? ' active' : '');
-                swatch.style.background = hex;
-                swatch.title = hex;
-                swatch.addEventListener('click', function() {
-                    colorContainer.querySelectorAll('.color-swatch').forEach(function(s) { s.classList.remove('active'); });
-                    swatch.classList.add('active');
-                    colorInput.value = hex;
-                });
-                colorContainer.appendChild(swatch);
-            });
-        }
-    });
-</script>
-{% endblock %}
+        if (recurringToggle) recurringToggle.addEventListener('change', updateRecurring);
+        if (recurrencePattern) recurrencePattern.addEventListener('change', updatePatternFields);
+        updateRecurring(); updatePatternFields();
+    })();
+    </script>
+</body>
+</html>
