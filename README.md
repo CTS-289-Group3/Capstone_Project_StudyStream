@@ -7,10 +7,27 @@ Useful docs:
 - [Project Structure Guide](docs/project-structure.md)
 - [Database ERD](docs/database-erd.md)
 
+## Environment Setup
+ 
+This project requires a `.env` file in the root directory (same level as `manage.py`). This file is **not** committed to GitHub for security reasons — you must create it manually.
+ 
+Create a file called `.env` and add the following:
+ 
+```
+SECRET_KEY=your-django-secret-key
+EMAIL_HOST_USER=studystream.noreply@gmail.com
+EMAIL_HOST_PASSWORD=your-app-password
+```
+ 
+> Ask a team member for the actual `SECRET_KEY` and `EMAIL_HOST_PASSWORD` values. Never commit this file to GitHub.
+ 
+The forgot password email feature will not work without these values set correctly.
+
 ## Quick Start (Codespaces)
 
 1. Open the repository in GitHub Codespaces.
-2. In the terminal, run:
+2. Create your `.env` file as described above.
+3. In the terminal, run:
 
 ```bash
 pip install -r requirements.txt
@@ -19,7 +36,7 @@ python manage.py seed_demo_data --fresh
 python manage.py runserver
 ```
 
-3. Open port `8000` in the browser.
+4. Open port `8000` in the browser.
 
 Default seeded user:
 
@@ -52,19 +69,31 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-### 3. Apply database migrations
+### 3. Create your .env file
+
+Create a file called `.env` in the root directory (same level as `manage.py`) and add the following:
+ 
+```
+SECRET_KEY=your-django-secret-key
+EMAIL_HOST_USER=studystream.noreply@gmail.com
+EMAIL_HOST_PASSWORD=your-app-password
+```
+ 
+> Ask a team member for the actual `SECRET_KEY` and `EMAIL_HOST_PASSWORD` values. Never commit this file to GitHub.
+
+### 4. Apply database migrations
 
 ```bash
 python manage.py migrate
 ```
 
-### 4. (Optional) Seed demo data
+### 5. (Optional) Seed demo data
 
 ```bash
 python manage.py seed_demo_data --fresh
 ```
 
-### 5. Run the dev server
+### 6. Run the dev server
 
 ```bash
 python manage.py runserver
@@ -116,6 +145,7 @@ python manage.py seed_demo_data --username qa_user --password TestPass123!
 3. Work shift and personal event scheduling
 4. Conflict detection with replace/suggest actions
 5. Workload forecasting (GREEN/YELLOW/RED), deadline cluster detection, and recommendations
+6. Forgot password with email reset
 
 ## API Endpoints (Assignments/Courses)
 
