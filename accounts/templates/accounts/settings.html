@@ -3,50 +3,55 @@
 {% block title %}Settings - StudyStream{% endblock %}
 
 {% block nav_actions %}
-  <a class="ss-btn ss-btn-ghost" href="{% url 'dashboard' %}">Dashboard</a>
-  <a class="ss-btn ss-btn-solid" href="{% url 'logout' %}">Sign out</a>
+  <a href="{% url 'dashboard' %}" class="ss-nav-back">Dashboard</a>
+  <div class="ss-user-menu" id="userMenu">
+    <button type="button" class="ss-user-trigger" id="userMenuTrigger" aria-haspopup="true" aria-expanded="false">
+      <span class="ss-nav-avatar">{% if profile.avatar_text %}{{ profile.avatar_text|slice:':1'|upper }}{% elif profile.display_name %}{{ profile.display_name|slice:':1'|upper }}{% else %}{{ request.user.username|slice:':1'|upper }}{% endif %}</span>
+      <span class="ss-user-name">{% if profile.display_name %}{{ profile.display_name }}{% else %}{{ request.user.username }}{% endif %}</span>
+      <span class="ss-user-caret">▼</span>
+    </button>
+    <div class="ss-user-dropdown" id="userMenuDropdown">
+      <div class="ss-dropdown-header">
+        <div class="ss-dropdown-label">Signed in as</div>
+        <div class="ss-dropdown-name">{% if profile.display_name %}{{ profile.display_name }}{% else %}{{ request.user.username }}{% endif %}</div>
+      </div>
+      <a href="{% url 'profile' %}" class="ss-dropdown-link"><span>Edit Profile</span><span>›</span></a>
+      <a href="{% url 'settings' %}" class="ss-dropdown-link"><span>Settings</span><span>›</span></a>
+      <a href="{% url 'logout' %}" class="ss-dropdown-link"><span>Sign out</span><span>›</span></a>
+    </div>
+  </div>
 {% endblock %}
 
 {% block content %}
-<section style="position:relative;z-index:1;max-width:900px;margin:0 auto;padding:32px 24px 48px;">
-  <div class="glass" style="padding:28px;border-radius:24px;display:grid;gap:20px;">
-    <div>
-      <h1 style="font-family:'Montserrat',sans-serif;font-size:28px;font-weight:800;line-height:1.1;">Account Settings</h1>
-      <p style="margin-top:8px;color:var(--text2);font-size:15px;">Manage how your account appears across StudyStream.</p>
-    </div>
+<div class="ss-banner">
+  <div class="ss-banner-flare"></div>
+  <div class="ss-banner-flare2"></div>
+  <div class="ss-banner-content">
+    <div class="ss-banner-eyebrow">Account · Preferences</div>
+    <div class="ss-banner-title">Your <span>Settings</span></div>
+    <div class="ss-banner-sub">Tune workload assumptions so recommendations match your weekly reality.</div>
+  </div>
+  <div class="ss-banner-wave">
+    <svg viewBox="0 0 1440 32" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="display:block;width:100%;height:32px;">
+      <path d="M0,16 C360,32 1080,0 1440,16 L1440,32 L0,32 Z" fill="var(--bg)"/>
+    </svg>
+  </div>
+</div>
 
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;">
-      <div class="glass" style="padding:18px;">
-        <div style="font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;">Display Name</div>
-        <div style="margin-top:6px;font-size:20px;font-weight:800;">{% if profile.display_name %}{{ profile.display_name }}{% else %}{{ request.user.username }}{% endif %}</div>
-      </div>
-      <div class="glass" style="padding:18px;">
-        <div style="font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;">Avatar Letter</div>
-        <div style="margin-top:6px;font-size:20px;font-weight:800;">{% if profile.avatar_text %}{{ profile.avatar_text|slice:':1'|upper }}{% else %}{{ request.user.username|slice:':1'|upper }}{% endif %}</div>
-      </div>
-      <div class="glass" style="padding:18px;">
-        <div style="font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;">Email</div>
-        <div style="margin-top:6px;font-size:20px;font-weight:800;word-break:break-word;">{{ request.user.email }}</div>
-      </div>
-    </div>
-
-    <div class="glass" style="padding:22px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;">
+<main class="ss-main" style="max-width:840px;">
+  <div class="ss-card" style="padding:0;overflow:hidden;">
+    <div class="ss-profile-header" style="padding:28px 34px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
       <div>
-        <div style="font-size:18px;font-weight:800;">Profile Appearance</div>
-        <p style="margin-top:6px;color:var(--text2);font-size:14px;">Edit your avatar letter, display name, bio, major, and year.</p>
+        <div class="ss-profile-header-name" style="font-size:20px;">
+          {% if profile.display_name %}{{ profile.display_name }}{% else %}{{ request.user.username }}{% endif %}<span>'s Settings</span>
+        </div>
+        <div class="ss-profile-header-email">{{ request.user.email }}</div>
       </div>
-      <a class="ss-btn ss-btn-solid" href="{% url 'profile' %}">Edit Profile</a>
+      <a class="btn-secondary" href="{% url 'profile' %}">Edit Profile</a>
     </div>
 
-    <div class="glass" style="padding:22px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
-        <div>
-          <div style="font-size:18px;font-weight:800;">Workload Analysis Preferences</div>
-          <p style="margin-top:6px;color:var(--text2);font-size:14px;">Set your sleep routine, personal and family commitments, and driving time so StudyStream can suggest more realistic schedules.</p>
-        </div>
-      </div>
-
-      <form method="post" class="ss-form" style="margin-top:18px;">
+    <div style="padding:30px 34px;">
+      <form method="post" class="ss-form">
         {% csrf_token %}
 
         {% if messages %}
@@ -101,11 +106,12 @@
           </div>
         </div>
 
-        <div style="display:flex;gap:12px;margin-top:8px;">
+        <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap;">
           <button type="submit" class="btn-primary">Save Preferences →</button>
+          <a href="{% url 'dashboard' %}" class="btn-secondary">← Back to Dashboard</a>
         </div>
       </form>
     </div>
   </div>
-</section>
+</main>
 {% endblock %}
