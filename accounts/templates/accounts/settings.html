@@ -37,6 +37,75 @@
       </div>
       <a class="ss-btn ss-btn-solid" href="{% url 'profile' %}">Edit Profile</a>
     </div>
+
+    <div class="glass" style="padding:22px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+        <div>
+          <div style="font-size:18px;font-weight:800;">Workload Analysis Preferences</div>
+          <p style="margin-top:6px;color:var(--text2);font-size:14px;">Set your sleep routine, personal and family commitments, and driving time so StudyStream can suggest more realistic schedules.</p>
+        </div>
+      </div>
+
+      <form method="post" class="ss-form" style="margin-top:18px;">
+        {% csrf_token %}
+
+        {% if messages %}
+          {% for message in messages %}
+            <div class="ss-success-msg">✓ {{ message }}</div>
+          {% endfor %}
+        {% endif %}
+
+        {% if workload_form.non_field_errors %}
+          <div class="ss-form-errors">{{ workload_form.non_field_errors }}</div>
+        {% endif %}
+
+        <div class="ss-form-row ss-single">
+          <div class="ss-field">
+            <label for="id_sleep_hours_per_night">Hours of Sleep Per Night</label>
+            {{ workload_form.sleep_hours_per_night }}
+            {{ workload_form.sleep_hours_per_night.errors }}
+          </div>
+        </div>
+
+        <div class="ss-form-row">
+          <div class="ss-field">
+            <label for="id_sleep_start_time">Sleep Start Time</label>
+            {{ workload_form.sleep_start_time }}
+            {{ workload_form.sleep_start_time.errors }}
+          </div>
+          <div class="ss-field">
+            <label for="id_sleep_end_time">Sleep End Time</label>
+            {{ workload_form.sleep_end_time }}
+            {{ workload_form.sleep_end_time.errors }}
+          </div>
+        </div>
+
+        <div class="ss-form-row">
+          <div class="ss-field">
+            <label for="id_personal_time_hours_per_week">Personal Time (Hours Per Week)</label>
+            {{ workload_form.personal_time_hours_per_week }}
+            {{ workload_form.personal_time_hours_per_week.errors }}
+          </div>
+          <div class="ss-field">
+            <label for="id_family_time_hours_per_week">Family Time (Hours Per Week)</label>
+            {{ workload_form.family_time_hours_per_week }}
+            {{ workload_form.family_time_hours_per_week.errors }}
+          </div>
+        </div>
+
+        <div class="ss-form-row ss-single">
+          <div class="ss-field">
+            <label for="id_commute_time_hours_per_week">Driving and Commute Time (Hours Per Week)</label>
+            {{ workload_form.commute_time_hours_per_week }}
+            {{ workload_form.commute_time_hours_per_week.errors }}
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:8px;">
+          <button type="submit" class="btn-primary">Save Preferences →</button>
+        </div>
+      </form>
+    </div>
   </div>
 </section>
 {% endblock %}

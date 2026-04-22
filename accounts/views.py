@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+from decimal import Decimal, InvalidOperation
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
@@ -13,9 +14,16 @@ from django.utils.dateparse import parse_date, parse_datetime
 from django.utils import timezone
 from django.db.models import Q
 
+from core.scheduling import (
+    build_scheduled_item,
+    delete_scheduled_item,
+    get_schedule_conflict,
+    schedule_conflict_to_dict,
+    validate_schedule_items,
+)
 from home.workload_engine import recompute_and_persist_workload
 
-from .forms import ProfileForm
+from .forms import ProfileForm, WorkloadPreferencesForm
 from .models import Assignment, AssignmentSubtask, CLASS_COLORS, Course, Profile, Semester, Tag, TimeBlock
 
 
@@ -33,6 +41,17 @@ def _normalize_course_color(raw_value):
     if color_value in ALLOWED_CLASS_COLORS:
         return color_value
     return '#1E90FF'
+
+
+def _parse_nonnegative_decimal(raw_value, default='0.0'):
+    value = (raw_value or '').strip()
+    if not value:
+        return Decimal(default)
+    try:
+        parsed = Decimal(value)
+    except (InvalidOperation, ValueError, TypeError):
+        return Decimal(default)
+    return parsed if parsed >= 0 else Decimal(default)
 
 
 def _parse_due_date_value(raw_value):
@@ -55,6 +74,41 @@ def _parse_due_date_value(raw_value):
 def _refresh_workload(user):
     # Keep workload density snapshots current whenever assignments change.
     return recompute_and_persist_workload(user, weeks=4)
+
+
+def _schedule_conflict_response(conflict):
+    payload = schedule_conflict_to_dict(conflict)
+    return JsonResponse(
+        {
+            'success': False,
+            'error': payload['message'],
+            'conflict': payload['conflict'],
+            'requested': payload['requested'],
+            'suggestion': payload['suggestion'],
+        },
+        status=409,
+    )
+
+
+def _resolve_schedule_conflict(request, user, items, *, exclude_refs=None):
+    conflict = get_schedule_conflict(user, items, exclude_refs=exclude_refs)
+    if not conflict:
+        return None
+
+    replace_requested = _parse_checkbox_value(request.POST.get('replace_conflict'), default=False)
+    conflict_kind = request.POST.get('conflict_kind', '').strip()
+    conflict_id = request.POST.get('conflict_id', '').strip()
+
+    if (
+        replace_requested
+        and conflict.replaceable
+        and conflict.conflicting_item.kind_key == conflict_kind
+        and str(conflict.conflicting_item.object_id) == conflict_id
+    ):
+        delete_scheduled_item(user, conflict.conflicting_item)
+        return get_schedule_conflict(user, items, exclude_refs=exclude_refs)
+
+    return conflict
 
 
 # ─────────────────────────────────────────────────────────────
@@ -145,7 +199,17 @@ def settings_view(request):
         profile.avatar_text = request.user.username[:1].upper()
         profile.save(update_fields=['display_name', 'avatar_text'])
 
-    return render(request, 'accounts/settings.html', {'profile': profile})
+    if request.method == 'POST':
+        workload_form = WorkloadPreferencesForm(request.POST, instance=profile)
+        if workload_form.is_valid():
+            workload_form.save()
+            recompute_and_persist_workload(request.user, weeks=4)
+            messages.success(request, 'Workload preferences updated successfully.')
+            return redirect('/accounts/settings/')
+    else:
+        workload_form = WorkloadPreferencesForm(instance=profile)
+
+    return render(request, 'accounts/settings.html', {'profile': profile, 'workload_form': workload_form})
 
 
 # ─────────────────────────────────────────────────────────────
@@ -228,6 +292,7 @@ def course_create(request):
             professor_name=request.POST.get('professor_name', '').strip(),
             professor_email=request.POST.get('professor_email', '').strip(),
             meeting_times=request.POST.get('meeting_times', '').strip(),
+            weekly_study_hours=_parse_nonnegative_decimal(request.POST.get('weekly_study_hours'), '0.0'),
             canvas_url=request.POST.get('canvas_url', '').strip(),
         )
         return JsonResponse({
@@ -236,6 +301,7 @@ def course_create(request):
             'course_code': course.course_code,
             'course_name': course.course_name,
             'color_hex': course.color_hex,
+            'weekly_study_hours': float(course.weekly_study_hours),
             'semester_id': semester.id,
             'semester_name': semester.name,
         })
@@ -255,6 +321,10 @@ def course_edit(request, pk):
         course.professor_name  = request.POST.get('professor_name', course.professor_name).strip()
         course.professor_email = request.POST.get('professor_email', course.professor_email).strip()
         course.meeting_times   = request.POST.get('meeting_times', course.meeting_times).strip()
+        course.weekly_study_hours = _parse_nonnegative_decimal(
+            request.POST.get('weekly_study_hours', str(course.weekly_study_hours)),
+            str(course.weekly_study_hours),
+        )
         course.canvas_url      = request.POST.get('canvas_url', course.canvas_url).strip()
         course.save()
         return JsonResponse({'success': True})
@@ -274,7 +344,7 @@ def course_delete(request, pk):
 def course_list_json(request):
     courses = Course.objects.filter(user=request.user).select_related('semester').values(
         'id', 'course_code', 'course_name', 'color_hex',
-        'semester__id', 'semester__name', 'professor_name', 'meeting_times'
+        'semester__id', 'semester__name', 'professor_name', 'meeting_times', 'weekly_study_hours'
     )
     return JsonResponse({'courses': list(courses)})
 
@@ -326,6 +396,44 @@ def assignment_create(request):
         if due_date is None:
             return JsonResponse({'success': False, 'error': 'Invalid due date format.'}, status=400)
 
+        items_to_validate = [
+            build_scheduled_item(
+                'assignment',
+                request.POST.get('title', '').strip(),
+                due_date,
+                duration_hours=request.POST.get('estimated_hours') or None,
+                local_ref='assignment',
+            )
+        ]
+
+        subtask_titles = request.POST.getlist('subtask_title[]')
+        subtask_due_dates = request.POST.getlist('subtask_due_date[]')
+        subtask_estimated_hours = request.POST.getlist('subtask_estimated_hours[]')
+        for i, st in enumerate(subtask_titles):
+            st = st.strip()
+            if not st:
+                continue
+            raw_subtask_due_date = subtask_due_dates[i].strip() if i < len(subtask_due_dates) else ''
+            if not raw_subtask_due_date:
+                continue
+            parsed_subtask_due_date = _parse_due_date_value(raw_subtask_due_date)
+            if parsed_subtask_due_date is None:
+                return JsonResponse({'success': False, 'error': 'Invalid subtask due date format.'}, status=400)
+            raw_estimated = subtask_estimated_hours[i].strip() if i < len(subtask_estimated_hours) else ''
+            items_to_validate.append(
+                build_scheduled_item(
+                    'subtask',
+                    st,
+                    parsed_subtask_due_date,
+                    duration_hours=raw_estimated or None,
+                    local_ref=f'subtask:{i}',
+                )
+            )
+
+        conflict = _resolve_schedule_conflict(request, request.user, items_to_validate)
+        if conflict:
+            return _schedule_conflict_response(conflict)
+
         assignment = Assignment.objects.create(
             user=request.user,
             course=course,
@@ -357,10 +465,7 @@ def assignment_create(request):
             assignment.tags.set(valid_tags)
 
         # Subtasks
-        subtask_titles = request.POST.getlist('subtask_title[]')
-        subtask_due_dates = request.POST.getlist('subtask_due_date[]')
         subtask_due_times = request.POST.getlist('subtask_due_time[]')
-        subtask_estimated_hours = request.POST.getlist('subtask_estimated_hours[]')
         for i, st in enumerate(subtask_titles):
             st = st.strip()
             if st:
@@ -405,30 +510,86 @@ def assignment_edit(request, pk):
         course_id = request.POST.get('course')
         if course_id:
             assignment.course = get_object_or_404(Course, pk=course_id, user=request.user)
-        assignment.title           = request.POST.get('title', assignment.title).strip()
-        assignment.description     = request.POST.get('description', assignment.description).strip()
-        assignment.assignment_type = request.POST.get('assignment_type', assignment.assignment_type)
+        new_title = request.POST.get('title', assignment.title).strip()
+        new_description = request.POST.get('description', assignment.description).strip()
+        new_assignment_type = request.POST.get('assignment_type', assignment.assignment_type)
         due_date_raw               = request.POST.get('due_date')
+        new_due_date = assignment.due_date
         if due_date_raw:
             due_date = _parse_due_date_value(due_date_raw)
             if due_date is None:
                 return JsonResponse({'success': False, 'error': 'Invalid due date format.'}, status=400)
-            assignment.due_date = due_date
-        assignment.due_time        = request.POST.get('due_time', assignment.due_time).strip()
-        assignment.estimated_hours = request.POST.get('estimated_hours') or None
-        assignment.status          = request.POST.get('status', assignment.status)
-        assignment.priority_level  = request.POST.get('priority_level') or request.POST.get('priority', assignment.priority_level)
-        assignment.is_major_project = _parse_checkbox_value(
+            new_due_date = due_date
+        new_due_time = request.POST.get('due_time', assignment.due_time).strip()
+        new_estimated_hours = request.POST.get('estimated_hours') or None
+        new_status = request.POST.get('status', assignment.status)
+        new_priority_level = request.POST.get('priority_level') or request.POST.get('priority', assignment.priority_level)
+        new_is_major_project = _parse_checkbox_value(
             request.POST.get('is_major_project', request.POST.get('is_major')),
             default=assignment.is_major_project,
         )
-        assignment.canvas_link     = request.POST.get('canvas_link', assignment.canvas_link).strip()
-        assignment.rubric_link     = request.POST.get('rubric_link', assignment.rubric_link).strip()
-        assignment.submission_link = request.POST.get('submission_link', assignment.submission_link).strip()
-        assignment.contributes_to_workload = _parse_checkbox_value(
+        new_canvas_link = request.POST.get('canvas_link', assignment.canvas_link).strip()
+        new_rubric_link = request.POST.get('rubric_link', assignment.rubric_link).strip()
+        new_submission_link = request.POST.get('submission_link', assignment.submission_link).strip()
+        new_contributes_to_workload = _parse_checkbox_value(
             request.POST.get('contributes_to_workload'),
             default=assignment.contributes_to_workload,
         )
+
+        subtask_titles = request.POST.getlist('subtask_title[]')
+        subtask_due_dates = request.POST.getlist('subtask_due_date[]')
+        subtask_estimated_hours = request.POST.getlist('subtask_estimated_hours[]')
+
+        items_to_validate = [
+            build_scheduled_item(
+                'assignment',
+                new_title,
+                new_due_date,
+                duration_hours=new_estimated_hours,
+                object_id=assignment.id,
+                local_ref='assignment',
+            )
+        ]
+        for i, st in enumerate(subtask_titles):
+            st = st.strip()
+            if not st:
+                continue
+            raw_subtask_due_date = subtask_due_dates[i].strip() if i < len(subtask_due_dates) else ''
+            if not raw_subtask_due_date:
+                continue
+            parsed_subtask_due_date = _parse_due_date_value(raw_subtask_due_date)
+            if parsed_subtask_due_date is None:
+                return JsonResponse({'success': False, 'error': 'Invalid subtask due date format.'}, status=400)
+            raw_estimated = subtask_estimated_hours[i].strip() if i < len(subtask_estimated_hours) else ''
+            items_to_validate.append(
+                build_scheduled_item(
+                    'subtask',
+                    st,
+                    parsed_subtask_due_date,
+                    duration_hours=raw_estimated or None,
+                    local_ref=f'subtask:{i}',
+                )
+            )
+
+        exclude_refs = {('assignment', assignment.id)}
+        exclude_refs.update(('subtask', subtask.id) for subtask in assignment.subtasks.all())
+        conflict = _resolve_schedule_conflict(request, request.user, items_to_validate, exclude_refs=exclude_refs)
+        if conflict:
+            return _schedule_conflict_response(conflict)
+
+        assignment.title = new_title
+        assignment.description = new_description
+        assignment.assignment_type = new_assignment_type
+        assignment.due_date = new_due_date
+        assignment.due_time = new_due_time
+        assignment.estimated_hours = new_estimated_hours
+        assignment.status = new_status
+        assignment.priority_level = new_priority_level
+        assignment.is_major_project = new_is_major_project
+        assignment.canvas_link = new_canvas_link
+        assignment.rubric_link = new_rubric_link
+        assignment.submission_link = new_submission_link
+        assignment.contributes_to_workload = new_contributes_to_workload
         assignment.save()
 
         tag_ids = request.POST.getlist('tags')
@@ -436,10 +597,7 @@ def assignment_edit(request, pk):
         assignment.tags.set(valid_tags)
 
         # Subtasks (replace existing ordering/content from modal payload)
-        subtask_titles = request.POST.getlist('subtask_title[]')
-        subtask_due_dates = request.POST.getlist('subtask_due_date[]')
         subtask_due_times = request.POST.getlist('subtask_due_time[]')
-        subtask_estimated_hours = request.POST.getlist('subtask_estimated_hours[]')
         assignment.subtasks.all().delete()
         for i, st in enumerate(subtask_titles):
             st = st.strip()
@@ -472,6 +630,7 @@ def assignment_edit(request, pk):
             'status': st.status,
             'step_order': st.step_order,
             'sequence_order': st.step_order,
+            'course_color': assignment.course.color_hex,
             'due_date': st.due_date.strftime('%Y-%m-%dT%H:%M') if st.due_date else '',
             'due_time': st.due_time,
             'estimated_hours': str(st.estimated_hours) if st.estimated_hours else '',
@@ -551,6 +710,7 @@ def assignment_list_json(request):
                 'status': st.status,
                 'step_order': st.step_order,
                 'sequence_order': st.step_order,
+                'course_color': a.course.color_hex,
                 'due_date': st.due_date.isoformat() if st.due_date else None,
                 'due_time': st.due_time,
                 'estimated_hours': float(st.estimated_hours) if st.estimated_hours is not None else None,
@@ -599,13 +759,40 @@ def subtask_create(request, assignment_pk):
         title = request.POST.get('title', '').strip()
         if not title:
             return JsonResponse({'success': False, 'error': 'Title required.'}, status=400)
+        parsed_due_date = _parse_due_date_value(request.POST.get('due_date')) if request.POST.get('due_date') else None
+        conflict_error = validate_schedule_items(
+            request.user,
+            [
+                build_scheduled_item(
+                    'subtask',
+                    title,
+                    parsed_due_date,
+                    duration_hours=request.POST.get('estimated_hours') or None,
+                    local_ref='subtask',
+                )
+            ],
+        )
+        if conflict_error:
+            conflict = get_schedule_conflict(
+                request.user,
+                [
+                    build_scheduled_item(
+                        'subtask',
+                        title,
+                        parsed_due_date,
+                        duration_hours=request.POST.get('estimated_hours') or None,
+                        local_ref='subtask',
+                    )
+                ],
+            )
+            return _schedule_conflict_response(conflict)
         order = assignment.subtasks.count()
         subtask = AssignmentSubtask.objects.create(
             assignment=assignment,
             title=title,
             description=request.POST.get('description', '').strip(),
             step_order=order,
-            due_date=_parse_due_date_value(request.POST.get('due_date')) if request.POST.get('due_date') else None,
+            due_date=parsed_due_date,
             due_time=request.POST.get('due_time', '').strip(),
             estimated_hours=request.POST.get('estimated_hours') or None,
         )
@@ -617,6 +804,7 @@ def subtask_create(request, assignment_pk):
             'status': subtask.status,
             'step_order': subtask.step_order,
             'sequence_order': subtask.step_order,
+            'course_color': assignment.course.color_hex,
             'completion_percentage': subtask.completion_percentage,
         })
     return JsonResponse({'success': False}, status=405)
@@ -638,6 +826,37 @@ def subtask_edit(request, pk):
     raw_due_date = request.POST.get('due_date', '')
     due_date = _parse_due_date_value(raw_due_date) if raw_due_date else None
 
+    conflict_error = validate_schedule_items(
+        request.user,
+        [
+            build_scheduled_item(
+                'subtask',
+                title,
+                due_date,
+                duration_hours=request.POST.get('estimated_hours') or None,
+                object_id=subtask.id,
+                local_ref='subtask',
+            )
+        ],
+        exclude_refs={('subtask', subtask.id)},
+    )
+    if conflict_error:
+        conflict = get_schedule_conflict(
+            request.user,
+            [
+                build_scheduled_item(
+                    'subtask',
+                    title,
+                    due_date,
+                    duration_hours=request.POST.get('estimated_hours') or None,
+                    object_id=subtask.id,
+                    local_ref='subtask',
+                )
+            ],
+            exclude_refs={('subtask', subtask.id)},
+        )
+        return _schedule_conflict_response(conflict)
+
     subtask.title = title
     subtask.description = request.POST.get('description', subtask.description).strip()
     subtask.due_date = due_date
@@ -654,6 +873,7 @@ def subtask_edit(request, pk):
         'status': subtask.status,
         'step_order': subtask.step_order,
         'sequence_order': subtask.step_order,
+        'course_color': subtask.assignment.course.color_hex,
         'due_date': subtask.due_date.isoformat() if subtask.due_date else None,
         'due_time': subtask.due_time,
         'estimated_hours': float(subtask.estimated_hours) if subtask.estimated_hours is not None else None,
@@ -710,6 +930,7 @@ def subtask_list_json(request, assignment_pk):
             'status': st.status,
             'step_order': st.step_order,
             'sequence_order': st.step_order,
+            'course_color': assignment.course.color_hex,
             'due_date': st.due_date.isoformat() if st.due_date else None,
             'due_time': st.due_time,
             'estimated_hours': float(st.estimated_hours) if st.estimated_hours is not None else None,

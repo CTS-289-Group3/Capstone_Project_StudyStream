@@ -45,6 +45,10 @@
   --ss-soft-bubble-bg: #edf3fa;
   --ss-soft-bubble-border: #d6e2ef;
   --ss-soft-bubble-hover: #e3ecf7;
+  --ss-calendar-grid-line: rgba(3, 78, 162, 0.16);
+  --ss-calendar-grid-line-strong: rgba(3, 78, 162, 0.22);
+  --ss-calendar-grid-fill: #fbfdff;
+  --ss-calendar-header-fill: #f4f8fe;
 }
 @keyframes dashIn { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
 
@@ -211,6 +215,7 @@
   border: none;
   border-radius: 999px;
   padding: 0;
+  position: relative;
 }
 .course-inline-dot {
   width: 8px;
@@ -228,6 +233,54 @@
   font-size: 9px;
   font-weight: 800;
   color: var(--text2);
+}
+.course-hover-card {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  min-width: 240px;
+  max-width: 320px;
+  transform: translate(-50%, 6px);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 280;
+  background: var(--bg2);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  padding: 10px 12px;
+  transition: opacity 0.16s ease, transform 0.16s ease;
+}
+.course-inline-chip:hover .course-hover-card,
+.course-inline-chip:focus-within .course-hover-card {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+.course-hover-title {
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--text);
+  margin-bottom: 7px;
+}
+.course-hover-row {
+  font-size: 11px;
+  color: var(--text2);
+  line-height: 1.4;
+  margin-top: 4px;
+}
+.course-hover-row strong {
+  color: var(--text);
+  font-weight: 800;
+}
+.course-hover-tip {
+  margin-top: 8px;
+  font-size: 10px;
+  color: var(--muted);
+}
+@media (hover: none) {
+  .course-hover-card {
+    display: none;
+  }
 }
 .semester-strip-empty {
   font-size: 11px;
@@ -476,7 +529,7 @@
 .month-cell.other-month { opacity:.4; }
 .month-date { font-size:12px;font-weight:800;color:var(--text); }
 .month-cell.today .month-date { color:var(--ss-blue); }
-.month-event { font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px;margin-top:2px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.month-event { font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
 .month-more { font-size:9px;color:var(--text2);font-weight:700;margin-top:2px; }
 
 /* Week grid */
@@ -497,8 +550,9 @@
 .today-badge { display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--ss-blue);color:#fff;font-size:11px;font-weight:900; }
 .week-time-label { font-size:10px;font-weight:700;color:var(--muted);text-align:right;padding:6px 6px 0 0;line-height:1; }
 .week-cell { background:var(--input-bg);border-radius:5px;position:relative;cursor:pointer;transition:background .12s; }
+.week-cell-fill { position:absolute; left:0; right:0; border-left:3px solid transparent; border-radius:5px; pointer-events:none; z-index:0; }
 .week-cell:hover { background:var(--card-border); }
-.cal-event { position:absolute;left:2px;right:2px;top:2px;bottom:2px;border-radius:5px;padding:3px 5px;font-size:9px;font-weight:700;overflow:hidden;z-index:1;cursor:pointer;display:flex;flex-direction:column;justify-content:center;gap:1px; }
+.cal-event { position:absolute;left:2px;right:2px;top:2px;bottom:2px;border-radius:5px;padding:3px 5px;font-size:9px;font-weight:700;overflow:hidden;z-index:2;cursor:pointer;display:flex;flex-direction:column;justify-content:center;gap:1px; }
 .cal-event-title { font-size:9px;font-weight:700;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
 .cal-event-detail { font-size:8px;font-weight:500;opacity:0.88;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
 
@@ -509,11 +563,50 @@
 .day-slot { display:flex; min-height:52px; border-bottom:1px solid var(--card-border); }
 .day-time { font-size:11px;font-weight:700;color:var(--muted);width:56px;flex-shrink:0;padding:8px 10px 0 0;text-align:right;border-right:1px solid var(--card-border); }
 .day-events { flex:1;padding:5px 8px;display:flex;flex-direction:column;gap:4px; }
-.day-event { border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;color:#fff;display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;box-sizing:border-box;cursor:default; }
+.day-event { border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;box-sizing:border-box;cursor:default; }
 .day-event-title { font-size:12px;font-weight:700;line-height:1.3; }
 .day-event-detail { font-size:11px;font-weight:400;opacity:0.87;line-height:1.3; }
 .day-event.clickable { cursor:pointer; }
 .day-slot.shift-slot { background:transparent; }
+
+[data-theme="light"] #weekGrid.active {
+  background: var(--ss-calendar-grid-line);
+  border: 1px solid var(--ss-calendar-grid-line-strong);
+  border-radius: 14px;
+  padding: 1px;
+}
+[data-theme="light"] .week-day-header,
+[data-theme="light"] .week-day-date,
+[data-theme="light"] .week-time-label {
+  background: var(--ss-calendar-header-fill);
+}
+[data-theme="light"] .week-cell {
+  background: var(--ss-calendar-grid-fill);
+  box-shadow: inset 0 0 0 1px rgba(3, 78, 162, 0.06);
+}
+[data-theme="light"] .week-cell:hover {
+  background: #e8f1fb;
+}
+[data-theme="light"] #dayView.active {
+  border: 1px solid var(--ss-calendar-grid-line-strong);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--ss-calendar-grid-fill);
+}
+[data-theme="light"] .day-header-row {
+  background: var(--ss-calendar-header-fill);
+  border-bottom: 1px solid var(--ss-calendar-grid-line-strong);
+}
+[data-theme="light"] .day-slot {
+  border-bottom-color: var(--ss-calendar-grid-line-strong);
+}
+[data-theme="light"] .day-time {
+  background: var(--ss-calendar-header-fill);
+  border-right-color: var(--ss-calendar-grid-line-strong);
+}
+[data-theme="light"] .day-events {
+  background: var(--ss-calendar-grid-fill);
+}
 
 /* ── TASKS ── */
 .tasks-card { background:var(--card);backdrop-filter:blur(20px);border:1px solid var(--card-border);border-radius:20px;padding:18px;box-shadow:var(--shadow); position:sticky; top:88px; height:560px; max-height:560px; overflow:auto; }
@@ -843,6 +936,229 @@ body.modal-open { overflow:hidden; }
   z-index:2;
 }
 
+.course-manager-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 360px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.course-manager-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--ss-soft-bubble-bg, var(--input-bg));
+  border: 1px solid var(--ss-soft-bubble-border, var(--input-border));
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+.course-manager-main {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.course-manager-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.course-manager-copy {
+  min-width: 0;
+}
+.course-manager-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.course-manager-meta {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.course-manager-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.course-manager-empty {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text2);
+  background: var(--ss-soft-bubble-bg, var(--input-bg));
+  border: 1px solid var(--ss-soft-bubble-border, var(--input-border));
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.confirm-modal {
+  max-width: 480px;
+  background:
+    radial-gradient(circle at top right, rgba(239, 68, 68, 0.18), transparent 36%),
+    radial-gradient(circle at top left, rgba(252, 175, 23, 0.12), transparent 28%),
+    var(--bg2);
+}
+.confirm-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(239, 68, 68, 0.22);
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.16), rgba(252, 175, 23, 0.08));
+}
+.confirm-badge {
+  flex: 0 0 auto;
+  min-width: 84px;
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-align: center;
+  text-transform: uppercase;
+}
+.confirm-title-text {
+  color: var(--text);
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1.3;
+}
+.confirm-body-text {
+  margin-top: 6px;
+  color: var(--text2);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.confirm-task-card {
+  border: 1px solid var(--card-border);
+  border-radius: 18px;
+  padding: 14px 15px;
+  background: var(--input-bg);
+}
+.confirm-task-label {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--text2);
+  margin-bottom: 8px;
+}
+.confirm-task-name {
+  font-size: 15px;
+  font-weight: 900;
+  color: var(--text);
+  line-height: 1.4;
+}
+.confirm-task-meta {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--text2);
+}
+.ss-btn-danger {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  border: 1px solid rgba(239, 68, 68, 0.32);
+  color: #fff;
+}
+.ss-btn-danger:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(239, 68, 68, 0.18);
+}
+
+.conflict-modal {
+  max-width: 560px;
+  background:
+    radial-gradient(circle at top right, rgba(252, 175, 23, 0.2), transparent 34%),
+    radial-gradient(circle at top left, rgba(30, 144, 255, 0.14), transparent 30%),
+    var(--bg2);
+}
+.conflict-header {
+  display:flex;
+  align-items:flex-start;
+  gap:14px;
+  padding:16px;
+  margin-bottom:16px;
+  border:1px solid rgba(252, 175, 23, 0.28);
+  border-radius:18px;
+  background:linear-gradient(135deg, rgba(252, 175, 23, 0.2), rgba(249, 115, 22, 0.1));
+}
+.conflict-badge {
+  flex:0 0 auto;
+  min-width:84px;
+  border-radius:999px;
+  padding:8px 12px;
+  background:#FCAF17;
+  color:#1f2937;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.12em;
+  text-align:center;
+  text-transform:uppercase;
+}
+.conflict-title-text {
+  color:var(--text);
+  font-size:17px;
+  font-weight:900;
+  line-height:1.3;
+}
+.conflict-body-text {
+  margin-top:6px;
+  color:var(--text2);
+  font-size:13px;
+  line-height:1.6;
+}
+.conflict-card-grid {
+  display:grid;
+  gap:12px;
+}
+.conflict-card {
+  border:1px solid var(--card-border);
+  border-radius:18px;
+  padding:15px 16px;
+  background:var(--input-bg);
+}
+.conflict-card-highlight {
+  border-color:rgba(30, 144, 255, 0.34);
+  box-shadow:0 0 0 1px rgba(30, 144, 255, 0.08) inset;
+}
+.conflict-card-label {
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.09em;
+  text-transform:uppercase;
+  color:var(--text2);
+  margin-bottom:8px;
+}
+.conflict-card-title {
+  font-size:15px;
+  font-weight:900;
+  color:var(--text);
+}
+.conflict-card-time {
+  margin-top:5px;
+  font-size:12px;
+  color:var(--text2);
+  line-height:1.5;
+}
+.conflict-card-note {
+  margin-top:8px;
+  font-size:12px;
+  color:var(--ss-blue-light);
+  font-weight:700;
+}
+
 /* Subtasks expand panel */
 .subtask-panel { margin-top:8px;padding:12px;background:var(--input-bg);border-radius:12px; }
 .subtask-panel-item { display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--card-border); }
@@ -967,6 +1283,7 @@ body.modal-open { overflow:hidden; }
     activeSemId:    {{ active_sem_id|default:"null" }},
     csrfToken:   '{{ csrf_token }}',
     urls: {
+      asgList:    '/accounts/api/assignments/',
       semCreate:  '/accounts/api/semesters/create/',
       semEdit:    '/accounts/api/semesters/{id}/edit/',
       semDelete:  '/accounts/api/semesters/{id}/delete/',
@@ -984,6 +1301,8 @@ body.modal-open { overflow:hidden; }
       stEdit:     '/accounts/api/subtasks/{id}/edit/',
       stToggle:   '/accounts/api/subtasks/{id}/toggle/',
       stDelete:   '/accounts/api/subtasks/{id}/delete/',
+      peList:     '/home/api/personal-events/',
+      wsList:     '/home/api/work-shifts/',
     }
   };
   /* eslint-enable */
@@ -1021,6 +1340,7 @@ body.modal-open { overflow:hidden; }
           <div class="ss-create-dropdown">
             <a class="ss-create-dropdown-link" href="javascript:void(0)" onclick="openSemesterModal(); this.closest('details').removeAttribute('open');">Semester</a>
             <a class="ss-create-dropdown-link" href="javascript:void(0)" onclick="openCourseModal(); this.closest('details').removeAttribute('open');">Course</a>
+            <a class="ss-create-dropdown-link" href="javascript:void(0)" onclick="openCourseManagerModal(); this.closest('details').removeAttribute('open');">View Courses</a>
           </div>
         </details>
       </div>
@@ -1203,6 +1523,10 @@ body.modal-open { overflow:hidden; }
       </div>
     </div>
     <div class="form-group">
+      <label class="form-label">Weekly Study Hours (Online/Async)</label>
+      <input class="form-input" id="courseWeeklyHours" type="number" min="0" max="168" step="0.5" placeholder="e.g. 4.0">
+    </div>
+    <div class="form-group">
       <label class="form-label">Canvas URL</label>
       <input class="form-input" id="courseCanvas" type="url" placeholder="https://…">
     </div>
@@ -1214,6 +1538,20 @@ body.modal-open { overflow:hidden; }
     <div class="modal-footer">
       <button class="ss-btn ss-btn-ghost" onclick="closeModal('courseModal')">Cancel</button>
       <button class="ss-btn ss-btn-solid" onclick="saveCourse()">Save Course</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MODAL: COURSE MANAGER
+═══════════════════════════════════════════ -->
+<div class="modal-overlay" id="courseManagerModal">
+  <div class="modal" style="max-width:620px;">
+    <div class="modal-title">📚 <span>Current Courses</span></div>
+    <div id="courseManagerBody" class="course-manager-list"></div>
+    <div class="modal-footer" style="justify-content:space-between;">
+      <button class="ss-btn ss-btn-ghost" onclick="closeModal('courseManagerModal')">Close</button>
+      <button class="ss-btn ss-btn-solid" onclick="addCourseFromManager()">+ Add Course</button>
     </div>
   </div>
 </div>
@@ -1348,6 +1686,50 @@ body.modal-open { overflow:hidden; }
     </div>
     <div class="modal-footer">
       <button class="ss-btn ss-btn-ghost" onclick="closeModal('subtaskModal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="taskDeleteModal">
+  <div class="modal confirm-modal">
+    <div class="modal-title">🗑 <span>Delete Task</span></div>
+    <div class="confirm-header">
+      <div class="confirm-badge">Delete</div>
+      <div>
+        <div class="confirm-title-text">Remove this task from StudyStream?</div>
+        <div class="confirm-body-text">This will permanently remove it from your planner, calendar, and workload view.</div>
+      </div>
+    </div>
+    <div class="confirm-task-card">
+      <div class="confirm-task-label">Task</div>
+      <div class="confirm-task-name" id="taskDeleteName">Untitled task</div>
+      <div class="confirm-task-meta" id="taskDeleteMeta"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="ss-btn ss-btn-ghost" onclick="closeTaskDeleteDialog(false)">Keep Task</button>
+      <button class="ss-btn ss-btn-danger" id="taskDeleteConfirmBtn" onclick="closeTaskDeleteDialog(true)">Delete Task</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="scheduleDeleteModal">
+  <div class="modal confirm-modal">
+    <div class="modal-title">🗑 <span id="scheduleDeleteModalTitle">Delete Item</span></div>
+    <div class="confirm-header">
+      <div class="confirm-badge" id="scheduleDeleteBadge">Delete</div>
+      <div>
+        <div class="confirm-title-text" id="scheduleDeleteHeading">Remove this item from StudyStream?</div>
+        <div class="confirm-body-text" id="scheduleDeleteBody">This will permanently remove it from your calendar.</div>
+      </div>
+    </div>
+    <div class="confirm-task-card">
+      <div class="confirm-task-label" id="scheduleDeleteLabel">Item</div>
+      <div class="confirm-task-name" id="scheduleDeleteName">Untitled item</div>
+      <div class="confirm-task-meta" id="scheduleDeleteMeta"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="ss-btn ss-btn-ghost" id="scheduleDeleteCancelBtn" onclick="closeScheduleDeleteDialog(false)">Keep Item</button>
+      <button class="ss-btn ss-btn-danger" id="scheduleDeleteConfirmBtn" onclick="closeScheduleDeleteDialog(true)">Delete Item</button>
     </div>
   </div>
 </div>
@@ -1542,13 +1924,46 @@ body.modal-open { overflow:hidden; }
   </div>
 </div>
 
+<div class="modal-overlay" id="scheduleConflictModal">
+  <div class="modal conflict-modal">
+    <div class="modal-title">⚠️ <span>Schedule Warning</span></div>
+    <div class="conflict-header">
+      <div class="conflict-badge">Warning</div>
+      <div>
+        <div class="conflict-title-text">This time slot is already taken.</div>
+        <div class="conflict-body-text" id="scheduleConflictMessage">Only one item can occupy a time block.</div>
+      </div>
+    </div>
+    <div class="conflict-card-grid">
+      <div class="conflict-card">
+        <div class="conflict-card-label">Current Scheduled Item</div>
+        <div class="conflict-card-title" id="scheduleConflictExistingTitle"></div>
+        <div class="conflict-card-time" id="scheduleConflictExistingTime"></div>
+      </div>
+      <div class="conflict-card conflict-card-highlight" id="scheduleConflictSuggestionCard" style="display:none;">
+        <div class="conflict-card-label">Suggested Open Time</div>
+        <div class="conflict-card-title" id="scheduleConflictSuggestionTitle">Use this open slot instead</div>
+        <div class="conflict-card-time" id="scheduleConflictSuggestionTime"></div>
+        <div class="conflict-card-note">StudyStream found the next open slot that fits the same duration.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="ss-btn ss-btn-ghost" onclick="closeScheduleConflictDialog('cancel')">Keep Current Schedule</button>
+      <button class="ss-btn ss-btn-ghost" id="scheduleConflictSuggestBtn" style="display:none;" onclick="closeScheduleConflictDialog('suggestion')">Use Suggested Time</button>
+      <button class="ss-btn ss-btn-solid" id="scheduleConflictReplaceBtn" style="display:none;" onclick="closeScheduleConflictDialog('replace')">Replace Existing Item</button>
+    </div>
+  </div>
+</div>
+
 
 <script>
 /* ═════════════════════════════════════════════
    UTILITIES
 ═════════════════════════════════════════════ */
 const $ = id => document.getElementById(id);
-const CSRF = SS_DATA.csrfToken;
+const CSRF = (SS_DATA.csrfToken && SS_DATA.csrfToken !== 'NOTPROVIDED')
+  ? SS_DATA.csrfToken
+  : ((window.getCsrf && window.getCsrf()) || '');
 
 /* Parse a due_date ISO string as LOCAL time (not UTC).
    Django stores datetimes as UTC and isoformat() adds +00:00,
@@ -1597,39 +2012,146 @@ function minuteFromTimeStr(t) {
   return t ? parseInt(t.split(':')[1], 10) : 0;
 }
 
-function timedEventCoversHour(startTime, endTime, hour) {
-  const sh = hourFromTimeStr(startTime);
-  const eh = hourFromTimeStr(endTime);
-  const em = minuteFromTimeStr(endTime);
-  return sh <= hour && (eh > hour || (eh === hour && em > 0));
+function timeStrToMinutes(t) {
+  if (!t) return null;
+  return (hourFromTimeStr(t) * 60) + minuteFromTimeStr(t);
 }
 
-function assignmentCoversHour(a, hour) {
-  const start = parseLocalDate(a.due_date);
-  if (Number.isNaN(start.getTime())) return false;
+function getMinuteSegmentForHour(startMinutes, endMinutes, hour) {
+  if (startMinutes === null || endMinutes === null) return null;
+  const slotStart = hour * 60;
+  const slotEnd = slotStart + 60;
+  const overlapStart = Math.max(startMinutes, slotStart);
+  const overlapEnd = Math.min(endMinutes, slotEnd);
+  if (overlapEnd <= overlapStart) return null;
+  return {
+    topPct: ((overlapStart - slotStart) / 60) * 100,
+    heightPct: ((overlapEnd - overlapStart) / 60) * 100,
+  };
+}
 
+function getDateSegmentForHour(start, end, hour) {
+  if (!(start instanceof Date) || Number.isNaN(start.getTime())) return null;
+  if (!(end instanceof Date) || Number.isNaN(end.getTime())) return null;
+  const slotStart = new Date(start);
+  slotStart.setHours(hour, 0, 0, 0);
+  const slotEnd = new Date(slotStart.getTime() + 60 * 60 * 1000);
+  const overlapStart = Math.max(start.getTime(), slotStart.getTime());
+  const overlapEnd = Math.min(end.getTime(), slotEnd.getTime());
+  if (overlapEnd <= overlapStart) return null;
+  return {
+    topPct: ((overlapStart - slotStart.getTime()) / 3600000) * 100,
+    heightPct: ((overlapEnd - overlapStart) / 3600000) * 100,
+  };
+}
+
+function getTimedEventHourSegment(startTime, endTime, hour) {
+  if (!startTime) return null;
+  const startMinutes = timeStrToMinutes(startTime);
+  const endMinutes = endTime ? timeStrToMinutes(endTime) : startMinutes + 60;
+  return getMinuteSegmentForHour(startMinutes, endMinutes, hour);
+}
+
+function getAssignmentHourSegment(a, hour) {
+  const start = parseLocalDate(a.due_date);
+  if (Number.isNaN(start.getTime())) return null;
   const rawHours = parseFloat(a.estimated_hours);
   const durationHours = Number.isFinite(rawHours) && rawHours > 0 ? rawHours : 1;
   const end = new Date(start.getTime() + durationHours * 60 * 60 * 1000);
-
-  const slotStart = new Date(start);
-  slotStart.setHours(hour, 0, 0, 0);
-  const slotEnd = new Date(slotStart.getTime() + 60 * 60 * 1000);
-  return start < slotEnd && end > slotStart;
+  return getDateSegmentForHour(start, end, hour);
 }
 
-function subtaskCoversHour(st, hour) {
+function getSubtaskHourSegment(st, hour) {
   const start = parseLocalDate(st.due_date);
-  if (Number.isNaN(start.getTime())) return false;
-
+  if (Number.isNaN(start.getTime())) return null;
   const rawHours = parseFloat(st.estimated_hours);
   const durationHours = Number.isFinite(rawHours) && rawHours > 0 ? rawHours : 1;
   const end = new Date(start.getTime() + durationHours * 60 * 60 * 1000);
+  return getDateSegmentForHour(start, end, hour);
+}
 
-  const slotStart = new Date(start);
-  slotStart.setHours(hour, 0, 0, 0);
-  const slotEnd = new Date(slotStart.getTime() + 60 * 60 * 1000);
-  return start < slotEnd && end > slotStart;
+function withAlpha(hexColor, alphaHex) {
+  return `${hexColor}${alphaHex}`;
+}
+
+function getReadableTextColor(hexColor) {
+  return '#000000';
+}
+
+function getSubtaskCourseColor(subtask) {
+  return subtask?.course_color || '#1E90FF';
+}
+
+function buildSubtaskCheckStyle(subtask) {
+  const color = getSubtaskCourseColor(subtask);
+  const isComplete = subtask?.status === 'complete';
+  const background = isComplete ? color : withAlpha(color, '18');
+  const textColor = isComplete ? getReadableTextColor(color) : color;
+  return [
+    `width:18px`,
+    `height:18px`,
+    `border-radius:5px`,
+    `flex-shrink:0`,
+    `display:flex`,
+    `align-items:center`,
+    `justify-content:center`,
+    `font-size:11px`,
+    `background:${background}`,
+    `border:2px solid ${color}`,
+    `color:${isComplete ? textColor : 'transparent'}`,
+  ].join(';');
+}
+
+function buildSubtaskRowAccentStyle(subtask) {
+  const color = getSubtaskCourseColor(subtask);
+  return [
+    `display:flex`,
+    `align-items:center`,
+    `gap:10px`,
+    `padding:8px 10px`,
+    `border-bottom:1px solid var(--card-border)`,
+    `border-left:4px solid ${color}`,
+    `background:${withAlpha(color, '10')}`,
+    `border-radius:10px`,
+  ].join(';');
+}
+
+function addWeekCellFill(cell, segment, colorHex) {
+  if (!segment) return;
+  const fill = document.createElement('div');
+  fill.className = 'week-cell-fill';
+  fill.style.top = `${segment.topPct}%`;
+  fill.style.height = `${segment.heightPct}%`;
+  fill.style.background = colorHex;
+  fill.style.borderLeftColor = colorHex;
+  cell.appendChild(fill);
+}
+
+function applyWeekEventSegment(ev, segment) {
+  if (!segment) return;
+  ev.style.top = `calc(${segment.topPct}% + 2px)`;
+  ev.style.height = `calc(${segment.heightPct}% - 4px)`;
+  ev.style.bottom = 'auto';
+}
+
+function buildDaySlotFillStyle(fills) {
+  if (!fills.length) return '';
+  const layers = fills.map(({ segment, colorHex }) => (
+    `linear-gradient(to bottom, transparent ${segment.topPct}%, ${colorHex} ${segment.topPct}%, ${colorHex} ${segment.topPct + segment.heightPct}%, transparent ${segment.topPct + segment.heightPct}%)`
+  ));
+  return `style="background:${layers.join(',')};"`;
+}
+
+function timedEventCoversHour(startTime, endTime, hour) {
+  return !!getTimedEventHourSegment(startTime, endTime, hour);
+}
+
+function assignmentCoversHour(a, hour) {
+  return !!getAssignmentHourSegment(a, hour);
+}
+
+function subtaskCoversHour(st, hour) {
+  return !!getSubtaskHourSegment(st, hour);
 }
 
 function formatEventTimeRange(startTime, endTime) {
@@ -1650,8 +2172,243 @@ async function api(endpoint, method='POST', body={}) {
     else fd.append(k, v);
   }
   fd.append('csrfmiddlewaretoken', CSRF);
-  const res = await fetch(endpoint, { method, body: fd });
-  return res.json();
+  const res = await fetch(endpoint, {
+    method,
+    body: fd,
+    headers: CSRF ? { 'X-CSRFToken': CSRF } : {},
+    credentials: 'same-origin',
+  });
+  const data = await res.json();
+  data._status = res.status;
+  return data;
+}
+
+function formatScheduleDateTime(isoValue) {
+  const dt = parseLocalDate(isoValue);
+  if (Number.isNaN(dt.getTime())) return isoValue || 'Unknown time';
+  return dt.toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}
+
+let scheduleConflictResolver = null;
+let taskDeleteResolver = null;
+let scheduleDeleteResolver = null;
+
+function closeScheduleConflictDialog(action='cancel') {
+  closeModal('scheduleConflictModal');
+  if (scheduleConflictResolver) {
+    const resolve = scheduleConflictResolver;
+    scheduleConflictResolver = null;
+    resolve(action);
+  }
+}
+
+function showScheduleConflictDialog(data) {
+  const conflict = data.conflict;
+  if (!conflict) {
+    return Promise.resolve('cancel');
+  }
+
+  $('scheduleConflictMessage').textContent = data.error || 'This time conflicts with an existing scheduled item.';
+  $('scheduleConflictExistingTitle').textContent = conflict.title || 'Scheduled item';
+  $('scheduleConflictExistingTime').textContent = `${formatScheduleDateTime(conflict.start)} - ${formatScheduleDateTime(conflict.end)}`;
+
+  const replaceBtn = $('scheduleConflictReplaceBtn');
+  const suggestBtn = $('scheduleConflictSuggestBtn');
+  const suggestionCard = $('scheduleConflictSuggestionCard');
+
+  replaceBtn.style.display = conflict.replaceable ? '' : 'none';
+
+  if (data.suggestion) {
+    suggestionCard.style.display = '';
+    $('scheduleConflictSuggestionTime').textContent = `${formatScheduleDateTime(data.suggestion.start)} - ${formatScheduleDateTime(data.suggestion.end)}`;
+    suggestBtn.style.display = '';
+  } else {
+    suggestionCard.style.display = 'none';
+    $('scheduleConflictSuggestionTime').textContent = '';
+    suggestBtn.style.display = 'none';
+  }
+
+  openModal('scheduleConflictModal');
+  return new Promise((resolve) => {
+    scheduleConflictResolver = resolve;
+  });
+}
+
+function formatTaskDeleteMeta(assignment) {
+  if (!assignment) return '';
+  const parts = [];
+  if (assignment.course_code) parts.push(assignment.course_code);
+  if (assignment.due_date) parts.push(`Due ${formatScheduleDateTime(assignment.due_date)}`);
+  return parts.join(' · ');
+}
+
+function closeTaskDeleteDialog(confirmed=false) {
+  closeModal('taskDeleteModal');
+  if (taskDeleteResolver) {
+    const resolve = taskDeleteResolver;
+    taskDeleteResolver = null;
+    resolve(Boolean(confirmed));
+  }
+}
+
+function showTaskDeleteDialog(assignment) {
+  if (!assignment) {
+    return Promise.resolve(false);
+  }
+
+  $('taskDeleteName').textContent = assignment.title || 'Untitled task';
+  $('taskDeleteMeta').textContent = formatTaskDeleteMeta(assignment);
+
+  openModal('taskDeleteModal');
+  setTimeout(() => {
+    $('taskDeleteConfirmBtn')?.focus();
+  }, 0);
+
+  return new Promise((resolve) => {
+    taskDeleteResolver = resolve;
+  });
+}
+
+function formatScheduleDeleteDate(dateValue) {
+  if (!dateValue) return '';
+  const dt = new Date(`${dateValue}T00:00:00`);
+  if (Number.isNaN(dt.getTime())) return dateValue;
+  return dt.toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+  });
+}
+
+function formatScheduleDeleteTimeRange(startTime, endTime) {
+  if (!startTime) return '';
+  const start = formatTime12(startTime.substring(0, 5));
+  if (!endTime) return start;
+  return `${start}-${formatTime12(endTime.substring(0, 5))}`;
+}
+
+function formatScheduleDeleteMeta(item, kind) {
+  if (!item) return '';
+  const parts = [];
+  if (kind === 'event') {
+    const dateLabel = formatScheduleDeleteDate(item.event_date);
+    const timeLabel = formatScheduleDeleteTimeRange(item.start_time, item.end_time);
+    if (dateLabel) parts.push(dateLabel);
+    if (timeLabel) parts.push(timeLabel);
+    if (item.location) parts.push(item.location);
+  } else if (kind === 'shift') {
+    const dateLabel = formatScheduleDeleteDate(item.shift_date);
+    const timeLabel = formatScheduleDeleteTimeRange(item.start_time, item.end_time);
+    if (dateLabel) parts.push(dateLabel);
+    if (timeLabel) parts.push(timeLabel);
+    if (item.location) parts.push(item.location);
+  }
+  return parts.join(' · ');
+}
+
+function closeScheduleDeleteDialog(confirmed=false) {
+  closeModal('scheduleDeleteModal');
+  if (scheduleDeleteResolver) {
+    const resolve = scheduleDeleteResolver;
+    scheduleDeleteResolver = null;
+    resolve(Boolean(confirmed));
+  }
+}
+
+function showScheduleDeleteDialog(kind, item) {
+  if (!item) {
+    return Promise.resolve(false);
+  }
+
+  const config = kind === 'shift'
+    ? {
+        title: 'Delete Work Shift',
+        badge: 'Shift',
+        heading: 'Remove this work shift from StudyStream?',
+        body: 'This will permanently remove it from your calendar and workload view.',
+        label: 'Work Shift',
+        keep: 'Keep Shift',
+        del: 'Delete Shift',
+        name: item.title || item.employer_name || item.job_title || 'Work Shift',
+      }
+    : {
+        title: 'Delete Personal Event',
+        badge: 'Event',
+        heading: 'Remove this personal event from StudyStream?',
+        body: 'This will permanently remove it from your calendar and upcoming schedule.',
+        label: 'Personal Event',
+        keep: 'Keep Event',
+        del: 'Delete Event',
+        name: item.title || 'Personal Event',
+      };
+
+  $('scheduleDeleteModalTitle').textContent = config.title;
+  $('scheduleDeleteBadge').textContent = config.badge;
+  $('scheduleDeleteHeading').textContent = config.heading;
+  $('scheduleDeleteBody').textContent = config.body;
+  $('scheduleDeleteLabel').textContent = config.label;
+  $('scheduleDeleteName').textContent = config.name;
+  $('scheduleDeleteMeta').textContent = formatScheduleDeleteMeta(item, kind);
+  $('scheduleDeleteCancelBtn').textContent = config.keep;
+  $('scheduleDeleteConfirmBtn').textContent = config.del;
+
+  openModal('scheduleDeleteModal');
+  setTimeout(() => {
+    $('scheduleDeleteConfirmBtn')?.focus();
+  }, 0);
+
+  return new Promise((resolve) => {
+    scheduleDeleteResolver = resolve;
+  });
+}
+
+async function resolveScheduleConflict(data, { onReplace, onUseSuggestion }) {
+  const conflict = data.conflict;
+  if (!conflict) {
+    alert(data.error || 'Schedule conflict detected.');
+    return false;
+  }
+
+  const action = await showScheduleConflictDialog(data);
+  if (action === 'replace' && conflict.replaceable && onReplace) {
+    return await onReplace(conflict);
+  }
+  if (action === 'suggestion' && data.suggestion && onUseSuggestion) {
+    return await onUseSuggestion(data.suggestion);
+  }
+  return false;
+}
+
+async function refreshDashboardScheduleState() {
+  const [assignmentsRes, personalEventsRes, workShiftsRes] = await Promise.all([
+    fetch(SS_DATA.urls.asgList, { credentials: 'same-origin' }),
+    fetch(SS_DATA.urls.peList, { credentials: 'same-origin' }),
+    fetch(SS_DATA.urls.wsList, { credentials: 'same-origin' }),
+  ]);
+
+  if (assignmentsRes.ok) {
+    const payload = await assignmentsRes.json();
+    state.assignments = payload.assignments || [];
+  }
+  if (personalEventsRes.ok) {
+    const payload = await personalEventsRes.json();
+    state.personalEvents = payload.personal_events || [];
+  }
+  if (workShiftsRes.ok) {
+    const payload = await workShiftsRes.json();
+    state.workShifts = payload.work_shifts || [];
+  }
+
+  renderTasks();
+  renderCourses();
+  renderCalendar();
+  renderSidebarUpcoming();
+  updateStats();
 }
 
 async function refreshWorkloadData() {
@@ -1682,7 +2439,22 @@ function closeModal(id) {
 
 // Close on overlay click
 document.querySelectorAll('.modal-overlay').forEach(ov => {
-  ov.addEventListener('click', e => { if(e.target === ov) ov.classList.remove('open'); });
+  ov.addEventListener('click', e => {
+    if (e.target !== ov) return;
+    if (ov.id === 'scheduleConflictModal') {
+      closeScheduleConflictDialog('cancel');
+      return;
+    }
+    if (ov.id === 'taskDeleteModal') {
+      closeTaskDeleteDialog(false);
+      return;
+    }
+    if (ov.id === 'scheduleDeleteModal') {
+      closeScheduleDeleteDialog(false);
+      return;
+    }
+    closeModal(ov.id);
+  });
 });
 
 /* ── Greeting ── */
@@ -1717,8 +2489,12 @@ const PLANNER_EVENT_COLLAPSED_COUNT = 6;
    COLOR SWATCHES
 ═════════════════════════════════════════════ */
 const COURSE_COLORS = [
-  '#1E90FF', '#3B82F6', '#2563EB', '#14B8A6',
-  '#22C55E', '#84CC16', '#F59E0B', '#EF4444',
+  '#DC143C', '#1E90FF', '#228B22', '#FFD700',
+  '#8B00FF', '#FF8C00', '#008080', '#FF69B4',
+];
+const TAG_PICKER_COLORS = [
+  '#EF4444', '#F97316', '#F59E0B', '#10B981',
+  '#06B6D4', '#3B82F6', '#8B5CF6', '#EC4899',
 ];
 const SCHEDULE_COLORS = [
   '#8B5CF6', '#A855F7', '#EC4899', '#F43F5E',
@@ -1745,7 +2521,7 @@ function buildColorPicker(containerId, hiddenId, defaultColor='#1E90FF', palette
 }
 
 buildColorPicker('courseColorPicker', 'courseColorVal', '#1E90FF', COURSE_COLORS);
-buildColorPicker('asgNewTagColorPicker', 'asgNewTagColorVal', '#3B82F6', COURSE_COLORS);
+buildColorPicker('asgNewTagColorPicker', 'asgNewTagColorVal', '#3B82F6', TAG_PICKER_COLORS);
 buildColorPicker('peColorPicker', 'peColorVal', '#8B5CF6', SCHEDULE_COLORS);
 buildColorPicker('wsColorPicker', 'wsColorVal', '#10B981', SCHEDULE_COLORS);
 if (!$('asgNewTagColorVal')) {
@@ -1840,9 +2616,9 @@ async function editPersonalEvent(eventId) {
   openModal('personalEventModal');
 }
 
-async function savePersonalEvent() {
+async function savePersonalEvent(extraBody={}) {
   const id = $('peEditId').value;
-  if (!id) { alert('No event ID.'); return; }
+  if (!id) { alert('No event ID.'); return false; }
   
   const body = {
     title: $('peTitle').value.trim(),
@@ -1852,24 +2628,44 @@ async function savePersonalEvent() {
     location: $('peLocation').value.trim(),
     description: $('peDescription').value.trim(),
     color_hex: $('peColorVal').value,
+    ...extraBody,
   };
   
-  if (!body.title) { alert('Title is required.'); return; }
-  if (!body.event_date) { alert('Date is required.'); return; }
+  if (!body.title) { alert('Title is required.'); return false; }
+  if (!body.event_date) { alert('Date is required.'); return false; }
 
   const data = await api(`/home/api/personal-events/${id}/edit/`, 'POST', body);
   if (data.success) {
-    const idx = state.personalEvents.findIndex(e => e.id == id);
-    if (idx > -1) state.personalEvents[idx] = { ...state.personalEvents[idx], ...body, id: parseInt(id) };
+    await refreshDashboardScheduleState();
     closeModal('personalEventModal');
     closeModal('personalEventViewModal');
-    renderCalendar();
-    renderSidebarUpcoming();
-  } else alert(data.error || 'Error saving event.');
+    return true;
+  } else if (data._status === 409 && data.conflict) {
+    return await resolveScheduleConflict(data, {
+      onReplace: (conflict) => savePersonalEvent({
+        replace_conflict: 'on',
+        conflict_kind: conflict.kind_key,
+        conflict_id: conflict.id,
+      }),
+      onUseSuggestion: (suggestion) => {
+        const start = parseLocalDate(suggestion.start);
+        const end = parseLocalDate(suggestion.end);
+        $('peDate').value = localDateStr(start);
+        $('peStartTime').value = `${String(start.getHours()).padStart(2, '0')}:${String(start.getMinutes()).padStart(2, '0')}`;
+        $('peEndTime').value = `${String(end.getHours()).padStart(2, '0')}:${String(end.getMinutes()).padStart(2, '0')}`;
+        return savePersonalEvent();
+      },
+    });
+  } else {
+    alert(data.error || 'Error saving event.');
+    return false;
+  }
 }
 
 async function deletePersonalEvent(eventId) {
-  if (!confirm('Delete this event?')) return;
+  const personalEvent = state.personalEvents.find(e => e.id === eventId);
+  const confirmed = await showScheduleDeleteDialog('event', personalEvent);
+  if (!confirmed) return;
   const data = await api(`/home/api/personal-events/${eventId}/delete/`, 'POST');
   if (data.success) {
     state.personalEvents = state.personalEvents.filter(e => e.id !== eventId);
@@ -1949,9 +2745,9 @@ async function editWorkShift(shiftId) {
   openModal('workShiftModal');
 }
 
-async function saveWorkShift() {
+async function saveWorkShift(extraBody={}) {
   const id = $('wsEditId').value;
-  if (!id) { alert('No shift ID.'); return; }
+  if (!id) { alert('No shift ID.'); return false; }
   
   const body = {
     employer_name: $('wsEmployerName').value.trim(),
@@ -1964,32 +2760,42 @@ async function saveWorkShift() {
     is_recurring: $('wsRecurring').checked ? 'on' : '',
     recurrence_pattern: $('wsRecurrencePattern').value.trim(),
     color_hex: $('wsColorVal').value,
+    ...extraBody,
   };
   
-  if (!body.shift_start) { alert('Shift start is required.'); return; }
-  if (!body.shift_end) { alert('Shift end is required.'); return; }
+  if (!body.shift_start) { alert('Shift start is required.'); return false; }
+  if (!body.shift_end) { alert('Shift end is required.'); return false; }
 
   const data = await api(`/home/api/work-shifts/${id}/edit/`, 'POST', body);
   if (data.success) {
-    const idx = state.workShifts.findIndex(s => s.id == id);
-    if (idx > -1) {
-      const updated = data.shift || {};
-      state.workShifts[idx] = {
-        ...state.workShifts[idx],
-        ...updated,
-        title: updated.title || updated.employer_name || updated.job_title || state.workShifts[idx].title,
-      };
-    }
+    await refreshDashboardScheduleState();
     closeModal('workShiftModal');
      closeModal('workShiftViewModal');
-    renderCalendar();
-    renderSidebarUpcoming();
     await refreshWorkloadData();
-  } else alert(data.error || 'Error saving shift.');
+    return true;
+  } else if (data._status === 409 && data.conflict) {
+    return await resolveScheduleConflict(data, {
+      onReplace: (conflict) => saveWorkShift({
+        replace_conflict: 'on',
+        conflict_kind: conflict.kind_key,
+        conflict_id: conflict.id,
+      }),
+      onUseSuggestion: (suggestion) => {
+        $('wsShiftStart').value = toDatetimeLocalValue(suggestion.start);
+        $('wsShiftEnd').value = toDatetimeLocalValue(suggestion.end);
+        return saveWorkShift();
+      },
+    });
+  } else {
+    alert(data.error || 'Error saving shift.');
+    return false;
+  }
 }
 
 async function deleteWorkShift(shiftId) {
-  if (!confirm('Delete this shift?')) return;
+  const workShift = state.workShifts.find(s => s.id === shiftId);
+  const confirmed = await showScheduleDeleteDialog('shift', workShift);
+  if (!confirmed) return;
   const data = await api(`/home/api/work-shifts/${shiftId}/delete/`, 'POST');
   if (data.success) {
     state.workShifts = state.workShifts.filter(s => s.id !== shiftId);
@@ -2128,9 +2934,16 @@ function renderCourses() {
   const previewCourses = visibleCourses.slice(0, 4);
   const overflowCount = Math.max(0, visibleCourses.length - previewCourses.length);
   el.innerHTML = `<div class="course-inline-list">${previewCourses.map(c => `
-      <div class="course-inline-chip" title="${c.course_code}: ${c.course_name}">
+      <div class="course-inline-chip" title="${escapeAttr(c.course_code)}: ${escapeAttr(c.course_name)}">
         <div class="course-inline-dot" style="background:${c.color_hex}"></div>
-        <span class="course-inline-name">${c.course_code}</span>
+        <span class="course-inline-name">${escapeAttr(c.course_code)}</span>
+        <div class="course-hover-card">
+          <div class="course-hover-title">${escapeAttr(c.course_code)} - ${escapeAttr(c.course_name)}</div>
+          <div class="course-hover-row"><strong>Professor:</strong> ${escapeAttr(c.professor_name || 'Not set')}</div>
+          <div class="course-hover-row"><strong>Meeting:</strong> ${escapeAttr(c.meeting_times || 'No scheduled meeting time')}</div>
+          <div class="course-hover-row"><strong>Async Study:</strong> ${Number(c.weekly_study_hours || 0).toFixed(1)}h/week</div>
+          <div class="course-hover-tip">Use Manage > View Courses to edit details.</div>
+        </div>
       </div>
     `).join('')}
     ${overflowCount ? `<span class="course-inline-summary">+${overflowCount} more</span>` : ''}
@@ -2144,10 +2957,61 @@ function openCourseModal() {
   $('courseName').value = '';
   $('courseProfessor').value = '';
   $('courseMeetTimes').value = '';
+  $('courseWeeklyHours').value = '';
   $('courseCanvas').value = '';
   populateCourseModalSemDropdown();
   buildColorPicker('courseColorPicker','courseColorVal', '#1E90FF', COURSE_COLORS);
   openModal('courseModal');
+}
+
+function openCourseManagerModal() {
+  renderCourseManagerList();
+  openModal('courseManagerModal');
+}
+
+function renderCourseManagerList() {
+  const el = $('courseManagerBody');
+  if (!el) return;
+
+  const activeSemester = state.semesters.find(s => s.is_active) || null;
+  if (!activeSemester) {
+    el.innerHTML = '<div class="course-manager-empty">Add and activate a semester first to manage courses.</div>';
+    return;
+  }
+
+  const visibleCourses = state.courses
+    .filter(c => c['semester__id'] === activeSemester.id)
+    .sort((a, b) => a.course_code.localeCompare(b.course_code));
+
+  if (!visibleCourses.length) {
+    el.innerHTML = '<div class="course-manager-empty">No courses found in the active semester yet.</div>';
+    return;
+  }
+
+  el.innerHTML = visibleCourses.map(c => `
+    <div class="course-manager-item">
+      <div class="course-manager-main">
+        <div class="course-manager-dot" style="background:${c.color_hex}"></div>
+        <div class="course-manager-copy">
+          <div class="course-manager-title">${c.course_code} - ${c.course_name}</div>
+          <div class="course-manager-meta">${c.professor_name || 'No professor set'}</div>
+        </div>
+      </div>
+      <div class="course-manager-actions">
+        <button class="ss-btn ss-btn-ghost" style="padding:6px 10px;font-size:11px;" onclick="editCourseFromManager(${c.id})">Edit</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function editCourseFromManager(id) {
+  closeModal('courseManagerModal');
+  editCourse(id);
+}
+
+function addCourseFromManager() {
+  closeModal('courseManagerModal');
+  openCourseModal();
 }
 
 function editCourse(id) {
@@ -2158,6 +3022,7 @@ function editCourse(id) {
   $('courseName').value      = c.course_name;
   $('courseProfessor').value = c.professor_name || '';
   $('courseMeetTimes').value = c.meeting_times  || '';
+  $('courseWeeklyHours').value = c.weekly_study_hours ?? '';
   $('courseCanvas').value    = c.canvas_url      || '';
   $('courseModalTitle').textContent = 'Edit Course';
   populateCourseModalSemDropdown();
@@ -2175,6 +3040,7 @@ async function saveCourse() {
     color_hex:      $('courseColorVal').value,
     professor_name: $('courseProfessor').value.trim(),
     meeting_times:  $('courseMeetTimes').value.trim(),
+    weekly_study_hours: $('courseWeeklyHours').value,
     canvas_url:     $('courseCanvas').value.trim(),
   };
   if (!body.course_code || !body.course_name) { alert('Code and name are required.'); return; }
@@ -2191,6 +3057,7 @@ async function saveCourse() {
       color_hex: body.color_hex,
       professor_name: body.professor_name,
       meeting_times: body.meeting_times,
+      weekly_study_hours: body.weekly_study_hours ? parseFloat(body.weekly_study_hours) : 0,
       'semester__id': parseInt(body.semester),
       'semester__name': sem ? sem.name : '',
     };
@@ -2202,6 +3069,9 @@ async function saveCourse() {
     }
     closeModal('courseModal');
     renderCourses();
+    if ($('courseManagerModal').classList.contains('open')) {
+      renderCourseManagerList();
+    }
     populateAsgCourseDropdown();
     updateStats();
     await refreshWorkloadData();
@@ -2215,6 +3085,9 @@ async function deleteCourse(id, code) {
     state.courses     = state.courses.filter(c => c.id !== id);
     state.assignments = state.assignments.filter(a => a.course_id !== id);
     renderCourses();
+    if ($('courseManagerModal').classList.contains('open')) {
+      renderCourseManagerList();
+    }
     renderTasks();
     renderCalendar();
     populateAsgCourseDropdown();
@@ -2626,7 +3499,26 @@ async function editAssignment(id) {
   openModal('assignmentModal');
 }
 
-async function saveAssignment() {
+function applyAssignmentSuggestion(suggestion) {
+  if (!suggestion) return false;
+  if (suggestion.local_ref === 'assignment') {
+    $('asgDue').value = toDatetimeLocalValue(suggestion.start);
+    return true;
+  }
+  if (suggestion.local_ref && suggestion.local_ref.startsWith('subtask:')) {
+    const idx = parseInt(suggestion.local_ref.split(':')[1], 10);
+    const rows = [...document.querySelectorAll('#subtaskBuilder .subtask-row')];
+    const row = rows[idx];
+    if (!row) return false;
+    const dueField = row.querySelector('.subtask-due-date');
+    if (!dueField) return false;
+    dueField.value = toDatetimeLocalValue(suggestion.start);
+    return true;
+  }
+  return false;
+}
+
+async function saveAssignment(extraBody={}) {
   const id     = $('asgEditId').value;
   const tagIds = getSelectedTagIds();
   const subtaskRows = [...document.querySelectorAll('#subtaskBuilder .subtask-row')];
@@ -2659,30 +3551,45 @@ async function saveAssignment() {
     'subtask_due_date[]': subtaskPayload.map((item) => item.due_date),
     'subtask_due_time[]': subtaskPayload.map((item) => item.due_time),
     'subtask_estimated_hours[]': subtaskPayload.map((item) => item.estimated_hours),
+    ...extraBody,
   };
 
-  if (!body.title)    { alert('Title is required.'); return; }
-  if (!body.course)   { alert('Please add a course first.'); return; }
-  if (!body.due_date) { alert('Due date is required.'); return; }
+  if (!body.title)    { alert('Title is required.'); return false; }
+  if (!body.course)   { alert('Please add a course first.'); return false; }
+  if (!body.due_date) { alert('Due date is required.'); return false; }
 
   const endpoint = id ? url(SS_DATA.urls.asgEdit, id) : SS_DATA.urls.asgCreate;
   const data = await api(endpoint, 'POST', body);
   if (data.success) {
-    // Refresh from server list
-    const res = await fetch('/accounts/api/assignments/');
-    const json = await res.json();
-    state.assignments = json.assignments;
+    await refreshDashboardScheduleState();
     closeModal('assignmentModal');
-    renderTasks();
-    renderCourses();
-    renderCalendar();
-    updateStats();
     await refreshWorkloadData();
-  } else alert(data.error || 'Error saving task.');
+    return true;
+  } else if (data._status === 409 && data.conflict) {
+    return await resolveScheduleConflict(data, {
+      onReplace: (conflict) => saveAssignment({
+        replace_conflict: 'on',
+        conflict_kind: conflict.kind_key,
+        conflict_id: conflict.id,
+      }),
+      onUseSuggestion: (suggestion) => {
+        if (!applyAssignmentSuggestion(suggestion)) {
+          alert(data.error || 'Could not apply the suggested time.');
+          return false;
+        }
+        return saveAssignment();
+      },
+    });
+  } else {
+    alert(data.error || 'Error saving assignment.');
+    return false;
+  }
 }
 
 async function deleteAssignment(id) {
-  if (!confirm('Delete this assignment?')) return;
+  const assignment = state.assignments.find(a => a.id === id);
+  const confirmed = await showTaskDeleteDialog(assignment);
+  if (!confirmed) return;
   const data = await api(url(SS_DATA.urls.asgDelete, id), 'POST');
   if (data.success) {
     state.assignments = state.assignments.filter(a => a.id !== id);
@@ -2737,8 +3644,8 @@ async function refreshSubtaskPanel(asgId) {
     el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0;">No steps yet. Add one below!</div>';
   } else {
     el.innerHTML = json.subtasks.map(st => `
-      <div class="subtask-panel-item">
-        <div class="st-check${st.status==='complete'?' done':''}" onclick="toggleSubtask(${st.id},this,${asgId})">${st.status==='complete'?'✓':''}</div>
+      <div class="subtask-panel-item" style="${buildSubtaskRowAccentStyle(st)}">
+        <div style="${buildSubtaskCheckStyle(st)}" onclick="toggleSubtask(${st.id},this,${asgId})">${st.status==='complete'?'✓':''}</div>
         <div style="display:grid;grid-template-columns:1fr 170px 140px 90px;gap:6px;flex:1;min-width:0;align-items:center;">
           <input class="form-input st-edit-title" data-subtask-id="${st.id}" value="${escapeAttr(st.title)}" placeholder="Step title" style="padding:6px 10px;font-size:12px;">
           <input class="form-input st-edit-due-date" data-subtask-id="${st.id}" type="datetime-local" value="${st.due_date ? escapeAttr(String(st.due_date).slice(0,16)) : ''}" style="padding:6px 10px;font-size:12px;">
@@ -2888,11 +3795,8 @@ function openTaskView(id) {
         $('tvSubtasks').innerHTML = `
           <div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;">Steps</div>
           ${d.subtasks.map(s=>`
-            <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--card-border);">
-              <div style="width:18px;height:18px;border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;
-                   background:${s.status==='complete'?'var(--ss-blue)':'var(--input-bg)'};
-                   border:2px solid ${s.status==='complete'?'var(--ss-blue)':'var(--muted)'};
-                   color:${s.status==='complete'?'#fff':'transparent'};">✓</div>
+            <div style="${buildSubtaskRowAccentStyle(s)}">
+              <div style="${buildSubtaskCheckStyle(s)}">✓</div>
               <div style="display:flex;flex-direction:column;gap:2px;min-width:0;">
                 <span style="font-size:13px;font-weight:600;color:var(--text);${s.status==='complete'?'text-decoration:line-through;color:var(--muted);':''}">${s.title}</span>
                 <span style="font-size:11px;color:var(--muted);">${s.due_time || (s.due_date ? new Date(s.due_date).toLocaleString() : 'No due date')}${s.estimated_hours ? ` · ${s.estimated_hours}h` : ''}</span>
@@ -3075,31 +3979,27 @@ function renderWeekCal() {
         return hourFromTimeStr(pe.start_time) === h;
       });
 
-      // Highlight full shift duration across all covered hour blocks.
+      // Render only the portion of the hour that is actually occupied.
       const shifts = getWorkShiftsByDate(dateStr);
-      const slotShifts = shifts.filter(s => {
-        const sh = parseInt(s.start_time.split(':')[0], 10);
-        const eh = parseInt(s.end_time.split(':')[0], 10);
-        const em = parseInt(s.end_time.split(':')[1], 10);
-        return sh <= h && (eh > h || (eh === h && em > 0));
-      });
+      const slotShifts = shifts.filter(s => timedEventCoversHour(s.start_time, s.end_time, h));
       if (slotShifts.length) {
         const baseHex = slotShifts[0].color_hex;
-        cell.style.background = baseHex;
-        cell.style.borderLeft = `3px solid ${baseHex}`;
+        addWeekCellFill(cell, getTimedEventHourSegment(slotShifts[0].start_time, slotShifts[0].end_time, h), baseHex);
       } else if (slotSchool.length && slotPersonal.length) {
-        const asgHex = slotSchool[0].course_color || '#007DC5';
+        const schoolItem = slotAsgs[0] || slotSubtasks[0];
+        const asgHex = schoolItem.course_color || '#007DC5';
         const personalHex = slotPersonal[0].color_hex || '#FCAF17';
-        cell.style.background = `linear-gradient(135deg, ${asgHex}, ${personalHex})`;
-        cell.style.borderLeft = `3px solid ${asgHex}`;
+        const schoolSegment = slotAsgs[0] ? getAssignmentHourSegment(slotAsgs[0], h) : getSubtaskHourSegment(slotSubtasks[0], h);
+        addWeekCellFill(cell, schoolSegment, asgHex);
+        addWeekCellFill(cell, getTimedEventHourSegment(slotPersonal[0].start_time, slotPersonal[0].end_time, h), personalHex);
       } else if (slotSchool.length) {
-        const asgHex = slotSchool[0].course_color || '#007DC5';
-        cell.style.background = asgHex;
-        cell.style.borderLeft = `3px solid ${asgHex}`;
+        const schoolItem = slotAsgs[0] || slotSubtasks[0];
+        const asgHex = schoolItem.course_color || '#007DC5';
+        const schoolSegment = slotAsgs[0] ? getAssignmentHourSegment(slotAsgs[0], h) : getSubtaskHourSegment(slotSubtasks[0], h);
+        addWeekCellFill(cell, schoolSegment, asgHex);
       } else if (slotPersonal.length) {
         const personalHex = slotPersonal[0].color_hex || '#FCAF17';
-        cell.style.background = personalHex;
-        cell.style.borderLeft = `3px solid ${personalHex}`;
+        addWeekCellFill(cell, getTimedEventHourSegment(slotPersonal[0].start_time, slotPersonal[0].end_time, h), personalHex);
       }
 
       // Show assignment label only at start hour.
@@ -3107,7 +4007,8 @@ function renderWeekCal() {
       startAsgs.forEach(a => {
         const ev = document.createElement('div');
         ev.className = 'cal-event';
-        ev.style.cssText = `background:${a.course_color};`;
+        ev.style.cssText = `background:${a.course_color};color:${getReadableTextColor(a.course_color)};`;
+        applyWeekEventSegment(ev, getAssignmentHourSegment(a, h));
         const dueTime = parseLocalDate(a.due_date).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
         const durationLabel = a.estimated_hours ? ` · ${a.estimated_hours}h` : '';
         const asgDetail = `Start ${dueTime}${durationLabel}${a.course_code ? ' · ' + a.course_code : ''}`;
@@ -3121,7 +4022,8 @@ function renderWeekCal() {
       startSubtasks.forEach(st => {
         const ev = document.createElement('div');
         ev.className = 'cal-event';
-        ev.style.cssText = `background:${st.course_color};outline:1px dashed rgba(255,255,255,.55);`;
+        ev.style.cssText = `background:${st.course_color};color:${getReadableTextColor(st.course_color)};outline:1px dashed rgba(255,255,255,.55);`;
+        applyWeekEventSegment(ev, getSubtaskHourSegment(st, h));
         const startTime = parseLocalDate(st.due_date).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
         const durationLabel = st.estimated_hours ? ` · ${st.estimated_hours}h` : '';
         const detail = `${st.assignment_title ? st.assignment_title + ' · ' : ''}${startTime}${durationLabel}`;
@@ -3137,7 +4039,8 @@ function renderWeekCal() {
         if (sh === h) {
           const ev = document.createElement('div');
           ev.className = 'cal-event';
-          ev.style.cssText = `background:${s.color_hex};cursor:pointer;`;
+          ev.style.cssText = `background:${s.color_hex};color:${getReadableTextColor(s.color_hex)};cursor:pointer;`;
+          applyWeekEventSegment(ev, getTimedEventHourSegment(s.start_time, s.end_time, h));
           const shiftDetail = `${formatTime12(s.start_time)}–${formatTime12(s.end_time)}${s.location ? ' · ' + s.location : ''}`;
           ev.innerHTML = `<div class="cal-event-title">${s.title}</div><div class="cal-event-detail">${shiftDetail}</div>`;
           ev.title = `${s.title} — ${shiftDetail} (click to edit)`;
@@ -3151,7 +4054,9 @@ function renderWeekCal() {
       startPersonal.forEach(pe => {
         const ev = document.createElement('div');
         ev.className = 'cal-event';
-        ev.style.cssText = `background:${pe.color_hex || '#FCAF17'};color:#1A2540;${pe.id ? 'cursor:pointer;' : ''}`;
+        const personalColor = pe.color_hex || '#FCAF17';
+        ev.style.cssText = `background:${personalColor};color:${getReadableTextColor(personalColor)};${pe.id ? 'cursor:pointer;' : ''}`;
+        applyWeekEventSegment(ev, getTimedEventHourSegment(pe.start_time, pe.end_time, h));
         const peTime = pe.start_time ? formatTime12(pe.start_time) : '';
         const peEnd = pe.end_time ? formatTime12(pe.end_time) : '';
         const peRange = peTime && peEnd ? `${peTime}–${peEnd}` : peTime;
@@ -3218,19 +4123,19 @@ function renderMonthCal() {
 
     let html = `<div class="month-date">${d}</div>`;
     asgs.slice(0,2).forEach(a => {
-      html += `<div class="month-event" style="background:${a.course_color};cursor:pointer;" title="${a.title}" onclick="event.stopPropagation();openTaskView(${a.id})">${a.title}</div>`;
+      html += `<div class="month-event" style="background:${a.course_color};color:${getReadableTextColor(a.course_color)};cursor:pointer;" title="${a.title}" onclick="event.stopPropagation();openTaskView(${a.id})">${a.title}</div>`;
     });
     if (asgs.length > 2) html += `<div class="month-more">+${asgs.length-2} more</div>`;
 
     subtasks.forEach(st => {
       const d = parseLocalDate(st.due_date);
       const label = `↳ ${st.title} · ${d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
-      html += `<div class="month-event" style="background:${st.course_color};outline:1px dashed rgba(255,255,255,.55);cursor:pointer;" title="${label}${st.assignment_title ? ' · ' + st.assignment_title : ''}" onclick="event.stopPropagation();openTaskView(${st.assignment_id})">${label}</div>`;
+      html += `<div class="month-event" style="background:${st.course_color};color:${getReadableTextColor(st.course_color)};outline:1px dashed rgba(255,255,255,.55);cursor:pointer;" title="${label}${st.assignment_title ? ' · ' + st.assignment_title : ''}" onclick="event.stopPropagation();openTaskView(${st.assignment_id})">${label}</div>`;
     });
 
     const shifts = getWorkShiftsByDate(dateStr);
     shifts.forEach(s => {
-       html += `<div class="month-event" style="background:${s.color_hex};cursor:pointer;" title="${s.title} ${s.start_time}–${s.end_time} (click to edit)" onclick="event.stopPropagation();openWorkShiftView(${s.id})">${s.title}</div>`;
+       html += `<div class="month-event" style="background:${s.color_hex};color:${getReadableTextColor(s.color_hex)};cursor:pointer;" title="${s.title} ${s.start_time}–${s.end_time} (click to edit)" onclick="event.stopPropagation();openWorkShiftView(${s.id})">${s.title}</div>`;
     });
 
     const pevents = getPersonalEventsByDate(dateStr);
@@ -3240,7 +4145,8 @@ function renderMonthCal() {
       const peLabel = peRange ? `${pe.title} · ${peRange}${recur}` : `${pe.title}${recur}`;
       const peClick = pe.id ? `onclick="event.stopPropagation();openPersonalEventView(${pe.id})"` : '';
       const peCursor = pe.id ? 'cursor:pointer;' : '';
-      html += `<div class="month-event" style="background:${pe.color_hex || '#FCAF17'};color:#1A2540;${peCursor}" title="${peLabel}${pe.id ? ' (click to view)' : ''}" ${peClick}>${peLabel}</div>`;
+      const personalColor = pe.color_hex || '#FCAF17';
+      html += `<div class="month-event" style="background:${personalColor};color:${getReadableTextColor(personalColor)};${peCursor}" title="${peLabel}${pe.id ? ' (click to view)' : ''}" ${peClick}>${peLabel}</div>`;
     });
 
     cell.innerHTML = html;
@@ -3281,19 +4187,40 @@ function renderDayCal() {
       return hourFromTimeStr(pe.start_time) === h;
     });
 
-    // Tint row if a shift covers this hour
-    let slotStyle = '';
+    const dayFills = [];
     if (slotShifts.length > 0) {
-      const hex = slotShifts[0].color_hex;
-      slotStyle = `style="background:${hex}18;border-left:3px solid ${hex};"`;
+      dayFills.push({
+        segment: getTimedEventHourSegment(slotShifts[0].start_time, slotShifts[0].end_time, h),
+        colorHex: slotShifts[0].color_hex,
+      });
+    } else {
+      if (slotAsgs.length > 0) {
+        dayFills.push({
+          segment: getAssignmentHourSegment(slotAsgs[0], h),
+          colorHex: slotAsgs[0].course_color || '#007DC5',
+        });
+      } else if (slotSubtasks.length > 0) {
+        dayFills.push({
+          segment: getSubtaskHourSegment(slotSubtasks[0], h),
+          colorHex: slotSubtasks[0].course_color || '#007DC5',
+        });
+      }
+      if (slotPersonal.length > 0) {
+        dayFills.push({
+          segment: getTimedEventHourSegment(slotPersonal[0].start_time, slotPersonal[0].end_time, h),
+          colorHex: slotPersonal[0].color_hex || '#FCAF17',
+        });
+      }
     }
+    const slotStyle = buildDaySlotFillStyle(dayFills.filter(fill => fill.segment));
 
     // Shift label pill only at the start hour
     const startShifts = slotShifts.filter(s => parseInt(s.start_time.split(':')[0], 10) === h);
     const shiftHtml = startShifts.map(s => {
       const shiftDetail = `${formatTime12(s.start_time)}–${formatTime12(s.end_time)}${s.location ? ' · ' + s.location : ''}`;
       const tip = `${s.title} — ${shiftDetail} (click to edit)`;
-       return `<div class="day-event" style="background:${s.color_hex};cursor:pointer;" onclick="openWorkShiftView(${s.id})" title="${tip}"><div class="day-event-title">${s.title}</div><div class="day-event-detail">${shiftDetail}</div></div>`;
+      const shiftTextColor = getReadableTextColor(s.color_hex);
+       return `<div class="day-event" style="background:${s.color_hex};color:${shiftTextColor};cursor:pointer;" onclick="openWorkShiftView(${s.id})" title="${tip}"><div class="day-event-title">${s.title}</div><div class="day-event-detail">${shiftDetail}</div></div>`;
     }).join('');
 
     const startPersonal = slotPersonal.filter(pe => hourFromTimeStr(pe.start_time) === h);
@@ -3306,7 +4233,9 @@ function renderDayCal() {
       const tip = `${pe.title}${peDetail ? ' — ' + peDetail : ''}${recur}${pe.id ? ' (click to view)' : ''}`;
       const click = pe.id ? `onclick="openPersonalEventView(${pe.id})"` : '';
       const cursor = pe.id ? 'cursor:pointer;' : '';
-      return `<div class="day-event" style="background:${pe.color_hex || '#FCAF17'};color:#1A2540;${cursor}" ${click} title="${tip}"><div class="day-event-title">${pe.title}</div>${peDetail || recur ? '<div class="day-event-detail" style="color:#1A2540;">' + [peDetail, recur].filter(Boolean).join('') + '</div>' : ''}</div>`;
+      const personalColor = pe.color_hex || '#FCAF17';
+      const personalTextColor = getReadableTextColor(personalColor);
+      return `<div class="day-event" style="background:${personalColor};color:${personalTextColor};${cursor}" ${click} title="${tip}"><div class="day-event-title">${pe.title}</div>${peDetail || recur ? '<div class="day-event-detail">' + [peDetail, recur].filter(Boolean).join('') + '</div>' : ''}</div>`;
     }).join('');
 
     const startAsgs = slotAsgs.filter(a => parseLocalDate(a.due_date).getHours() === h);
@@ -3314,7 +4243,7 @@ function renderDayCal() {
       const dueTime = parseLocalDate(a.due_date).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
       const durationLabel = a.estimated_hours ? ` · ${a.estimated_hours}h` : '';
       const asgDetail = `Start ${dueTime}${durationLabel}${a.course_code ? ' · ' + a.course_code : ''}`;
-      return `<div class="day-event clickable" style="background:${a.course_color};" onclick="openTaskView(${a.id})" title="${a.title} — click to view"><div class="day-event-title">${a.title}</div><div class="day-event-detail">${asgDetail}</div></div>`;
+      return `<div class="day-event clickable" style="background:${a.course_color};color:${getReadableTextColor(a.course_color)};" onclick="openTaskView(${a.id})" title="${a.title} — click to view"><div class="day-event-title">${a.title}</div><div class="day-event-detail">${asgDetail}</div></div>`;
     }).join('');
 
     const startSubtasks = slotSubtasks.filter(st => parseLocalDate(st.due_date).getHours() === h);
@@ -3322,7 +4251,7 @@ function renderDayCal() {
       const dueTime = parseLocalDate(st.due_date).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
       const durationLabel = st.estimated_hours ? ` · ${st.estimated_hours}h` : '';
       const detail = `${st.assignment_title ? st.assignment_title + ' · ' : ''}${dueTime}${durationLabel}`;
-      return `<div class="day-event clickable" style="background:${st.course_color};outline:1px dashed rgba(255,255,255,.55);" onclick="openTaskView(${st.assignment_id})" title="${st.title} — click to view"><div class="day-event-title">↳ ${st.title}</div><div class="day-event-detail">${detail}</div></div>`;
+      return `<div class="day-event clickable" style="background:${st.course_color};color:${getReadableTextColor(st.course_color)};outline:1px dashed rgba(255,255,255,.55);" onclick="openTaskView(${st.assignment_id})" title="${st.title} — click to view"><div class="day-event-title">↳ ${st.title}</div><div class="day-event-detail">${detail}</div></div>`;
     }).join('');
 
     html += `<div class="day-slot${slotShifts.length ? ' shift-slot' : ''}" ${slotStyle}>
@@ -3520,7 +4449,23 @@ function renderWorkloadWidgets() {
   }
 
   if (summaryWarningCard && summaryWarningValue && summaryWarningNote) {
-    const primaryAlert = workloadAlerts[0] || null;
+    const summaryStatus = String(selectedWeekSummary.status || 'GREEN').toUpperCase();
+    const summaryUtilPct = Number(selectedWeekSummary.utilization_percent || 0);
+    const fallbackAlert = summaryStatus === 'RED'
+      ? {
+          color: SS_DATA.workloadDensityColors?.RED || '#E74C3C',
+          title: 'Current week is overloaded',
+          message: `Utilization is ${summaryUtilPct.toFixed(1)}%. Consider redistributing work.`,
+        }
+      : summaryStatus === 'YELLOW'
+        ? {
+            color: SS_DATA.workloadDensityColors?.YELLOW || '#F39C12',
+            title: 'Current week is getting heavy',
+            message: `Utilization is ${summaryUtilPct.toFixed(1)}%. Plan ahead for major tasks.`,
+          }
+        : null;
+
+    const primaryAlert = workloadAlerts[0] || fallbackAlert;
     if (!primaryAlert) {
       summaryWarningCard.style.borderColor = 'var(--input-border)';
       summaryWarningValue.style.color = 'var(--text)';
@@ -3529,8 +4474,10 @@ function renderWorkloadWidgets() {
     } else {
       summaryWarningCard.style.borderColor = primaryAlert.color || '#f59e0b';
       summaryWarningValue.style.color = primaryAlert.color || '#f59e0b';
-      summaryWarningValue.textContent = workloadAlerts.length === 1 ? '1 Alert' : `${workloadAlerts.length} Alerts`;
-      summaryWarningNote.textContent = primaryAlert.title || 'Workload alert';
+      summaryWarningValue.textContent = workloadAlerts.length
+        ? (workloadAlerts.length === 1 ? '1 Alert' : `${workloadAlerts.length} Alerts`)
+        : (summaryStatus === 'RED' ? 'Critical' : 'Caution');
+      summaryWarningNote.textContent = primaryAlert.title || primaryAlert.message || 'Workload alert';
     }
   }
 

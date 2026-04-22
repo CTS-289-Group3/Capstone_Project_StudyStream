@@ -1,12 +1,18 @@
+from datetime import datetime
+
 from django import forms
+from django.utils import timezone
 
 from core.models import (
+    DEFAULT_PERSONAL_EVENT_COLOR,
+    DEFAULT_WORK_SHIFT_COLOR,
     PersonalEvent,
     RecurringPersonalEvent,
     RecurringJobTitle,
     RecurringWorkLocation,
     RecurringWorkShift,
     WorkShift,
+    normalize_schedule_color,
 )
 
 
@@ -67,6 +73,12 @@ class PersonalEventForm(forms.ModelForm):
 
         return cleaned_data
 
+    def clean_color_hex(self):
+        return normalize_schedule_color(
+            self.cleaned_data.get("color_hex"),
+            DEFAULT_PERSONAL_EVENT_COLOR,
+        )
+
     def save_personal_event(self, user, commit=True):
         event = super().save(commit=False)
         event.user = user
@@ -100,6 +112,19 @@ class PersonalEventForm(forms.ModelForm):
 
 
 class WorkShiftForm(forms.ModelForm):
+    job_title = forms.CharField(required=False, label="Job Title")
+    shift_date = forms.DateField(
+        widget=forms.DateInput(attrs={"type": "date"}),
+        label="Shift Date",
+    )
+    start_time = forms.TimeField(
+        widget=forms.TimeInput(attrs={"type": "time"}),
+        label="Start Time",
+    )
+    end_time = forms.TimeField(
+        widget=forms.TimeInput(attrs={"type": "time"}),
+        label="End Time",
+    )
     shift_type = forms.ChoiceField(
         choices=[
             ("one_time", "One-time shift"),
@@ -132,24 +157,67 @@ class WorkShiftForm(forms.ModelForm):
 
     class Meta:
         model = WorkShift
-        fields = ["employer_name", "shift_start", "shift_end", "location", "notes", "color_hex"]
+        fields = ["job_title", "shift_date", "start_time", "end_time", "location", "notes", "color_hex"]
         labels = {
-            "employer_name": "Employer Name",
-            "shift_start": "Shift Start",
-            "shift_end": "Shift End",
+            "job_title": "Job Title",
         }
         widgets = {
-            "shift_start": forms.DateTimeInput(attrs={"type": "datetime-local"}),
-            "shift_end": forms.DateTimeInput(attrs={"type": "datetime-local"}),
             "color_hex": forms.HiddenInput(),
         }
 
     def __init__(self, user=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            self.fields["job_title"].initial = self.instance.job_title or self.instance.employer_name
+            self.fields["shift_date"].initial = self.instance.shift_date
+            self.fields["start_time"].initial = self.instance.start_time
+            self.fields["end_time"].initial = self.instance.end_time
         if user:
             self.fields["recurring_template"].queryset = RecurringWorkShift.objects.filter(
                 user=user, is_active=True
             ).order_by("name")
+
+    def clean(self):
+        cleaned_data = super().clean()
+        shift_date = cleaned_data.get("shift_date")
+        start_time = cleaned_data.get("start_time")
+        end_time = cleaned_data.get("end_time")
+
+        if shift_date and start_time and end_time:
+            start_dt = datetime.combine(shift_date, start_time)
+            end_dt = datetime.combine(shift_date, end_time)
+            if end_dt <= start_dt:
+                self.add_error("end_time", "End time must be after the start time.")
+
+        return cleaned_data
+
+    def clean_color_hex(self):
+        return normalize_schedule_color(
+            self.cleaned_data.get("color_hex"),
+            DEFAULT_WORK_SHIFT_COLOR,
+        )
+
+    def save(self, commit=True):
+        shift = super().save(commit=False)
+        job_title = (self.cleaned_data.get("job_title") or "").strip()
+        shift.job_title = job_title
+        shift.employer_name = job_title
+
+        shift_date = self.cleaned_data.get("shift_date")
+        start_time = self.cleaned_data.get("start_time")
+        end_time = self.cleaned_data.get("end_time")
+        if shift_date and start_time and end_time:
+            tz = timezone.get_current_timezone()
+            shift.shift_date = shift_date
+            shift.start_time = start_time
+            shift.end_time = end_time
+            shift.shift_start = timezone.make_aware(datetime.combine(shift_date, start_time), tz)
+            shift.shift_end = timezone.make_aware(datetime.combine(shift_date, end_time), tz)
+
+        if commit:
+            shift.save()
+
+        return shift
 
 
 class RecurringWorkShiftForm(forms.ModelForm):

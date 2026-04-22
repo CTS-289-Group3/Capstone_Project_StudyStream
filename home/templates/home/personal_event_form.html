@@ -38,6 +38,10 @@
           <a href="{% url 'recurring_personal_event_list' %}" class="ss-btn-sm">Manage Recurring Events</a>
         </div>
 
+        {% if form.non_field_errors %}
+          <div class="ss-form-errors">{{ form.non_field_errors }}</div>
+        {% endif %}
+
         <form method="post" class="ss-form">
           {% csrf_token %}
 
@@ -143,10 +147,10 @@
     <script src="{% static 'accounts/js/ss-shared.js' %}"></script>
     <script>
     (function() {
-        const PE_COLORS = ['#ef4444','#f97316','#f59e0b','#FCAF17','#10b981','#06b6d4','#3b82f6','#8b5cf6','#ec4899','#6b7280'];
+      const PE_COLORS = ['#8B5CF6','#A855F7','#EC4899','#F43F5E','#06B6D4','#0EA5E9','#10B981','#F97316'];
         const colorContainer = document.getElementById('peColorPicker');
         const colorInput = document.getElementById('id_color_hex');
-        const currentColor = (colorInput && colorInput.value) ? colorInput.value : '#FCAF17';
+      const currentColor = (colorInput && colorInput.value) ? colorInput.value : '#8B5CF6';
         if (colorContainer && colorInput) {
             PE_COLORS.forEach(hex => {
                 const s = document.createElement('div');

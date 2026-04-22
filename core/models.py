@@ -5,6 +5,27 @@ import uuid
 
 from django.utils import timezone
 
+SCHEDULE_COLORS = [
+    '#8B5CF6',
+    '#A855F7',
+    '#EC4899',
+    '#F43F5E',
+    '#06B6D4',
+    '#0EA5E9',
+    '#10B981',
+    '#F97316',
+]
+DEFAULT_PERSONAL_EVENT_COLOR = '#8B5CF6'
+DEFAULT_WORK_SHIFT_COLOR = '#10B981'
+ALLOWED_SCHEDULE_COLORS = {color.upper() for color in SCHEDULE_COLORS}
+
+
+def normalize_schedule_color(raw_value, default_color=DEFAULT_PERSONAL_EVENT_COLOR):
+    color_value = (raw_value or '').strip().upper()
+    if color_value in ALLOWED_SCHEDULE_COLORS:
+        return color_value
+    return default_color
+
 class Workspace(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
@@ -19,7 +40,7 @@ class PersonalEvent(models.Model):
     start_time = models.TimeField(null=True, blank=True)
     end_time = models.TimeField(null=True, blank=True)
     location = models.CharField(max_length=200, blank=True)
-    color_hex = models.CharField(max_length=7, default='#FCAF17')
+    color_hex = models.CharField(max_length=7, default=DEFAULT_PERSONAL_EVENT_COLOR)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -41,7 +62,7 @@ class WorkShift(models.Model):
     is_recurring = models.BooleanField(default=False)
     recurrence_pattern = models.CharField(max_length=50, blank=True)
     notes = models.TextField(blank=True)
-    color_hex = models.CharField(max_length=7, default='#10b981')
+    color_hex = models.CharField(max_length=7, default=DEFAULT_WORK_SHIFT_COLOR)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

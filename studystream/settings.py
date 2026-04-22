@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -61,6 +62,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.csrf',
                 'django.template.context_processors.request',
                 'accounts.context_processors.profile_context',
                 'django.contrib.auth.context_processors.auth',
@@ -127,7 +129,34 @@ CSRF_TRUSTED_ORIGINS = [
     'https://127.0.0.1:8000',
     'https://*.app.github.dev',
     'http://*.app.github.dev',
+    'https://*.preview.app.github.dev',
+    'http://*.preview.app.github.dev',
+    'https://*.githubpreview.dev',
+    'http://*.githubpreview.dev',
 ]
+
+_forwarding_domain = os.getenv('GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN', '').strip()
+if _forwarding_domain:
+    CSRF_TRUSTED_ORIGINS.extend(
+        [
+            f'https://*.{_forwarding_domain}',
+            f'http://*.{_forwarding_domain}',
+        ]
+    )
+
+for _host_pattern in os.getenv('RAILS_DEVELOPMENT_HOSTS', '').split(','):
+    _host_pattern = _host_pattern.strip()
+    if not _host_pattern:
+        continue
+    host = _host_pattern if _host_pattern.startswith('.') else f'.{_host_pattern}'
+    CSRF_TRUSTED_ORIGINS.extend(
+        [
+            f'https://*{host}',
+            f'http://*{host}',
+        ]
+    )
+
+CSRF_TRUSTED_ORIGINS = list(dict.fromkeys(CSRF_TRUSTED_ORIGINS))
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

@@ -1,104 +1,123 @@
-# Updates - April 16, 2026
+# StudyStream Update Log
 
-## Dark Mode Dropdown Fix
-- Fixed white text visibility issue in form dropdown menus in dark mode
-- Added `color-scheme: dark` CSS to all form select elements
-- Updated all form templates:
-  - `recurring_shift_form.html`
-  - `work_shift_form.html`
-  - `personal_event_form.html`
-  - `recurring_personal_event_form.html`
-  - `recurring_job_title_form.html`
-  - `recurring_location_form.html`
+## 2026-04-22
 
-## Add Work Shift - Recurring Template Feature
-- Added ability to create shifts from recurring shift templates
-- Users can select between:
-  - **One-time shift** (default)
-  - **Recurring shift template**
+### Schedule Conflict UX and Behavior
+- Fixed conflict-resolution flow so selecting `Replace Existing Item` or `Use Suggested Time` reliably applies changes and refreshes dashboard state.
+- Added StudyStream-style schedule warning modal to Add Work Shift form page with:
+  - `Keep Current Schedule`
+  - `Replace Existing Item`
+- Enabled replace-on-conflict behavior for Add Work Shift form submissions.
 
-### Recurrence Options
-When selecting "Recurring shift template", users can now:
-1. Select a saved recurring template
-2. Choose repeat pattern:
-   - Weekly (every 7 days)
-   - Every 2 Weeks (every 14 days)
-   - Monthly (same day each month)
-3. Set an end date for the recurring shifts
+### Workload Preferences (User Settings)
+- Added workload preference fields to `Profile`:
+  - `sleep_hours_per_night`
+  - `sleep_start_time`
+  - `sleep_end_time`
+  - `personal_time_hours_per_week`
+  - `family_time_hours_per_week`
+  - `commute_time_hours_per_week`
+- Added settings form to edit these values in `accounts/settings/`.
+- Workload analysis now uses these user-specific preferences when computing available weekly study time.
+- Schedule suggestion logic now avoids sleep and reserved personal/family/commute windows.
 
-### Auto-Fill Feature
-- Start time, end time, and location are automatically filled from the selected template
-- Multiple individual shifts are generated based on the recurrence pattern
-- All shifts appear on the dashboard calendar
+### Online Course Workload Support
+- Added `weekly_study_hours` to `Course` for async/online classes without fixed meeting times.
+- Wired the new field through:
+  - course create/edit/list APIs
+  - dashboard course modal UI
+  - dashboard course JSON serialization
+- Workload engine now includes `weekly_study_hours` in class-hour totals.
 
-### Updated Files
-- `home/forms.py` - Added `WorkShiftForm` fields for recurrence
-- `home/views.py` - Updated `add_work_shift` view to generate multiple shifts
-- `home/templates/home/work_shift_form.html` - Added UI for recurrence controls
+### Dashboard UX Improvements
+- Added `View Courses` option under semester/courses `Manage` menu.
+- Added current-course management modal with quick edit/add actions.
+- Added hover detail card for each course chip in semester/courses bubble showing:
+  - course code + name
+  - professor
+  - meeting times
+  - weekly async study hours
+- Fixed workload warning card to reflect current summary status even when alerts list is empty.
 
-## Updates - April 18, 2026
+### Documentation Cleanup
+- Consolidated setup docs into `README.md` and removed `SETUP.md`.
+- Added `docs/project-structure.md` with folder diagram and Django file-role explanations.
+- Updated `docs/database-erd.md` to match current models.
+- Added a simplified presentation-friendly ERD section.
 
-## Workload Density Engine + Forecast
-- Added a centralized workload engine that computes weekly workload snapshots, utilization ratio, and status bands (GREEN/YELLOW/RED)
-- Added 4-week forecast output with workload alerts and recommendation payloads
-- Added persistence to WorkloadAnalysis with one row per user/week
-- Added management command to recompute workload for all users or a single user:
+### Tests and Migrations
+- Added/updated tests for:
+  - conflict resolution behaviors
+  - settings preference persistence
+  - workload preference calculations
+  - online course weekly-hour workload inclusion
+- Added migrations:
+  - `accounts.0007_profile_workload_preferences`
+  - `accounts.0008_course_weekly_study_hours`
+
+## 2026-04-18
+
+### Workload Density Engine + Forecast
+- Added workload engine to compute weekly snapshots, utilization ratio, and status bands (GREEN/YELLOW/RED).
+- Added 4-week forecast output with alert and recommendation payloads.
+- Added persistence to `WorkloadAnalysis` with one record per user/week.
+- Added command support:
   - `python manage.py run_workload_analysis`
   - `python manage.py run_workload_analysis --user-id <id>`
   - `python manage.py run_workload_analysis --weeks <n>`
 
-## Assignment + Subtask Schema Upgrade
-- Assignment model updates:
-  - Added `assignment_id` UUID
-  - Renamed `priority` -> `priority_level`
-  - Renamed `is_major` -> `is_major_project`
-  - Renamed `completion_pct` -> `completion_percentage`
-  - Added `due_time`, `submission_link`, `contributes_to_workload`
-- Subtask model updates:
-  - Added `subtask_id` UUID
-  - Renamed `sequence_order` -> `step_order`
-  - Renamed `milestone_date` -> `due_date`
-  - Added `due_time`, `completion_percentage`
-- New migrations added for these upgrades in Accounts and Core apps
+### Assignment + Subtask Schema Upgrade
+- Assignment changes:
+  - added `assignment_id` UUID
+  - renamed `priority` -> `priority_level`
+  - renamed `is_major` -> `is_major_project`
+  - renamed `completion_pct` -> `completion_percentage`
+  - added `due_time`, `submission_link`, `contributes_to_workload`
+- Subtask changes:
+  - added `subtask_id` UUID
+  - renamed `sequence_order` -> `step_order`
+  - renamed `milestone_date` -> `due_date`
+  - added `due_time`, `completion_percentage`
 
-## Work Shift Data Model + Form Modernization
-- WorkShift now supports richer scheduling fields:
+### Work Shift Data Model + Form Modernization
+- WorkShift improvements:
   - `shift_id` UUID
   - `employer_name`
   - `shift_start` / `shift_end` datetime fields
   - `is_confirmed`, `is_recurring`, `recurrence_pattern`
-  - Auto-derived `duration_hours`
-- Add/Edit work shift flows updated to use datetime-based scheduling and to recompute workload after changes
-- Work shift form updated from separate date/time fields to start/end datetime fields
+  - derived `duration_hours`
+- Updated add/edit work-shift flows to use datetime scheduling and trigger workload recomputation.
 
-## Dashboard / Planner UX Improvements
-- Planner redesigned with tabbed views: All / Assignments / Events
-- Assignment rows changed to compact bubble-style status icons
-- Added one-click assignment status cycling (not started -> in progress -> complete)
-- Improved due-date display metadata for assignment rows (weekday + month/day + optional label)
-- Added inline subtask editing for title, due date/time, and estimated hours
-- Added workload summary card and workload density widget with:
-  - current-week utilization
-  - assignment/work/available-study hour breakdown
-  - upcoming week indicator
-  - workload warning summary
-- Updated week-bucket logic for stats to align with Monday-Sunday behavior
+### Dashboard / Planner UX Improvements
+- Planner tabbed views: All / Assignments / Events.
+- Compact assignment status bubble UI with one-click status cycling.
+- Improved due-date display metadata.
+- Added inline subtask editing for title, due date/time, and estimated hours.
+- Added workload summary and density widgets with current-week and upcoming-week signals.
 
-## Color and Theme Improvements
-- Split color palettes so course colors are distinct from personal/work schedule colors
-- Expanded to at least 8 selectable color options for course and schedule contexts
-- Softened light-mode bubble backgrounds and borders to reduce glare
-- Fixed dark mode leakage by scoping light-mode styles to `[data-theme="light"]`
+### Color and Theme Updates
+- Split course color palette from schedule color palette.
+- Expanded selectable colors for course/schedule contexts.
+- Improved light-mode bubble contrast.
+- Scoped light-mode overrides to `[data-theme="light"]`.
 
-## API and Backend Integration Updates
-- Added subtask edit endpoint:
-  - `accounts/api/subtasks/<pk>/edit/`
-- Assignment and subtask API responses now include upgraded schema fields
-- Workload recomputation is now triggered on assignment/work-shift create/edit/delete/status updates
-- Added workload constants/config payloads to dashboard context
+### API and Integration Updates
+- Added subtask edit endpoint: `accounts/api/subtasks/<pk>/edit/`.
+- Expanded assignment/subtask API payloads to include upgraded fields.
+- Triggered workload recomputation on assignment/work-shift create/edit/delete/status changes.
 
-## Seed Data + Admin + Documentation
-- Expanded demo seed command with richer assignment/subtask/timeblock/workload sample data
-- Registered WorkloadAnalysis in Django admin
-- Updated README with workload analysis command usage
-- Updated ERD documentation in `docs/database-erd.md` to reflect the current Accounts/Core/Auth schema and relationships
+## 2026-04-16
+
+### Dark Mode Dropdown Fix
+- Fixed form dropdown text visibility in dark mode.
+- Added `color-scheme: dark` handling for select inputs in scheduling-related forms.
+
+### Add Work Shift: Recurring Template Feature
+- Added support for creating shifts from recurring templates.
+- Added recurrence options:
+  - weekly
+  - biweekly
+  - monthly
+- Added recurrence end date support.
+- Added auto-fill of start/end time and location from selected recurring template.
+- Added multi-shift generation based on selected recurrence pattern.

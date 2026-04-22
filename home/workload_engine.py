@@ -7,7 +7,7 @@ from decimal import Decimal
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 
-from accounts.models import Assignment, Course
+from accounts.models import Assignment, Course, Profile
 from core.models import WorkShift, WorkloadAnalysis
 
 from .workload_config import NOTIFICATIONS, WORKLOAD_DENSITY_COLORS
@@ -127,16 +127,43 @@ def _extract_duration_hours(meeting_times: str) -> Decimal:
 
 def _compute_weekly_class_hours(user) -> Decimal:
     total = Decimal("0.00")
-    courses = Course.objects.filter(user=user, semester__is_active=True).only("meeting_times")
+    courses = Course.objects.filter(user=user, semester__is_active=True).only("meeting_times", "weekly_study_hours")
     for course in courses:
         duration = _extract_duration_hours(course.meeting_times)
         if duration <= 0:
+            total += _to_decimal(course.weekly_study_hours)
             continue
         day_count = len(_extract_day_indexes(course.meeting_times))
         if day_count <= 0:
+            total += _to_decimal(course.weekly_study_hours)
             continue
-        total += duration * Decimal(day_count)
+        total += (duration * Decimal(day_count)) + _to_decimal(course.weekly_study_hours)
     return total.quantize(Decimal("0.01"))
+
+
+def _get_capacity_preferences(user):
+    profile = Profile.objects.filter(user=user).only(
+        'sleep_hours_per_night',
+        'personal_time_hours_per_week',
+        'family_time_hours_per_week',
+        'commute_time_hours_per_week',
+    ).first()
+
+    if not profile:
+        return {
+            'sleep_hours_per_week': SLEEP_HOURS,
+            'personal_hours_per_week': PERSONAL_HOURS,
+            'family_hours_per_week': Decimal('0.00'),
+            'commute_hours_per_week': Decimal('0.00'),
+        }
+
+    sleep_hours_per_week = (_to_decimal(profile.sleep_hours_per_night, '7.0') * Decimal('7.0')).quantize(Decimal('0.01'))
+    return {
+        'sleep_hours_per_week': sleep_hours_per_week,
+        'personal_hours_per_week': _to_decimal(profile.personal_time_hours_per_week, '14.0').quantize(Decimal('0.01')),
+        'family_hours_per_week': _to_decimal(profile.family_time_hours_per_week, '0.0').quantize(Decimal('0.01')),
+        'commute_hours_per_week': _to_decimal(profile.commute_time_hours_per_week, '0.0').quantize(Decimal('0.01')),
+    }
 
 
 def _compute_weekly_snapshot(user, week_start_date: date):
@@ -171,8 +198,15 @@ def _compute_weekly_snapshot(user, week_start_date: date):
         total_work_hours += _to_decimal(shift.duration_hours)
 
     total_class_hours = _compute_weekly_class_hours(user)
+    preferences = _get_capacity_preferences(user)
+    reserved_hours = (
+        preferences['sleep_hours_per_week']
+        + preferences['personal_hours_per_week']
+        + preferences['family_hours_per_week']
+        + preferences['commute_hours_per_week']
+    )
     available_study_hours = (
-        WEEK_HOURS - total_class_hours - total_work_hours - SLEEP_HOURS - PERSONAL_HOURS
+        WEEK_HOURS - total_class_hours - total_work_hours - reserved_hours
     ).quantize(Decimal("0.01"))
     available_study_hours = max(Decimal("0.00"), available_study_hours)
 

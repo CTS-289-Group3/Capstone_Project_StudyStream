@@ -212,8 +212,8 @@ class Command(BaseCommand):
                 "type": "problem_set",
                 "description": "Implement open addressing and compare collision behavior.",
                 "subtasks": [
-                    ("Write hash table insert/search", 1, timezone.make_aware(datetime(2026, 4, 20, 15, 0)), Decimal("2.0"), "not_started"),
-                    ("Capture runtime analysis",        2, timezone.make_aware(datetime(2026, 4, 21, 19, 0)), Decimal("2.0"), "not_started"),
+                    ("Write hash table insert/search", 1, timezone.make_aware(datetime(2026, 4, 20, 18, 0)), Decimal("2.0"), "not_started"),
+                    ("Capture runtime analysis",        2, timezone.make_aware(datetime(2026, 4, 21, 21, 0)), Decimal("2.0"), "not_started"),
                 ],
             },
             {
@@ -227,8 +227,8 @@ class Command(BaseCommand):
                 "type": "project",
                 "description": "Package the final shell automation project and deployment notes.",
                 "subtasks": [
-                    ("Finish shell scripts",          1, timezone.make_aware(datetime(2026, 4, 21, 17, 30)), Decimal("3.0"), "in_progress"),
-                    ("Write usage documentation",     2, timezone.make_aware(datetime(2026, 4, 22, 18, 0)),  Decimal("2.0"), "not_started"),
+                    ("Finish shell scripts",          1, timezone.make_aware(datetime(2026, 4, 21, 14, 30)), Decimal("3.0"), "in_progress"),
+                    ("Write usage documentation",     2, timezone.make_aware(datetime(2026, 4, 22, 21, 0)),  Decimal("2.0"), "not_started"),
                     ("Prepare submission archive",    3, timezone.make_aware(datetime(2026, 4, 24, 10, 0)),  Decimal("1.5"), "not_started"),
                     ("Peer review partner's script",  4, timezone.make_aware(datetime(2026, 4, 23, 14, 0)),  Decimal("1.0"), "not_started"),
                     ("Record walkthrough screencast", 5, timezone.make_aware(datetime(2026, 4, 24, 13, 0)),  Decimal("1.0"), "not_started"),
@@ -245,8 +245,8 @@ class Command(BaseCommand):
                 "type": "project",
                 "description": "Integrate dashboard updates, seed data, and workload analysis improvements.",
                 "subtasks": [
-                    ("Update dashboard widgets",  1, timezone.make_aware(datetime(2026, 4, 22, 16, 0)), Decimal("3.0"), "in_progress"),
-                    ("Seed new testing fields",   2, timezone.make_aware(datetime(2026, 4, 23, 12, 0)), Decimal("2.5"), "not_started"),
+                    ("Update dashboard widgets",  1, timezone.make_aware(datetime(2026, 4, 22, 8, 0)), Decimal("3.0"), "in_progress"),
+                    ("Seed new testing fields",   2, timezone.make_aware(datetime(2026, 4, 23, 15, 0)), Decimal("2.5"), "not_started"),
                     ("Review final demo flow",    3, timezone.make_aware(datetime(2026, 4, 25, 11, 0)), Decimal("2.0"), "not_started"),
                     ("Write project README",      4, timezone.make_aware(datetime(2026, 4, 24, 15, 0)), Decimal("1.0"), "not_started"),
                     ("Submit to Canvas",          5, timezone.make_aware(datetime(2026, 4, 25, 16, 0)), Decimal("0.5"), "not_started"),
@@ -266,8 +266,8 @@ class Command(BaseCommand):
                 "description": "Reflect on bias, fairness, and transparency in modern AI systems. Minimum 800 words.",
                 "subtasks": [
                     ("Outline key argument",         1, timezone.make_aware(datetime(2026, 4, 26, 19, 0)), Decimal("0.5"), "not_started"),
-                    ("Draft body paragraphs",        2, timezone.make_aware(datetime(2026, 4, 27, 20, 0)), Decimal("1.5"), "not_started"),
-                    ("Add citations and revise",     3, timezone.make_aware(datetime(2026, 4, 28, 18, 0)), Decimal("1.0"), "not_started"),
+                    ("Draft body paragraphs",        2, timezone.make_aware(datetime(2026, 4, 27, 18, 0)), Decimal("1.5"), "not_started"),
+                    ("Add citations and revise",     3, timezone.make_aware(datetime(2026, 4, 28, 21, 0)), Decimal("1.0"), "not_started"),
                     ("Proofread and submit",         4, timezone.make_aware(datetime(2026, 4, 29, 21, 0)), Decimal("0.5"), "not_started"),
                 ],
             },
@@ -284,9 +284,9 @@ class Command(BaseCommand):
                 "subtasks": [
                     ("Implement merge sort",           1, timezone.make_aware(datetime(2026, 4, 26, 15, 0)), Decimal("1.0"), "not_started"),
                     ("Implement quicksort",            2, timezone.make_aware(datetime(2026, 4, 27, 15, 0)), Decimal("1.0"), "not_started"),
-                    ("Implement heapsort",             3, timezone.make_aware(datetime(2026, 4, 28, 15, 0)), Decimal("1.0"), "not_started"),
+                    ("Implement heapsort",             3, timezone.make_aware(datetime(2026, 4, 28, 19, 0)), Decimal("1.0"), "not_started"),
                     ("Run benchmarks + record data",   4, timezone.make_aware(datetime(2026, 4, 29, 17, 0)), Decimal("1.0"), "not_started"),
-                    ("Write analysis summary",         5, timezone.make_aware(datetime(2026, 4, 30, 10, 0)), Decimal("1.0"), "not_started"),
+                    ("Write analysis summary",         5, timezone.make_aware(datetime(2026, 4, 30, 11, 0)), Decimal("1.0"), "not_started"),
                 ],
             },
             {
@@ -300,9 +300,9 @@ class Command(BaseCommand):
                 "type": "lab",
                 "description": "Set up cron jobs to automate backup and log rotation tasks on a Linux VM.",
                 "subtasks": [
-                    ("Configure VM environment",      1, timezone.make_aware(datetime(2026, 4, 28, 16, 0)), Decimal("0.5"), "not_started"),
+                    ("Configure VM environment",      1, timezone.make_aware(datetime(2026, 4, 28, 20, 30)), Decimal("0.5"), "not_started"),
                     ("Write backup cron job",         2, timezone.make_aware(datetime(2026, 4, 29, 16, 0)), Decimal("1.0"), "not_started"),
-                    ("Write log rotation cron job",   3, timezone.make_aware(datetime(2026, 4, 30, 16, 0)), Decimal("1.0"), "not_started"),
+                    ("Write log rotation cron job",   3, timezone.make_aware(datetime(2026, 4, 30, 20, 30)), Decimal("1.0"), "not_started"),
                     ("Screenshot results and submit", 4, timezone.make_aware(datetime(2026, 5,  1, 14, 0)), Decimal("0.5"), "not_started"),
                 ],
             },
@@ -319,9 +319,9 @@ class Command(BaseCommand):
                 "type": "lab",
                 "description": "Review a classmate's capstone repo and submit structured written feedback.",
                 "subtasks": [
-                    ("Clone and run partner's project",   1, timezone.make_aware(datetime(2026, 5, 4, 16, 0)), Decimal("0.5"), "not_started"),
-                    ("Evaluate code quality & structure", 2, timezone.make_aware(datetime(2026, 5, 5, 17, 0)), Decimal("1.5"), "not_started"),
-                    ("Write review document",             3, timezone.make_aware(datetime(2026, 5, 5, 19, 0)), Decimal("1.5"), "not_started"),
+                    ("Clone and run partner's project",   1, timezone.make_aware(datetime(2026, 5, 4, 18, 30)), Decimal("0.5"), "not_started"),
+                    ("Evaluate code quality & structure", 2, timezone.make_aware(datetime(2026, 5, 5, 10, 0)), Decimal("1.5"), "not_started"),
+                    ("Write review document",             3, timezone.make_aware(datetime(2026, 5, 5, 21, 30)), Decimal("1.5"), "not_started"),
                     ("Submit on Canvas",                  4, timezone.make_aware(datetime(2026, 5, 6, 15, 0)), Decimal("0.5"), "not_started"),
                 ],
             },
@@ -337,8 +337,8 @@ class Command(BaseCommand):
                 "description": "Present a trained classifier to the class. Must include dataset description, model choice rationale, and accuracy results.",
                 "subtasks": [
                     ("Select dataset and train model",       1, timezone.make_aware(datetime(2026, 5, 3, 18, 0)), Decimal("2.0"), "not_started"),
-                    ("Build slide deck",                     2, timezone.make_aware(datetime(2026, 5, 5, 18, 0)), Decimal("1.5"), "not_started"),
-                    ("Rehearse presentation",                3, timezone.make_aware(datetime(2026, 5, 6, 18, 0)), Decimal("1.0"), "not_started"),
+                    ("Build slide deck",                     2, timezone.make_aware(datetime(2026, 5, 5, 11, 30)), Decimal("1.5"), "not_started"),
+                    ("Rehearse presentation",                3, timezone.make_aware(datetime(2026, 5, 6, 20, 30)), Decimal("1.0"), "not_started"),
                     ("Upload slides to Canvas",              4, timezone.make_aware(datetime(2026, 5, 7, 10, 0)), Decimal("0.5"), "not_started"),
                 ],
             },
@@ -355,7 +355,7 @@ class Command(BaseCommand):
                 "subtasks": [
                     ("Implement BFS",                     1, timezone.make_aware(datetime(2026, 5, 4, 15, 0)), Decimal("1.0"), "not_started"),
                     ("Implement DFS",                     2, timezone.make_aware(datetime(2026, 5, 5, 15, 0)), Decimal("1.0"), "not_started"),
-                    ("Solve shortest-path problems",      3, timezone.make_aware(datetime(2026, 5, 6, 16, 0)), Decimal("1.5"), "not_started"),
+                    ("Solve shortest-path problems",      3, timezone.make_aware(datetime(2026, 5, 6, 12, 30)), Decimal("1.5"), "not_started"),
                     ("Write complexity analysis",         4, timezone.make_aware(datetime(2026, 5, 7, 17, 0)), Decimal("1.0"), "not_started"),
                 ],
             },
@@ -372,12 +372,12 @@ class Command(BaseCommand):
                 "type": "project",
                 "description": "Final polished submission: clean repo, full README, demo video, and in-class presentation.",
                 "subtasks": [
-                    ("Final bug sweep and cleanup",          1, timezone.make_aware(datetime(2026, 5, 10, 15, 0)), Decimal("2.0"), "not_started"),
+                    ("Final bug sweep and cleanup",          1, timezone.make_aware(datetime(2026, 5, 10, 20, 0)), Decimal("2.0"), "not_started"),
                     ("Record 5-min demo video",              2, timezone.make_aware(datetime(2026, 5, 11, 14, 0)), Decimal("1.5"), "not_started"),
-                    ("Write final README",                   3, timezone.make_aware(datetime(2026, 5, 11, 17, 0)), Decimal("1.5"), "not_started"),
+                    ("Write final README",                   3, timezone.make_aware(datetime(2026, 5, 11, 15, 30)), Decimal("1.5"), "not_started"),
                     ("Push clean repo to GitHub",            4, timezone.make_aware(datetime(2026, 5, 12, 12, 0)), Decimal("0.5"), "not_started"),
-                    ("In-class final presentation",          5, timezone.make_aware(datetime(2026, 5, 13, 10, 0)), Decimal("1.5"), "not_started"),
-                    ("Submit all materials on Canvas",       6, timezone.make_aware(datetime(2026, 5, 13, 16, 0)), Decimal("1.0"), "not_started"),
+                    ("In-class final presentation",          5, timezone.make_aware(datetime(2026, 5, 13, 12, 0)), Decimal("1.5"), "not_started"),
+                    ("Submit all materials on Canvas",       6, timezone.make_aware(datetime(2026, 5, 13, 17, 30)), Decimal("1.0"), "not_started"),
                 ],
             },
             {
@@ -391,10 +391,10 @@ class Command(BaseCommand):
                 "type": "exam",
                 "description": "Cumulative practical exam. Topics: scripting, file permissions, cron, SSH, sed/awk, and process management.",
                 "subtasks": [
-                    ("Review shell scripting notes",          1, timezone.make_aware(datetime(2026, 5, 10, 18, 0)), Decimal("1.5"), "not_started"),
-                    ("Review file permissions & ACLs",        2, timezone.make_aware(datetime(2026, 5, 11, 18, 0)), Decimal("1.0"), "not_started"),
-                    ("Practice sed/awk exercises",            3, timezone.make_aware(datetime(2026, 5, 12, 17, 0)), Decimal("1.5"), "not_started"),
-                    ("Do timed practice exam",                4, timezone.make_aware(datetime(2026, 5, 13, 14, 0)), Decimal("1.5"), "not_started"),
+                    ("Review shell scripting notes",          1, timezone.make_aware(datetime(2026, 5, 10, 22, 0)), Decimal("1.5"), "not_started"),
+                    ("Review file permissions & ACLs",        2, timezone.make_aware(datetime(2026, 5, 11, 21, 15)), Decimal("1.0"), "not_started"),
+                    ("Practice sed/awk exercises",            3, timezone.make_aware(datetime(2026, 5, 12, 14, 30)), Decimal("1.5"), "not_started"),
+                    ("Do timed practice exam",                4, timezone.make_aware(datetime(2026, 5, 13, 20, 30)), Decimal("1.5"), "not_started"),
                     ("Final review pass",                     5, timezone.make_aware(datetime(2026, 5, 14, 8,  0)), Decimal("0.5"), "not_started"),
                 ],
             },
@@ -409,9 +409,9 @@ class Command(BaseCommand):
                 "type": "exam",
                 "description": "Cumulative exam covering search, ML basics, neural networks, ethics, and NLP.",
                 "subtasks": [
-                    ("Review search algorithms unit",         1, timezone.make_aware(datetime(2026, 5, 10, 17, 0)), Decimal("1.0"), "not_started"),
-                    ("Review ML & neural network notes",      2, timezone.make_aware(datetime(2026, 5, 11, 19, 0)), Decimal("1.5"), "not_started"),
-                    ("Review NLP and ethics modules",         3, timezone.make_aware(datetime(2026, 5, 12, 18, 0)), Decimal("1.0"), "not_started"),
+                    ("Review search algorithms unit",         1, timezone.make_aware(datetime(2026, 5, 10, 18, 30)), Decimal("1.0"), "not_started"),
+                    ("Review ML & neural network notes",      2, timezone.make_aware(datetime(2026, 5, 11, 12, 0)), Decimal("1.5"), "not_started"),
+                    ("Review NLP and ethics modules",         3, timezone.make_aware(datetime(2026, 5, 12, 16, 30)), Decimal("1.0"), "not_started"),
                     ("Complete practice quiz set",            4, timezone.make_aware(datetime(2026, 5, 13, 19, 0)), Decimal("1.0"), "not_started"),
                     ("Final review pass",                     5, timezone.make_aware(datetime(2026, 5, 14, 20, 0)), Decimal("0.5"), "not_started"),
                 ],
@@ -550,12 +550,12 @@ class Command(BaseCommand):
             ("Laundry + Meal Prep",               date(2026, 5,  2), time(14, 0), time(16, 0), "Home",                    "Batch cooking for the week.",                      "#64748b"),
 
             # ── WEEK 3: May 3–9 ────────────────────────────────────────────
-            ("Gym – Full Body",                   date(2026, 5,  3), time(9,  0), time(10,30), "Planet Fitness",           "Deload week – lighter weight.",                    "#8b5cf6"),
+            ("Gym – Full Body",                   date(2026, 5,  3), time(11, 30), time(13, 0), "Planet Fitness",          "Deload week – lighter weight.",                    "#8b5cf6"),
             ("Gym – Upper Body",                  date(2026, 5,  5), time(8,  0), time(9,  30), "Planet Fitness",          "Pull-ups, rows, curls.",                           "#8b5cf6"),
             ("Study Group – CSC-113",             date(2026, 5,  4), time(16, 0), time(18, 0), "Campus Library Room 1A",   "ML model review before presentation.",             "#DC143C"),
             ("Dinner with Family",                date(2026, 5,  6), time(18, 30),time(20, 30), "Mom's house",             "Weekly family dinner.",                            "#f59e0b"),
             ("Capstone Dry Run",                  date(2026, 5,  8), time(17, 0), time(18, 30), "Campus Lab 204",          "Practice final presentation with classmates.",     "#228B22"),
-            ("Pharmacy + Errands",                date(2026, 5,  7), time(12, 0), time(13, 0), "CVS + Target",             "Prescriptions and supplies.",                      "#64748b"),
+            ("Pharmacy + Errands",                date(2026, 5,  7), time(15, 30), time(16, 30), "CVS + Target",            "Prescriptions and supplies.",                      "#64748b"),
 
             # ── FINALS WEEK: May 10–15 ─────────────────────────────────────
             ("Light Gym – Stress Relief",         date(2026, 5, 10), time(14, 0), time(15, 0), "Planet Fitness",           "30 min cardio only – don't overdo it.",            "#8b5cf6"),
@@ -583,12 +583,12 @@ class Command(BaseCommand):
         # ------------------------------------------------------------------ #
         assignments_qs = seed_context["assignments"]
         block_map = {
-            "Capstone: StudyStream":        ("Capstone dashboard polish",        datetime(2026, 4, 22, 18, 0), datetime(2026, 4, 22, 20, 0), "Home office",       "Focus on workload widgets and demo flow."),
+            "Capstone: StudyStream":        ("Capstone dashboard polish",        datetime(2026, 4, 22, 13, 0), datetime(2026, 4, 22, 15, 0), "Home office",       "Focus on workload widgets and demo flow."),
             "Hash Table Implementation":    ("Hash table implementation block",  datetime(2026, 4, 21, 19,30), datetime(2026, 4, 21, 21, 0), "Campus library",    "Finish collision handling and tests."),
             "AI Ethics Reflection Paper":   ("AI Ethics paper draft session",    datetime(2026, 4, 27, 20, 0), datetime(2026, 4, 27, 22, 0), "Home desk",         "Draft body paragraphs in one sitting."),
             "Sorting Algorithm Comparison": ("Sorting algo coding block",        datetime(2026, 4, 28, 15, 0), datetime(2026, 4, 28, 17, 0), "Campus lab",        "Implement merge sort and quicksort."),
             "Linux Final Project":          ("Linux project shell scripting",    datetime(2026, 4, 21, 17,30), datetime(2026, 4, 21, 19, 0), "Home desk",         "Finish automation scripts."),
-            "ML Model Demo Presentation":   ("ML presentation prep block",       datetime(2026, 5,  5, 18, 0), datetime(2026, 5,  5, 20, 0), "Home desk",         "Build slide deck and rehearse."),
+            "ML Model Demo Presentation":   ("ML presentation prep block",       datetime(2026, 5,  5, 13, 0), datetime(2026, 5,  5, 15, 0), "Home desk",         "Build slide deck and rehearse."),
             "Capstone Final Submission":    ("Final capstone cleanup block",     datetime(2026, 5, 10, 15, 0), datetime(2026, 5, 10, 18, 0), "Home office",       "Bug sweep, README, and demo video."),
             "AI Fundamentals Final Exam":   ("AI exam review session",           datetime(2026, 5, 12, 18, 0), datetime(2026, 5, 12, 20,30), "Campus library",    "Timed practice questions."),
             "Linux Final Exam":             ("Linux exam timed practice",        datetime(2026, 5, 13, 14, 0), datetime(2026, 5, 13, 16,30), "Home desk",         "Full timed mock exam."),

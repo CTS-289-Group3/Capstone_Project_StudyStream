@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.validators import MaxValueValidator, MinValueValidator
 import uuid
 
 
@@ -48,6 +49,12 @@ class Course(models.Model):
     canvas_url      = models.URLField(blank=True)
     syllabus_url    = models.URLField(blank=True)
     meeting_times   = models.TextField(blank=True)
+    weekly_study_hours = models.DecimalField(
+        max_digits=4,
+        decimal_places=1,
+        default=0,
+        validators=[MinValueValidator(0), MaxValueValidator(168)],
+    )
     created_at      = models.DateTimeField(auto_now_add=True)
     updated_at      = models.DateTimeField(auto_now=True)
 
@@ -234,6 +241,32 @@ class Profile(models.Model):
     bio = models.TextField(blank=True)
     major = models.CharField(max_length=100, blank=True)
     year = models.CharField(max_length=20, blank=True)
+    sleep_hours_per_night = models.DecimalField(
+        max_digits=3,
+        decimal_places=1,
+        default=7.0,
+        validators=[MinValueValidator(0), MaxValueValidator(24)],
+    )
+    sleep_start_time = models.TimeField(null=True, blank=True)
+    sleep_end_time = models.TimeField(null=True, blank=True)
+    personal_time_hours_per_week = models.DecimalField(
+        max_digits=4,
+        decimal_places=1,
+        default=14.0,
+        validators=[MinValueValidator(0), MaxValueValidator(168)],
+    )
+    family_time_hours_per_week = models.DecimalField(
+        max_digits=4,
+        decimal_places=1,
+        default=0.0,
+        validators=[MinValueValidator(0), MaxValueValidator(168)],
+    )
+    commute_time_hours_per_week = models.DecimalField(
+        max_digits=4,
+        decimal_places=1,
+        default=0.0,
+        validators=[MinValueValidator(0), MaxValueValidator(168)],
+    )
 
     def __str__(self):
         return f'{self.user.username} Profile'

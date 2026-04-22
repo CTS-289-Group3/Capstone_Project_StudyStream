@@ -11,6 +11,120 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=DM+Sans:wght@400;500;600&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="{% static 'accounts/images/logo_icon.svg' %}">
     <link rel="stylesheet" href="{% static 'accounts/css/ss-shared.css' %}">
+    <style>
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, .60);
+        backdrop-filter: blur(8px);
+        z-index: 1400;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 80px 16px 24px;
+      }
+      .modal-overlay.open {
+        display: flex;
+      }
+      .modal {
+        background: var(--bg2);
+        border: 1px solid var(--card-border);
+        border-radius: 24px;
+        padding: 28px;
+        width: 100%;
+        max-width: 600px;
+        box-shadow: var(--shadow-lg);
+      }
+      .modal-title {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 20px;
+        font-weight: 900;
+        color: var(--text);
+        margin-bottom: 16px;
+      }
+      .modal-title span {
+        color: var(--ss-yellow);
+      }
+      .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 20px;
+        padding-top: 16px;
+        border-top: 1px solid var(--card-border);
+      }
+      .conflict-modal {
+        max-width: 560px;
+        background:
+          radial-gradient(circle at top right, rgba(252, 175, 23, 0.2), transparent 34%),
+          radial-gradient(circle at top left, rgba(30, 144, 255, 0.14), transparent 30%),
+          var(--bg2);
+      }
+      .conflict-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 16px;
+        margin-bottom: 16px;
+        border: 1px solid rgba(252, 175, 23, 0.28);
+        border-radius: 18px;
+        background: linear-gradient(135deg, rgba(252, 175, 23, 0.2), rgba(249, 115, 22, 0.1));
+      }
+      .conflict-badge {
+        flex: 0 0 auto;
+        min-width: 84px;
+        border-radius: 999px;
+        padding: 8px 12px;
+        background: #FCAF17;
+        color: #1f2937;
+        font-size: 11px;
+        font-weight: 900;
+        letter-spacing: .12em;
+        text-align: center;
+        text-transform: uppercase;
+      }
+      .conflict-title-text {
+        color: var(--text);
+        font-size: 17px;
+        font-weight: 900;
+        line-height: 1.3;
+      }
+      .conflict-body-text {
+        margin-top: 6px;
+        color: var(--text2);
+        font-size: 13px;
+        line-height: 1.6;
+      }
+      .conflict-card-grid {
+        display: grid;
+        gap: 12px;
+      }
+      .conflict-card {
+        border: 1px solid var(--card-border);
+        border-radius: 18px;
+        padding: 15px 16px;
+        background: var(--input-bg);
+      }
+      .conflict-card-label {
+        font-size: 11px;
+        font-weight: 900;
+        letter-spacing: .09em;
+        text-transform: uppercase;
+        color: var(--text2);
+        margin-bottom: 8px;
+      }
+      .conflict-card-title {
+        color: var(--text);
+        font-size: 15px;
+        font-weight: 900;
+        line-height: 1.35;
+      }
+      .conflict-card-time {
+        margin-top: 6px;
+        color: var(--text2);
+        font-size: 12px;
+      }
+    </style>
 </head>
 <body>
 
@@ -42,8 +156,11 @@
           <div class="ss-form-errors">{{ form.non_field_errors }}</div>
         {% endif %}
 
-        <form method="post" class="ss-form">
+        <form method="post" class="ss-form" id="workShiftForm">
           {% csrf_token %}
+          <input type="hidden" name="replace_conflict" id="replaceConflictFlag" value="">
+          <input type="hidden" name="conflict_kind" id="replaceConflictKind" value="">
+          <input type="hidden" name="conflict_id" id="replaceConflictId" value="">
           <datalist id="jobTitleOptions">{% for jt in job_title_options %}<option value="{{ jt }}"></option>{% endfor %}</datalist>
           <datalist id="locationOptions">{% for l in location_options %}<option value="{{ l }}"></option>{% endfor %}</datalist>
 
@@ -134,14 +251,43 @@
       </footer>
     </div>
 
+    <div class="modal-overlay" id="workShiftConflictModal" role="dialog" aria-modal="true" aria-labelledby="workShiftConflictTitle">
+      <div class="modal conflict-modal">
+        <div class="modal-title" id="workShiftConflictTitle">⚠️ <span>Schedule Warning</span></div>
+        <div class="conflict-header">
+          <div class="conflict-badge">Warning</div>
+          <div>
+            <div class="conflict-title-text">This time slot is already taken.</div>
+            <div class="conflict-body-text" id="workShiftConflictMessage">Only one item can occupy a time block.</div>
+          </div>
+        </div>
+        <div class="conflict-card-grid">
+          <div class="conflict-card">
+            <div class="conflict-card-label">Current Scheduled Item</div>
+            <div class="conflict-card-title" id="workShiftConflictItemTitle">Scheduled item</div>
+            <div class="conflict-card-time" id="workShiftConflictItemTime"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" id="workShiftConflictCancel">Keep Current Schedule</button>
+          <button type="button" class="btn-primary" id="workShiftConflictReplace">Replace Existing Item</button>
+        </div>
+      </div>
+    </div>
+
     <script src="{% static 'accounts/js/ss-shared.js' %}"></script>
     <script>
     (function() {
-        const SHIFT_COLORS = ['#ef4444','#f97316','#f59e0b','#10b981','#06b6d4','#3b82f6','#8b5cf6','#ec4899','#6b7280'];
+      const conflictPayload = {{ conflict_payload_json|safe }};
+      const SHIFT_COLORS = ['#8B5CF6','#A855F7','#EC4899','#F43F5E','#06B6D4','#0EA5E9','#10B981','#F97316'];
+        const form = document.getElementById('workShiftForm');
+        const replaceFlag = document.getElementById('replaceConflictFlag');
+        const replaceKind = document.getElementById('replaceConflictKind');
+        const replaceId = document.getElementById('replaceConflictId');
         const container = document.getElementById('shiftColorPicker');
         const hidden = document.getElementById('id_color_hex');
         if (container && hidden) {
-            if (!hidden.value) hidden.value = '#10b981';
+        if (!hidden.value) hidden.value = '#10B981';
             SHIFT_COLORS.forEach(hex => {
                 const s = document.createElement('div');
                 s.className = 'ss-swatch' + (hex === hidden.value ? ' active' : '');
@@ -169,6 +315,50 @@
                 if (sel.dataset.end)   endTime.value   = sel.dataset.end;
                 if (sel.dataset.location && locationInput) locationInput.value = sel.dataset.location;
             });
+        }
+
+        const modal = document.getElementById('workShiftConflictModal');
+        const message = document.getElementById('workShiftConflictMessage');
+        const itemTitle = document.getElementById('workShiftConflictItemTitle');
+        const itemTime = document.getElementById('workShiftConflictItemTime');
+        const cancelBtn = document.getElementById('workShiftConflictCancel');
+        const replaceBtn = document.getElementById('workShiftConflictReplace');
+
+        function closeConflictModal() {
+          modal.classList.remove('open');
+        }
+
+        function formatDateTime(value) {
+          if (!value) return '';
+          const parsed = new Date(value.replace(/([+-]\d{2}:\d{2}|Z)$/, ''));
+          if (Number.isNaN(parsed.getTime())) return value;
+          return parsed.toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+          });
+        }
+
+        cancelBtn.addEventListener('click', closeConflictModal);
+        modal.addEventListener('click', function(event) {
+          if (event.target === modal) closeConflictModal();
+        });
+
+        replaceBtn.addEventListener('click', function() {
+          if (!conflictPayload || !conflictPayload.conflict || !form) return;
+          replaceFlag.value = 'on';
+          replaceKind.value = conflictPayload.conflict.kind_key || '';
+          replaceId.value = conflictPayload.conflict.id || '';
+          form.submit();
+        });
+
+        if (conflictPayload && conflictPayload.conflict) {
+          message.textContent = conflictPayload.message || 'This time slot is already taken.';
+          itemTitle.textContent = conflictPayload.conflict.title || 'Scheduled item';
+          itemTime.textContent = `${formatDateTime(conflictPayload.conflict.start)} - ${formatDateTime(conflictPayload.conflict.end)}`;
+          replaceBtn.style.display = conflictPayload.conflict.replaceable ? '' : 'none';
+          modal.classList.add('open');
         }
     })();
     </script>
