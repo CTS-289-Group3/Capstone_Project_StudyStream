@@ -13,6 +13,7 @@ Capstone_Project_StudyStream/
 |-- UPDATE.md
 |-- docs/
 |   |-- database-erd.md
+|   |-- program-flowchart.md
 |   `-- project-structure.md
 |-- studystream/
 |   |-- __init__.py
