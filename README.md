@@ -87,13 +87,21 @@ EMAIL_HOST_PASSWORD=your-app-password
 python manage.py migrate
 ```
 
-### 5. (Optional) Seed demo data
+### 5. Create an admin user (for Django admin)
+
+```bash
+python manage.py createsuperuser
+```
+
+Then sign in at `http://127.0.0.1:8000/admin/` with that account.
+
+### 6. (Optional) Seed demo data
 
 ```bash
 python manage.py seed_demo_data --fresh
 ```
 
-### 6. Run the dev server
+### 7. Run the dev server
 
 ```bash
 python manage.py runserver
@@ -102,6 +110,25 @@ python manage.py runserver
 Open: http://127.0.0.1:8000/
 
 ## Useful Commands
+
+### Core Django
+
+```bash
+# Create new migration files after model changes
+python manage.py makemigrations
+
+# Apply migrations
+python manage.py migrate
+
+# Create/update an admin (superuser) account
+python manage.py createsuperuser
+
+# Open Django shell
+python manage.py shell
+
+# Run tests
+python manage.py test
+```
 
 ### Workload analysis
 
