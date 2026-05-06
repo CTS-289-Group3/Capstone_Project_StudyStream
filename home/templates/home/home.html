@@ -1331,6 +1331,7 @@ body.modal-open { overflow:hidden; }
       stToggle:   '/accounts/api/subtasks/{id}/toggle/',
       stDelete:   '/accounts/api/subtasks/{id}/delete/',
       peList:     '/home/api/personal-events/',
+      recPeEdit:  '/home/dashboard/recurring-personal-events/{id}/edit/',
       wsList:     '/home/api/work-shifts/',
     }
   };
@@ -2604,6 +2605,36 @@ async function openPersonalEventView(eventId) {
   openModal('personalEventViewModal');
 }
 
+function openRecurringPersonalEventEdit(recurringId) {
+  if (recurringId === undefined || recurringId === null || recurringId === '') return;
+  window.location.href = url(SS_DATA.urls.recPeEdit, recurringId);
+}
+
+function getPersonalEventAction(pe) {
+  if (pe && pe.id) {
+    return {
+      clickable: true,
+      onclickAttr: `openPersonalEventView(${pe.id})`,
+      titleHint: ' (click to view)',
+      handler: () => openPersonalEventView(pe.id),
+    };
+  }
+  if (pe && pe.recurring_id) {
+    return {
+      clickable: true,
+      onclickAttr: `openRecurringPersonalEventEdit(${pe.recurring_id})`,
+      titleHint: ' (click to edit recurring event)',
+      handler: () => openRecurringPersonalEventEdit(pe.recurring_id),
+    };
+  }
+  return {
+    clickable: false,
+    onclickAttr: '',
+    titleHint: '',
+    handler: null,
+  };
+}
+
 async function editPersonalEvent(eventId) {
   const res = await fetch(`/home/api/personal-events/${eventId}/edit/`);
   const data = await res.json();
@@ -3028,6 +3059,7 @@ function renderCourseManagerList() {
       </div>
       <div class="course-manager-actions">
         <button class="ss-btn ss-btn-ghost" style="padding:6px 10px;font-size:11px;" onclick="editCourseFromManager(${c.id})">Edit</button>
+        <button class="ss-btn" style="padding:6px 10px;font-size:11px;background:rgba(239,68,68,.18);border:1px solid rgba(239,68,68,.3);color:#f87171;" onclick="deleteCourse(${c.id})">Remove</button>
       </div>
     </div>
   `).join('');
@@ -3107,7 +3139,9 @@ async function saveCourse() {
   } else alert(data.error || 'Error saving course.');
 }
 
-async function deleteCourse(id, code) {
+async function deleteCourse(id) {
+  const course = state.courses.find(c => c.id === id);
+  const code = course ? course.course_code : `#${id}`;
   if (!confirm(`Delete course "${code}"? All assignments in it will also be deleted.`)) return;
   const data = await api(url(SS_DATA.urls.courseDelete, id), 'POST');
   if (data.success) {
@@ -3297,6 +3331,7 @@ function getUpcomingPlannerItems() {
   const eventItems = state.personalEvents
     .filter(e => localDateTime(e.event_date, e.start_time, true) >= now)
     .map(e => {
+      const action = getPersonalEventAction(e);
       const d = new Date(e.event_date + 'T00:00:00');
       const dateStr = `${DAY[d.getDay()]}, ${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
       const timeStr = e.start_time ? ` · ${formatTime12(e.start_time)}` : '';
@@ -3309,7 +3344,7 @@ function getUpcomingPlannerItems() {
         color: e.color_hex || '#FCAF17',
         title: e.title,
         meta: `${dateStr}${timeStr}${recur}${e.location ? ` · ${e.location}` : ''}`,
-        onclick: e.id ? `openPersonalEventView(${e.id})` : '',
+        onclick: action.onclickAttr,
       };
     });
 
@@ -4110,10 +4145,11 @@ function renderWeekCal() {
       // Show personal event label only at start hour.
       const startPersonal = slotPersonal.filter(pe => hourFromTimeStr(pe.start_time) === h);
       startPersonal.forEach(pe => {
+        const action = getPersonalEventAction(pe);
         const ev = document.createElement('div');
         ev.className = 'cal-event';
         const personalColor = pe.color_hex || '#FCAF17';
-        ev.style.cssText = `background:${personalColor};color:${getReadableTextColor(personalColor)};${pe.id ? 'cursor:pointer;' : ''}`;
+        ev.style.cssText = `background:${personalColor};color:${getReadableTextColor(personalColor)};${action.clickable ? 'cursor:pointer;' : ''}`;
         applyWeekEventSegment(ev, getTimedEventHourSegment(pe.start_time, pe.end_time, h));
         const peTime = pe.start_time ? formatTime12(pe.start_time) : '';
         const peEnd = pe.end_time ? formatTime12(pe.end_time) : '';
@@ -4121,8 +4157,8 @@ function renderWeekCal() {
         const peDetail = [peRange, pe.location].filter(Boolean).join(' · ');
         const recurringBadge = pe.recurrence_label ? ` · ${pe.recurrence_label}` : '';
         ev.innerHTML = `<div class="cal-event-title">${pe.title}</div>${peDetail || recurringBadge ? '<div class="cal-event-detail">' + [peDetail, recurringBadge].filter(Boolean).join('') + '</div>' : ''}`;
-        ev.title = `${pe.title}${peDetail ? ' — ' + peDetail : ''}${pe.recurrence_label ? ' · ' + pe.recurrence_label : ''}${pe.id ? ' (click to view)' : ''}`;
-        if (pe.id) ev.onclick = () => openPersonalEventView(pe.id);
+        ev.title = `${pe.title}${peDetail ? ' — ' + peDetail : ''}${pe.recurrence_label ? ' · ' + pe.recurrence_label : ''}${action.titleHint}`;
+        if (action.handler) ev.onclick = action.handler;
         cell.appendChild(ev);
       });
 
@@ -4198,13 +4234,14 @@ function renderMonthCal() {
 
     const pevents = getPersonalEventsByDate(dateStr);
     pevents.forEach(pe => {
+      const action = getPersonalEventAction(pe);
       const peRange = formatEventTimeRange(pe.start_time, pe.end_time);
       const recur = pe.recurrence_label ? ` · ${pe.recurrence_label}` : '';
       const peLabel = peRange ? `${pe.title} · ${peRange}${recur}` : `${pe.title}${recur}`;
-      const peClick = pe.id ? `onclick="event.stopPropagation();openPersonalEventView(${pe.id})"` : '';
-      const peCursor = pe.id ? 'cursor:pointer;' : '';
+      const peClick = action.clickable ? `onclick="event.stopPropagation();${action.onclickAttr}"` : '';
+      const peCursor = action.clickable ? 'cursor:pointer;' : '';
       const personalColor = pe.color_hex || '#FCAF17';
-      html += `<div class="month-event" style="background:${personalColor};color:${getReadableTextColor(personalColor)};${peCursor}" title="${peLabel}${pe.id ? ' (click to view)' : ''}" ${peClick}>${peLabel}</div>`;
+      html += `<div class="month-event" style="background:${personalColor};color:${getReadableTextColor(personalColor)};${peCursor}" title="${peLabel}${action.titleHint}" ${peClick}>${peLabel}</div>`;
     });
 
     cell.innerHTML = html;
@@ -4283,14 +4320,15 @@ function renderDayCal() {
 
     const startPersonal = slotPersonal.filter(pe => hourFromTimeStr(pe.start_time) === h);
     const personalHtml = startPersonal.map(pe => {
+      const action = getPersonalEventAction(pe);
       const peTime = pe.start_time ? formatTime12(pe.start_time) : '';
       const peEnd = pe.end_time ? formatTime12(pe.end_time) : '';
       const peRange = peTime && peEnd ? `${peTime}–${peEnd}` : peTime;
       const peDetail = [peRange, pe.location].filter(Boolean).join(' · ');
       const recur = pe.recurrence_label ? ` · ${pe.recurrence_label}` : '';
-      const tip = `${pe.title}${peDetail ? ' — ' + peDetail : ''}${recur}${pe.id ? ' (click to view)' : ''}`;
-      const click = pe.id ? `onclick="openPersonalEventView(${pe.id})"` : '';
-      const cursor = pe.id ? 'cursor:pointer;' : '';
+      const tip = `${pe.title}${peDetail ? ' — ' + peDetail : ''}${recur}${action.titleHint}`;
+      const click = action.clickable ? `onclick="${action.onclickAttr}"` : '';
+      const cursor = action.clickable ? 'cursor:pointer;' : '';
       const personalColor = pe.color_hex || '#FCAF17';
       const personalTextColor = getReadableTextColor(personalColor);
       return `<div class="day-event" style="background:${personalColor};color:${personalTextColor};${cursor}" ${click} title="${tip}"><div class="day-event-title">${pe.title}</div>${peDetail || recur ? '<div class="day-event-detail">' + [peDetail, recur].filter(Boolean).join('') + '</div>' : ''}</div>`;
