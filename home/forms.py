@@ -17,6 +17,14 @@ from core.models import (
 
 
 class PersonalEventForm(forms.ModelForm):
+    duration_hours = forms.DecimalField(
+        required=False,
+        min_value=0.25,
+        max_value=24,
+        decimal_places=2,
+        label="Duration (hours)",
+        widget=forms.NumberInput(attrs={"step": "0.25", "placeholder": "e.g. 1.5"}),
+    )
     recurring_enabled = forms.BooleanField(required=False, label="Make this a recurring event")
     recurrence_pattern = forms.ChoiceField(
         choices=RecurringPersonalEvent.RECUR_CHOICES,
@@ -52,6 +60,16 @@ class PersonalEventForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
+
+        # Derive end_time from duration_hours if end_time not provided
+        start_time = cleaned_data.get("start_time")
+        end_time = cleaned_data.get("end_time")
+        duration_hours = cleaned_data.get("duration_hours")
+        if start_time and not end_time and duration_hours:
+            from datetime import timedelta
+            start_dt = datetime.combine(datetime.today(), start_time)
+            end_dt = start_dt + timedelta(hours=float(duration_hours))
+            cleaned_data["end_time"] = end_dt.time()
 
         if not cleaned_data.get("recurring_enabled"):
             return cleaned_data
@@ -129,10 +147,10 @@ class WorkShiftForm(forms.ModelForm):
     shift_type = forms.ChoiceField(
         choices=[
             ("one_time", "One-time shift"),
-            ("recurring", "Recurring shift template"),
+            ("recurring", "Recurring shift"),
         ],
         initial="one_time",
-        required=True,
+        required=False,
         label="Shift Type",
         widget=forms.RadioSelect,
     )
@@ -180,15 +198,29 @@ class WorkShiftForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
+        if not cleaned_data.get("shift_type"):
+            cleaned_data["shift_type"] = "one_time"
+
+        shift_type = cleaned_data.get("shift_type")
         shift_date = cleaned_data.get("shift_date")
         start_time = cleaned_data.get("start_time")
         end_time = cleaned_data.get("end_time")
+        recurrence_pattern = cleaned_data.get("recurrence_pattern")
+        recurrence_end_date = cleaned_data.get("recurrence_end_date")
 
         if shift_date and start_time and end_time:
             start_dt = datetime.combine(shift_date, start_time)
             end_dt = datetime.combine(shift_date, end_time)
             if end_dt <= start_dt:
                 self.add_error("end_time", "End time must be after the start time.")
+
+        if shift_type == "recurring":
+            if not recurrence_pattern:
+                self.add_error("recurrence_pattern", "Select a repeat pattern for recurring shifts.")
+            if not recurrence_end_date:
+                self.add_error("recurrence_end_date", "Select an end date for recurring shifts.")
+            elif shift_date and recurrence_end_date < shift_date:
+                self.add_error("recurrence_end_date", "End date must be on or after the shift date.")
 
         return cleaned_data
 

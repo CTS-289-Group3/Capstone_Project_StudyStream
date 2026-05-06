@@ -64,14 +64,6 @@
           <div class="ss-form-errors">{{ workload_form.non_field_errors }}</div>
         {% endif %}
 
-        <div class="ss-form-row ss-single">
-          <div class="ss-field">
-            <label for="id_sleep_hours_per_night">Hours of Sleep Per Night</label>
-            {{ workload_form.sleep_hours_per_night }}
-            {{ workload_form.sleep_hours_per_night.errors }}
-          </div>
-        </div>
-
         <div class="ss-form-row">
           <div class="ss-field">
             <label for="id_sleep_start_time">Sleep Start Time</label>
@@ -83,6 +75,9 @@
             {{ workload_form.sleep_end_time }}
             {{ workload_form.sleep_end_time.errors }}
           </div>
+        </div>
+        <div style="margin-top:-6px;margin-bottom:8px;font-size:12px;color:var(--text2);">
+          Sleep hours are calculated automatically from your sleep start and end time.
         </div>
 
         <div class="ss-form-row">

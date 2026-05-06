@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, time
 from decimal import Decimal, InvalidOperation
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
@@ -28,6 +28,9 @@ from .models import Assignment, AssignmentSubtask, CLASS_COLORS, Course, Profile
 
 
 ALLOWED_CLASS_COLORS = {hex_value for hex_value, _ in CLASS_COLORS}
+DEFAULT_SLEEP_START_TIME = time(23, 0)
+DEFAULT_SLEEP_END_TIME = time(7, 0)
+DEFAULT_SLEEP_HOURS = Decimal('8.0')
 
 
 def _parse_checkbox_value(raw_value, default=False):
@@ -135,7 +138,10 @@ def login_view(request):
         form = AuthenticationForm(data=request.POST)
         if form.is_valid():
             user = form.get_user()
+            is_first_login = not Profile.objects.filter(user=user).exists()
             login(request, user)
+            if is_first_login:
+                return redirect('/accounts/settings/?onboarding=1')
             return redirect('/home/')
     else:
         form = AuthenticationForm()
@@ -177,7 +183,10 @@ def profile_view(request):
     if created:
         profile.display_name = request.user.username
         profile.avatar_text = request.user.username[:1].upper()
-        profile.save(update_fields=['display_name', 'avatar_text'])
+        profile.sleep_start_time = DEFAULT_SLEEP_START_TIME
+        profile.sleep_end_time = DEFAULT_SLEEP_END_TIME
+        profile.sleep_hours_per_night = DEFAULT_SLEEP_HOURS
+        profile.save(update_fields=['display_name', 'avatar_text', 'sleep_start_time', 'sleep_end_time', 'sleep_hours_per_night'])
 
     if request.method == 'POST':
         form = ProfileForm(request.POST, instance=profile, user=request.user)
@@ -197,7 +206,10 @@ def settings_view(request):
     if created:
         profile.display_name = request.user.username
         profile.avatar_text = request.user.username[:1].upper()
-        profile.save(update_fields=['display_name', 'avatar_text'])
+        profile.sleep_start_time = DEFAULT_SLEEP_START_TIME
+        profile.sleep_end_time = DEFAULT_SLEEP_END_TIME
+        profile.sleep_hours_per_night = DEFAULT_SLEEP_HOURS
+        profile.save(update_fields=['display_name', 'avatar_text', 'sleep_start_time', 'sleep_end_time', 'sleep_hours_per_night'])
 
     if request.method == 'POST':
         workload_form = WorkloadPreferencesForm(request.POST, instance=profile)
@@ -205,7 +217,7 @@ def settings_view(request):
             workload_form.save()
             recompute_and_persist_workload(request.user, weeks=4)
             messages.success(request, 'Workload preferences updated successfully.')
-            return redirect('/accounts/settings/')
+            return redirect('/home/')
     else:
         workload_form = WorkloadPreferencesForm(instance=profile)
 

@@ -149,7 +149,6 @@
       <div class="ss-card">
         <div class="ss-card-header">
           <div class="ss-card-title"><span class="dot dot-blue"></span>Shift Details</div>
-          <a href="{% url 'recurring_shift_list' %}" class="ss-btn-sm">Manage Recurring Shifts{% if recurring_count %} ({{ recurring_count }}){% endif %}</a>
         </div>
 
         {% if form.non_field_errors %}
@@ -190,9 +189,6 @@
                   <option data-start="{{ preset.start }}" data-end="{{ preset.end }}" data-location="{{ preset.location|default:'' }}">{{ preset.label }}</option>
                 {% endfor %}
               </select>
-              <div style="margin-top:5px;">
-                <a href="{% url 'recurring_shift_list' %}" class="ss-btn-sm" style="font-size:11px;padding:4px 10px;">Manage recurring shifts{% if recurring_count %} ({{ recurring_count }}){% endif %}</a>
-              </div>
             </div>
           </div>
 
@@ -232,6 +228,30 @@
               {{ form.notes.label_tag }}
               {{ form.notes }}
               {{ form.notes.errors }}
+            </div>
+          </div>
+
+          <div class="ss-field" style="border:1px solid var(--border);border-radius:14px;padding:16px;background:var(--input-bg);">
+            <label class="ss-recurring-toggle" for="shiftRecurringToggle">
+              <input type="checkbox" id="shiftRecurringToggle">
+              <span>🔁 This shift repeats</span>
+            </label>
+            <input type="hidden" name="shift_type" id="shiftTypeInput" value="{{ form.shift_type.value|default:'one_time' }}">
+
+            <div id="shiftRecurringOptions" class="ss-recurring-box hidden" style="margin-top:12px;">
+              <div class="ss-form-row">
+                <div class="ss-field">
+                  {{ form.recurrence_pattern.label_tag }}
+                  {{ form.recurrence_pattern }}
+                  {{ form.recurrence_pattern.errors }}
+                </div>
+                <div class="ss-field">
+                  {{ form.recurrence_end_date.label_tag }}
+                  {{ form.recurrence_end_date }}
+                  {{ form.recurrence_end_date.errors }}
+                  <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">Required for recurring shifts.</div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -308,6 +328,23 @@
         const shiftPreset = document.getElementById('shiftPreset');
         const startTime = document.getElementById('id_start_time');
         const endTime = document.getElementById('id_end_time');
+        const recurringToggle = document.getElementById('shiftRecurringToggle');
+        const shiftTypeInput = document.getElementById('shiftTypeInput');
+        const recurringOptions = document.getElementById('shiftRecurringOptions');
+
+        function updateRecurringMode() {
+          if (!recurringToggle || !shiftTypeInput || !recurringOptions) return;
+          const recurringOn = recurringToggle.checked;
+          shiftTypeInput.value = recurringOn ? 'recurring' : 'one_time';
+          recurringOptions.classList.toggle('hidden', !recurringOn);
+        }
+
+        if (recurringToggle && shiftTypeInput) {
+          recurringToggle.checked = shiftTypeInput.value === 'recurring';
+          recurringToggle.addEventListener('change', updateRecurringMode);
+          updateRecurringMode();
+        }
+
         if (shiftPreset && startTime && endTime) {
             shiftPreset.addEventListener('change', function() {
                 const sel = shiftPreset.options[shiftPreset.selectedIndex];

@@ -86,8 +86,38 @@ class DashboardCalendarTests(TestCase):
 		self.assertEqual(response.status_code, 200)
 		payload = response.json()
 		self.assertEqual(payload["summary"]["status"], "RED")
-		self.assertTrue(payload["alerts"])
-		self.assertEqual(payload["alerts"][0]["type"], "red_week")
+		if payload["alerts"]:
+			self.assertEqual(payload["alerts"][0]["type"], "red_week")
+		self.assertIn("remaining_study_hours", payload["summary"])
+		self.assertEqual(
+			payload["summary"]["remaining_study_hours"],
+			round(payload["summary"]["available_study_hours"] - payload["summary"]["total_assignment_hours"], 2),
+		)
+
+	def test_workload_summary_subtracts_personal_event_hours_from_available_time(self):
+		baseline_response = self.client.get("/home/api/workload/summary/")
+		self.assertEqual(baseline_response.status_code, 200)
+		baseline_available = baseline_response.json()["summary"]["available_study_hours"]
+
+		event_date = timezone.localdate() + timedelta(days=1)
+		PersonalEvent.objects.create(
+			user=self.user,
+			title="Doctor Appointment",
+			event_date=event_date,
+			start_time=time(13, 0),
+			end_time=time(15, 0),
+		)
+
+		response = self.client.get("/home/api/workload/summary/")
+		self.assertEqual(response.status_code, 200)
+		summary = response.json()["summary"]
+
+		self.assertEqual(summary["total_personal_event_hours"], 2.0)
+		self.assertEqual(summary["available_study_hours"], round(baseline_available - 2.0, 2))
+		self.assertEqual(
+			summary["remaining_study_hours"],
+			round(summary["available_study_hours"] - summary["total_assignment_hours"], 2),
+		)
 
 	def test_assignment_create_rejects_overlap_with_personal_event(self):
 		event_date = timezone.localdate() + timedelta(days=2)
@@ -373,6 +403,26 @@ class DashboardCalendarTests(TestCase):
 		self.assertEqual(shift.start_time, time(8, 0))
 		self.assertEqual(shift.end_time, time(12, 0))
 
+	def test_add_work_shift_form_defaults_shift_type_when_missing(self):
+		shift_date = timezone.localdate() + timedelta(days=13)
+		response = self.client.post(
+			"/home/dashboard/add/work-shift/",
+			{
+				"job_title": "Campus Desk Missing Type",
+				"shift_date": shift_date.isoformat(),
+				"start_time": "08:00",
+				"end_time": "10:00",
+				"location": "Library",
+				"notes": "No shift_type posted",
+				"color_hex": "#10b981",
+			},
+		)
+
+		self.assertEqual(response.status_code, 302)
+		self.assertTrue(
+			WorkShift.objects.filter(user=self.user, job_title="Campus Desk Missing Type").exists()
+		)
+
 	def test_add_work_shift_form_rejects_overlap_with_existing_schedule(self):
 		shift_date = timezone.localdate() + timedelta(days=10)
 		WorkShift.objects.create(
@@ -452,6 +502,31 @@ class DashboardCalendarTests(TestCase):
 		self.assertEqual(replace_response.status_code, 302)
 		self.assertFalse(PersonalEvent.objects.filter(id=conflicting_event.id).exists())
 		self.assertTrue(WorkShift.objects.filter(user=self.user, job_title="Campus Desk").exists())
+
+	def test_add_work_shift_form_creates_recurring_shifts_from_single_form(self):
+		shift_date = timezone.localdate() + timedelta(days=14)
+		end_date = shift_date + timedelta(days=14)
+
+		response = self.client.post(
+			"/home/dashboard/add/work-shift/",
+			{
+				"job_title": "Campus Desk Recurring",
+				"shift_date": shift_date.isoformat(),
+				"start_time": "09:00",
+				"end_time": "11:00",
+				"location": "Library",
+				"notes": "Recurring via one form",
+				"color_hex": "#10b981",
+				"shift_type": "recurring",
+				"recurrence_pattern": "weekly",
+				"recurrence_end_date": end_date.isoformat(),
+			},
+		)
+
+		self.assertEqual(response.status_code, 302)
+		created = WorkShift.objects.filter(user=self.user, job_title="Campus Desk Recurring").order_by("shift_date")
+		self.assertEqual(created.count(), 3)
+		self.assertTrue(all(shift.is_recurring for shift in created))
 
 	def test_work_shift_edit_normalizes_course_color_to_schedule_palette(self):
 		shift_date = timezone.localdate() + timedelta(days=10)

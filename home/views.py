@@ -34,7 +34,6 @@ from .forms import (
     RecurringPersonalEventForm,
     RecurringJobTitleForm,
     RecurringWorkLocationForm,
-    RecurringWorkShiftForm,
     WorkShiftForm,
 )
 from .workload_config import DASHBOARD_WIDGETS, STATUS_COLORS, WORKLOAD_DENSITY_COLORS
@@ -505,6 +504,7 @@ def work_shift_list_json(request):
 
 @login_required
 def add_personal_event(request):
+    conflict_payload = None
     if request.method == "POST":
         form = PersonalEventForm(request.POST)
         if form.is_valid():
@@ -529,16 +529,19 @@ def add_personal_event(request):
             except ValueError as exc:
                 form.add_error(None, str(exc))
             else:
-                conflict = get_schedule_conflict(request.user, [requested_item])
+                conflict = _resolve_schedule_conflict(request, request.user, [requested_item])
                 if conflict:
-                    form.add_error(None, _format_schedule_conflict_form_error(conflict))
+                    conflict_payload = schedule_conflict_to_dict(conflict)
                 else:
                     form.save_personal_event(request.user)
                     return redirect("/home/")
     else:
         form = PersonalEventForm()
 
-    return render(request, "home/personal_event_form.html", {"form": form})
+    return render(request, "home/personal_event_form.html", {
+        "form": form,
+        "conflict_payload_json": json.dumps(conflict_payload, cls=DjangoJSONEncoder) if conflict_payload else "null",
+    })
 
 
 @login_required
@@ -613,62 +616,47 @@ def add_work_shift(request):
             shift.user = request.user
             shift.job_title = shift.employer_name
             shifts_to_create = []
-            
-            # If using a recurring template, auto-fill the shift times and location
-            if form.cleaned_data.get("shift_type") == "recurring" and form.cleaned_data.get("recurring_template"):
-                template = form.cleaned_data.get("recurring_template")
 
+            # Optional template autofill while staying on one consolidated form.
+            template = form.cleaned_data.get("recurring_template")
+            if template:
                 base_start = timezone.localtime(shift.shift_start)
                 base_end = timezone.localtime(shift.shift_end)
                 tz = timezone.get_current_timezone()
-
-                start_dt = timezone.make_aware(
-                    datetime.combine(base_start.date(), template.start_time),
-                    tz,
-                )
-                end_dt = timezone.make_aware(
-                    datetime.combine(base_end.date(), template.end_time),
-                    tz,
-                )
-                shift.shift_start = start_dt
-                shift.shift_end = end_dt
-
-                if not shift.location:  # Only use template location if user didn't specify one
+                shift.shift_start = timezone.make_aware(datetime.combine(base_start.date(), template.start_time), tz)
+                shift.shift_end = timezone.make_aware(datetime.combine(base_end.date(), template.end_time), tz)
+                if not shift.location:
                     shift.location = template.location
-                
-                # Generate recurring shifts based on pattern
+
+            if form.cleaned_data.get("shift_type") == "recurring":
                 recurrence_pattern = form.cleaned_data.get("recurrence_pattern")
                 recurrence_end_date = form.cleaned_data.get("recurrence_end_date")
-                
-                if recurrence_pattern and recurrence_end_date:
-                    # Generate shifts for the recurrence period
-                    local_start = timezone.localtime(shift.shift_start)
-                    local_end = timezone.localtime(shift.shift_end)
-                    current_date = local_start.date()
 
-                    start_time_value = local_start.time().replace(microsecond=0)
-                    end_time_value = local_end.time().replace(microsecond=0)
-                    
-                    # Determine the increment days based on pattern
-                    if recurrence_pattern == "weekly":
-                        increment = timedelta(days=7)
-                    elif recurrence_pattern == "biweekly":
-                        increment = timedelta(days=14)
-                    elif recurrence_pattern == "monthly":
-                        increment = None  # Handle monthly separately
-                    
-                    # Create all recurring shifts
-                    while current_date <= recurrence_end_date:
-                        new_shift_start = timezone.make_aware(
-                            datetime.combine(current_date, start_time_value),
-                            timezone.get_current_timezone(),
-                        )
-                        new_shift_end = timezone.make_aware(
-                            datetime.combine(current_date, end_time_value),
-                            timezone.get_current_timezone(),
-                        )
+                local_start = timezone.localtime(shift.shift_start)
+                local_end = timezone.localtime(shift.shift_end)
+                current_date = local_start.date()
+                start_time_value = local_start.time().replace(microsecond=0)
+                end_time_value = local_end.time().replace(microsecond=0)
 
-                        new_shift = WorkShift(
+                if recurrence_pattern == "weekly":
+                    increment = timedelta(days=7)
+                elif recurrence_pattern == "biweekly":
+                    increment = timedelta(days=14)
+                else:
+                    increment = None
+
+                while current_date <= recurrence_end_date:
+                    new_shift_start = timezone.make_aware(
+                        datetime.combine(current_date, start_time_value),
+                        timezone.get_current_timezone(),
+                    )
+                    new_shift_end = timezone.make_aware(
+                        datetime.combine(current_date, end_time_value),
+                        timezone.get_current_timezone(),
+                    )
+
+                    shifts_to_create.append(
+                        WorkShift(
                             user=request.user,
                             employer_name=shift.employer_name,
                             job_title=shift.job_title,
@@ -681,22 +669,16 @@ def add_work_shift(request):
                             is_recurring=True,
                             recurrence_pattern=f"{recurrence_pattern}_{current_date.strftime('%A').lower()}",
                         )
-                        shifts_to_create.append(new_shift)
-                        
-                        # Calculate next date
-                        if recurrence_pattern == "monthly":
-                            # Add one month
-                            if current_date.month == 12:
-                                current_date = current_date.replace(year=current_date.year + 1, month=1)
-                            else:
-                                current_date = current_date.replace(month=current_date.month + 1)
+                    )
+
+                    if recurrence_pattern == "monthly":
+                        if current_date.month == 12:
+                            current_date = current_date.replace(year=current_date.year + 1, month=1)
                         else:
-                            current_date = current_date + increment
-                else:
-                    # No recurrence pattern selected, just save as one shift
-                    shifts_to_create.append(shift)
+                            current_date = current_date.replace(month=current_date.month + 1)
+                    else:
+                        current_date = current_date + increment
             else:
-                # One-time shift
                 shifts_to_create.append(shift)
 
             items_to_validate = []
@@ -738,60 +720,6 @@ def add_work_shift(request):
         "conflict_payload_json": json.dumps(conflict_payload, cls=DjangoJSONEncoder) if conflict_payload else "null",
     }
     return render(request, "home/work_shift_form.html", context)
-
-
-@login_required
-def recurring_shift_list(request):
-    recurring_shifts = RecurringWorkShift.objects.filter(user=request.user).order_by("-updated_at", "name")
-    return render(request, "home/recurring_shift_list.html", {"recurring_shifts": recurring_shifts})
-
-
-@login_required
-def add_recurring_shift(request):
-    if request.method == "POST":
-        form = RecurringWorkShiftForm(request.POST)
-        if form.is_valid():
-            recurring_shift = form.save(commit=False)
-            recurring_shift.user = request.user
-            recurring_shift.save()
-            return redirect("recurring_shift_list")
-    else:
-        form = RecurringWorkShiftForm()
-
-    context = {
-        "form": form,
-        "page_title": "Add Recurring Shift",
-        "submit_label": "Save Recurring Shift",
-    }
-    return render(request, "home/recurring_shift_form.html", context)
-
-
-@login_required
-def edit_recurring_shift(request, shift_id):
-    recurring_shift = get_object_or_404(RecurringWorkShift, id=shift_id, user=request.user)
-
-    if request.method == "POST":
-        form = RecurringWorkShiftForm(request.POST, instance=recurring_shift)
-        if form.is_valid():
-            form.save()
-            return redirect("recurring_shift_list")
-    else:
-        form = RecurringWorkShiftForm(instance=recurring_shift)
-
-    context = {
-        "form": form,
-        "page_title": "Edit Recurring Shift",
-        "submit_label": "Update Recurring Shift",
-    }
-    return render(request, "home/recurring_shift_form.html", context)
-
-
-@login_required
-def delete_recurring_shift(request, shift_id):
-    recurring_shift = get_object_or_404(RecurringWorkShift, id=shift_id, user=request.user)
-    if request.method == "POST":
-        recurring_shift.delete()
-    return redirect("recurring_shift_list")
 
 
 @login_required

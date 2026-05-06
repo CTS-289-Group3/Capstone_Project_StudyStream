@@ -7,8 +7,8 @@ from decimal import Decimal
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 
-from accounts.models import Assignment, Course, Profile
-from core.models import WorkShift, WorkloadAnalysis
+from accounts.models import Assignment, AssignmentSubtask, Course, Profile
+from core.models import PersonalEvent, RecurringPersonalEvent, WorkShift, WorkloadAnalysis
 
 from .workload_config import NOTIFICATIONS, WORKLOAD_DENSITY_COLORS
 
@@ -141,6 +141,77 @@ def _compute_weekly_class_hours(user) -> Decimal:
     return total.quantize(Decimal("0.01"))
 
 
+def _event_duration_hours(start_time, end_time) -> Decimal:
+    if not start_time:
+        return Decimal("1.00")
+    if not end_time:
+        return Decimal("1.00")
+
+    start_dt = datetime.combine(date.today(), start_time)
+    end_dt = datetime.combine(date.today(), end_time)
+    if end_dt <= start_dt:
+        end_dt += timedelta(days=1)
+    return Decimal(str((end_dt - start_dt).total_seconds() / 3600)).quantize(Decimal("0.01"))
+
+
+def _recurring_event_occurs_on_date(event, candidate_date: date, week_start_date: date) -> bool:
+    if candidate_date < event.start_date:
+        return False
+
+    if event.recurrence_pattern == RecurringPersonalEvent.RECUR_WEEKLY:
+        if event.weekdays:
+            weekdays = {int(token) for token in event.weekdays.split(",") if token.strip().isdigit()}
+            return candidate_date.weekday() in weekdays
+        return candidate_date.weekday() == event.start_date.weekday()
+
+    if event.recurrence_pattern == RecurringPersonalEvent.RECUR_BIWEEKLY:
+        base_week_start = week_start(event.start_date)
+        candidate_week_start = week_start(candidate_date)
+        weeks_delta = (candidate_week_start - base_week_start).days // 7
+        if weeks_delta < 0 or weeks_delta % 2 != 0:
+            return False
+        if event.weekdays:
+            weekdays = {int(token) for token in event.weekdays.split(",") if token.strip().isdigit()}
+            return candidate_date.weekday() in weekdays
+        return candidate_date.weekday() == event.start_date.weekday()
+
+    if event.recurrence_pattern == RecurringPersonalEvent.RECUR_MONTHLY:
+        target_day = event.monthly_day or event.start_date.day
+        return candidate_date.day == target_day
+
+    return False
+
+
+def _compute_weekly_personal_event_hours(user, week_start_date: date, week_end_date: date) -> Decimal:
+    total = Decimal("0.00")
+
+    one_time_events = PersonalEvent.objects.filter(
+        user=user,
+        event_date__gte=week_start_date,
+        event_date__lt=week_end_date,
+    ).only("start_time", "end_time")
+    for event in one_time_events:
+        total += _event_duration_hours(event.start_time, event.end_time)
+
+    recurring_events = RecurringPersonalEvent.objects.filter(user=user, is_active=True).only(
+        "start_date",
+        "start_time",
+        "end_time",
+        "recurrence_pattern",
+        "weekdays",
+        "monthly_day",
+    )
+    for recurring in recurring_events:
+        for offset in range(7):
+            candidate_date = week_start_date + timedelta(days=offset)
+            if candidate_date >= week_end_date:
+                break
+            if _recurring_event_occurs_on_date(recurring, candidate_date, week_start_date):
+                total += _event_duration_hours(recurring.start_time, recurring.end_time)
+
+    return total.quantize(Decimal("0.01"))
+
+
 def _get_capacity_preferences(user):
     profile = Profile.objects.filter(user=user).only(
         'sleep_hours_per_night',
@@ -157,7 +228,25 @@ def _get_capacity_preferences(user):
             'commute_hours_per_week': Decimal('0.00'),
         }
 
-    sleep_hours_per_week = (_to_decimal(profile.sleep_hours_per_night, '7.0') * Decimal('7.0')).quantize(Decimal('0.01'))
+    max_sleep_hours_per_night = Decimal('16.0')
+
+    sleep_start = getattr(profile, 'sleep_start_time', None)
+    sleep_end = getattr(profile, 'sleep_end_time', None)
+    if sleep_start and sleep_end:
+        start_dt = datetime.combine(date.today(), sleep_start)
+        end_dt = datetime.combine(date.today(), sleep_end)
+        if end_dt <= start_dt:
+            end_dt += timedelta(days=1)
+        sleep_hours_per_night = Decimal(str((end_dt - start_dt).total_seconds() / 3600)).quantize(Decimal('0.01'))
+    else:
+        sleep_hours_per_night = _to_decimal(profile.sleep_hours_per_night, '7.0').quantize(Decimal('0.01'))
+
+    if sleep_hours_per_night < Decimal('0.00'):
+        sleep_hours_per_night = Decimal('0.00')
+    if sleep_hours_per_night > max_sleep_hours_per_night:
+        sleep_hours_per_night = max_sleep_hours_per_night
+
+    sleep_hours_per_week = (sleep_hours_per_night * Decimal('7.0')).quantize(Decimal('0.01'))
     return {
         'sleep_hours_per_week': sleep_hours_per_week,
         'personal_hours_per_week': _to_decimal(profile.personal_time_hours_per_week, '14.0').quantize(Decimal('0.01')),
@@ -188,6 +277,16 @@ def _compute_weekly_snapshot(user, week_start_date: date):
     for assignment in assignments:
         total_assignment_hours += _to_decimal(assignment.estimated_hours)
 
+    subtasks = AssignmentSubtask.objects.filter(
+        assignment__user=user,
+        assignment__contributes_to_workload=True,
+        status__in=["not_started", "in_progress"],
+        due_date__date__gte=week_start_date,
+        due_date__date__lt=week_end_date,
+    ).only("estimated_hours")
+    for subtask in subtasks:
+        total_assignment_hours += _to_decimal(subtask.estimated_hours)
+
     work_shifts = WorkShift.objects.filter(
         user=user,
         shift_date__gte=week_start_date,
@@ -198,6 +297,7 @@ def _compute_weekly_snapshot(user, week_start_date: date):
         total_work_hours += _to_decimal(shift.duration_hours)
 
     total_class_hours = _compute_weekly_class_hours(user)
+    total_personal_event_hours = _compute_weekly_personal_event_hours(user, week_start_date, week_end_date)
     preferences = _get_capacity_preferences(user)
     reserved_hours = (
         preferences['sleep_hours_per_week']
@@ -206,9 +306,10 @@ def _compute_weekly_snapshot(user, week_start_date: date):
         + preferences['commute_hours_per_week']
     )
     available_study_hours = (
-        WEEK_HOURS - total_class_hours - total_work_hours - reserved_hours
+        WEEK_HOURS - total_class_hours - total_work_hours - total_personal_event_hours - reserved_hours
     ).quantize(Decimal("0.01"))
     available_study_hours = max(Decimal("0.00"), available_study_hours)
+    remaining_study_hours = (available_study_hours - total_assignment_hours).quantize(Decimal("0.01"))
 
     utilization_ratio = Decimal("0.000")
     if available_study_hours > 0:
@@ -237,8 +338,10 @@ def _compute_weekly_snapshot(user, week_start_date: date):
         "year": iso_year,
         "total_class_hours": total_class_hours,
         "total_work_hours": total_work_hours.quantize(Decimal("0.01")),
+        "total_personal_event_hours": total_personal_event_hours,
         "total_assignment_hours": total_assignment_hours.quantize(Decimal("0.01")),
         "available_study_hours": available_study_hours,
+        "remaining_study_hours": remaining_study_hours,
         "utilization_ratio": utilization_ratio,
         "week_status": week_status,
         "assignment_count": assignment_count,
@@ -347,7 +450,7 @@ def _build_alerts_from_forecast(snapshots, today: date):
                             week_number=snap["week_number"],
                             assignment_count=snap["assignment_count"],
                             total_hours=snap["total_assignment_hours"],
-                            available_hours=snap["available_study_hours"],
+                            available_hours=snap.get("remaining_study_hours", snap["available_study_hours"]),
                         ),
                         "color": WORKLOAD_DENSITY_COLORS[WorkloadAnalysis.STATUS_RED],
                     }
@@ -388,8 +491,10 @@ def _serialize_snapshot(snapshot):
         "utilization_percent": round(float(snapshot["utilization_ratio"]) * 100, 1),
         "total_class_hours": float(snapshot["total_class_hours"]),
         "total_work_hours": float(snapshot["total_work_hours"]),
+        "total_personal_event_hours": float(snapshot.get("total_personal_event_hours", 0.0)),
         "total_assignment_hours": float(snapshot["total_assignment_hours"]),
         "available_study_hours": float(snapshot["available_study_hours"]),
+        "remaining_study_hours": float(snapshot.get("remaining_study_hours", snapshot["available_study_hours"])),
         "assignment_count": snapshot["assignment_count"],
         "major_assignment_count": snapshot["major_assignment_count"],
         "deadline_cluster_detected": snapshot["deadline_cluster_detected"],

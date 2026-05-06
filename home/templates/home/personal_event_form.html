@@ -11,6 +11,82 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=DM+Sans:wght@400;500;600&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="{% static 'accounts/images/logo_icon.svg' %}">
     <link rel="stylesheet" href="{% static 'accounts/css/ss-shared.css' %}">
+    <style>
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,.55);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+      }
+      .modal-overlay.open { display: flex; }
+      .modal {
+        background: var(--bg2);
+        border: 1px solid var(--card-border);
+        border-radius: 24px;
+        padding: 28px 26px 24px;
+        width: 100%;
+        max-width: 480px;
+        box-shadow: 0 24px 64px rgba(0,0,0,.45);
+        animation: modalIn .18s ease;
+      }
+      @keyframes modalIn { from { opacity:0; transform:scale(.96) translateY(6px); } to { opacity:1; transform:none; } }
+      .modal-title {
+        font-size: 20px;
+        font-weight: 900;
+        color: var(--text);
+        margin-bottom: 16px;
+      }
+      .modal-title span { color: var(--ss-yellow); }
+      .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 20px;
+        padding-top: 16px;
+        border-top: 1px solid var(--card-border);
+      }
+      .conflict-modal {
+        max-width: 560px;
+        background:
+          radial-gradient(circle at top right, rgba(252,175,23,.2), transparent 34%),
+          radial-gradient(circle at top left, rgba(30,144,255,.14), transparent 30%),
+          var(--bg2);
+      }
+      .conflict-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 16px;
+        margin-bottom: 16px;
+        border: 1px solid rgba(252,175,23,.28);
+        border-radius: 18px;
+        background: linear-gradient(135deg, rgba(252,175,23,.2), rgba(249,115,22,.1));
+      }
+      .conflict-badge {
+        flex: 0 0 auto;
+        min-width: 84px;
+        border-radius: 999px;
+        padding: 8px 12px;
+        background: #FCAF17;
+        color: #1f2937;
+        font-size: 11px;
+        font-weight: 900;
+        letter-spacing: .12em;
+        text-align: center;
+        text-transform: uppercase;
+      }
+      .conflict-title-text { color: var(--text); font-size: 17px; font-weight: 900; line-height: 1.3; }
+      .conflict-body-text { margin-top: 6px; color: var(--text2); font-size: 13px; line-height: 1.6; }
+      .conflict-card-grid { display: grid; gap: 12px; }
+      .conflict-card { border: 1px solid var(--card-border); border-radius: 18px; padding: 15px 16px; background: var(--input-bg); }
+      .conflict-card-label { font-size: 11px; font-weight: 900; letter-spacing: .09em; text-transform: uppercase; color: var(--text2); margin-bottom: 8px; }
+      .conflict-card-title { color: var(--text); font-size: 15px; font-weight: 900; line-height: 1.35; }
+      .conflict-card-time { margin-top: 6px; color: var(--text2); font-size: 12px; }
+    </style>
 </head>
 <body>
 
@@ -42,8 +118,11 @@
           <div class="ss-form-errors">{{ form.non_field_errors }}</div>
         {% endif %}
 
-        <form method="post" class="ss-form">
+        <form method="post" class="ss-form" id="personalEventForm">
           {% csrf_token %}
+          <input type="hidden" name="replace_conflict" id="peReplaceConflictFlag" value="">
+          <input type="hidden" name="conflict_kind" id="peReplaceConflictKind" value="">
+          <input type="hidden" name="conflict_id" id="peReplaceConflictId" value="">
 
           <div class="ss-form-row ss-single">
             <div class="ss-field">
@@ -80,11 +159,19 @@
               {{ form.start_time }}
               {{ form.start_time.errors }}
             </div>
-            <div class="ss-field">
+            <div class="ss-field" id="peEndTimeField">
               {{ form.end_time.label_tag }}
               {{ form.end_time }}
               {{ form.end_time.errors }}
             </div>
+            <div class="ss-field" id="peDurationField" style="display:none;">
+              {{ form.duration_hours.label_tag }}
+              {{ form.duration_hours }}
+              {{ form.duration_hours.errors }}
+            </div>
+          </div>
+          <div style="margin-top:-6px;margin-bottom:4px;">
+            <button type="button" id="peEndTimeToggle" class="ss-btn-sm" style="font-size:11px;opacity:.75;">⏱ Use duration instead</button>
           </div>
 
           <div class="ss-field">
@@ -136,6 +223,30 @@
       </div>
     </main>
 
+    <div class="modal-overlay" id="peConflictModal" role="dialog" aria-modal="true" aria-labelledby="peConflictTitle">
+      <div class="modal conflict-modal">
+        <div class="modal-title" id="peConflictTitle">⚠️ <span>Schedule Warning</span></div>
+        <div class="conflict-header">
+          <div class="conflict-badge">Warning</div>
+          <div>
+            <div class="conflict-title-text">This time slot is already taken.</div>
+            <div class="conflict-body-text" id="peConflictMessage">Only one item can occupy a time block.</div>
+          </div>
+        </div>
+        <div class="conflict-card-grid">
+          <div class="conflict-card">
+            <div class="conflict-card-label">Current Scheduled Item</div>
+            <div class="conflict-card-title" id="peConflictItemTitle">Scheduled item</div>
+            <div class="conflict-card-time" id="peConflictItemTime"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" id="peConflictCancel">Keep Current Schedule</button>
+          <button type="button" class="btn-primary" id="peConflictReplace">Replace Existing Item</button>
+        </div>
+      </div>
+    </div>
+
     <div class="ss-footer-outer">
       <footer class="ss-footer">
         <div class="ss-footer-logo"><span class="w1">STUDY</span><span class="w2">STREAM</span></div>
@@ -184,6 +295,78 @@
         if (recurringToggle) recurringToggle.addEventListener('change', updateRecurring);
         if (recurrencePattern) recurrencePattern.addEventListener('change', updatePatternFields);
         updateRecurring(); updatePatternFields();
+
+        // End time / duration toggle
+        const peEndTimeField = document.getElementById('peEndTimeField');
+        const peDurationField = document.getElementById('peDurationField');
+        const peEndTimeToggle = document.getElementById('peEndTimeToggle');
+        const peEndTimeInput = document.getElementById('id_end_time');
+        const peDurationInput = document.getElementById('id_duration_hours');
+        let peDurationMode = Boolean(peDurationField && peDurationField.querySelector('input')?.value);
+
+        // If returning with a duration_hours error/value, start in duration mode
+        if (peDurationInput && peDurationInput.value) peDurationMode = true;
+
+        function applyPeDurationMode() {
+          if (!peEndTimeField || !peDurationField || !peEndTimeToggle) return;
+          if (peDurationMode) {
+            peEndTimeField.style.display = 'none';
+            peDurationField.style.display = '';
+            if (peEndTimeInput) peEndTimeInput.value = '';
+            peEndTimeToggle.textContent = '🕐 Use end time instead';
+          } else {
+            peEndTimeField.style.display = '';
+            peDurationField.style.display = 'none';
+            if (peDurationInput) peDurationInput.value = '';
+            peEndTimeToggle.textContent = '⏱ Use duration instead';
+          }
+        }
+        applyPeDurationMode();
+        if (peEndTimeToggle) peEndTimeToggle.addEventListener('click', function() {
+          peDurationMode = !peDurationMode;
+          applyPeDurationMode();
+        });
+
+        // Conflict modal
+        const conflictPayload = {{ conflict_payload_json|safe }};
+        const peConflictModal = document.getElementById('peConflictModal');
+        const peConflictCancel = document.getElementById('peConflictCancel');
+        const peConflictReplace = document.getElementById('peConflictReplace');
+        const peReplaceFlag = document.getElementById('peReplaceConflictFlag');
+        const peReplaceKind = document.getElementById('peReplaceConflictKind');
+        const peReplaceId = document.getElementById('peReplaceConflictId');
+        const peForm = document.getElementById('personalEventForm');
+
+        function formatDateTime(value) {
+          if (!value) return '';
+          const parsed = new Date(value.replace(/([+-]\d{2}:\d{2}|Z)$/, ''));
+          if (Number.isNaN(parsed.getTime())) return value;
+          return parsed.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+        }
+
+        function closePeConflictModal() {
+          peConflictModal.classList.remove('open');
+        }
+
+        if (peConflictCancel) peConflictCancel.addEventListener('click', closePeConflictModal);
+        if (peConflictModal) peConflictModal.addEventListener('click', function(e) {
+          if (e.target === peConflictModal) closePeConflictModal();
+        });
+        if (peConflictReplace) peConflictReplace.addEventListener('click', function() {
+          if (!conflictPayload || !conflictPayload.conflict || !peForm) return;
+          peReplaceFlag.value = 'on';
+          peReplaceKind.value = conflictPayload.conflict.kind_key || '';
+          peReplaceId.value = conflictPayload.conflict.id || '';
+          peForm.submit();
+        });
+
+        if (conflictPayload && conflictPayload.conflict) {
+          document.getElementById('peConflictMessage').textContent = conflictPayload.message || 'This time slot is already taken.';
+          document.getElementById('peConflictItemTitle').textContent = conflictPayload.conflict.title || 'Scheduled item';
+          document.getElementById('peConflictItemTime').textContent = `${formatDateTime(conflictPayload.conflict.start)} - ${formatDateTime(conflictPayload.conflict.end)}`;
+          if (peConflictReplace) peConflictReplace.style.display = conflictPayload.conflict.replaceable ? '' : 'none';
+          peConflictModal.classList.add('open');
+        }
     })();
     </script>
 </body>

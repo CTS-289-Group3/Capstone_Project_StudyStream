@@ -619,7 +619,8 @@
 [data-theme="light"] #dayView.active {
   border: 1px solid var(--ss-calendar-grid-line-strong);
   border-radius: 14px;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   background: var(--ss-calendar-grid-fill);
 }
 [data-theme="light"] .day-header-row {
@@ -1804,8 +1805,8 @@ body.modal-open { overflow:hidden; }
     <div class="modal-footer">
       <button class="ss-btn ss-btn-ghost" onclick="closeModal('personalEventViewModal')">Close</button>
       <div style="display:flex;gap:8px;margin-left:auto;">
-        <button class="ss-btn" id="pevDeleteBtn" onclick="" style="background:rgba(239,68,68,.18);border:1px solid rgba(239,68,68,.3);color:#f87171;">🗑 Delete</button>
-        <button class="ss-btn ss-btn-solid" id="pevEditBtn" onclick="">✏️ Edit</button>
+        <button class="ss-btn" id="pevDeleteBtn" onclick="deletePersonalEventFromView()" style="background:rgba(239,68,68,.18);border:1px solid rgba(239,68,68,.3);color:#f87171;">🗑 Delete</button>
+        <button class="ss-btn ss-btn-solid" id="pevEditBtn" onclick="editPersonalEventFromView()">✏️ Edit</button>
       </div>
     </div>
   </div>
@@ -1834,8 +1835,8 @@ body.modal-open { overflow:hidden; }
     <div class="modal-footer">
       <button class="ss-btn ss-btn-ghost" onclick="closeModal('workShiftViewModal')">Close</button>
       <div style="display:flex;gap:8px;margin-left:auto;">
-        <button class="ss-btn" id="wsvDeleteBtn" onclick="" style="background:rgba(239,68,68,.18);border:1px solid rgba(239,68,68,.3);color:#f87171;">🗑 Delete</button>
-        <button class="ss-btn ss-btn-solid" id="wsvEditBtn" onclick="">✏️ Edit</button>
+        <button class="ss-btn" id="wsvDeleteBtn" onclick="deleteWorkShiftFromView()" style="background:rgba(239,68,68,.18);border:1px solid rgba(239,68,68,.3);color:#f87171;">🗑 Delete</button>
+        <button class="ss-btn ss-btn-solid" id="wsvEditBtn" onclick="editWorkShiftFromView()">✏️ Edit</button>
       </div>
     </div>
   </div>
@@ -2610,6 +2611,20 @@ function openRecurringPersonalEventEdit(recurringId) {
   window.location.href = url(SS_DATA.urls.recPeEdit, recurringId);
 }
 
+function editPersonalEventFromView() {
+  const id = Number($('pevViewId')?.value || 0);
+  if (!id) return;
+  closeModal('personalEventViewModal');
+  editPersonalEvent(id);
+}
+
+function deletePersonalEventFromView() {
+  const id = Number($('pevViewId')?.value || 0);
+  if (!id) return;
+  closeModal('personalEventViewModal');
+  deletePersonalEvent(id);
+}
+
 function getPersonalEventAction(pe) {
   if (pe && pe.id) {
     return {
@@ -2781,6 +2796,20 @@ async function openWorkShiftView(shiftId) {
   openModal('workShiftViewModal');
 }
 
+function editWorkShiftFromView() {
+  const id = Number($('wsvViewId')?.value || 0);
+  if (!id) return;
+  closeModal('workShiftViewModal');
+  editWorkShift(id);
+}
+
+function deleteWorkShiftFromView() {
+  const id = Number($('wsvViewId')?.value || 0);
+  if (!id) return;
+  closeModal('workShiftViewModal');
+  deleteWorkShift(id);
+}
+
 /* ═════════════════════════════════════════════
    WORK SHIFT EDIT MODAL
 ═════════════════════════════════════════════ */
@@ -2828,7 +2857,22 @@ async function saveWorkShift(extraBody={}) {
 
   const data = await api(`/home/api/work-shifts/${id}/edit/`, 'POST', body);
   if (data.success) {
-    await refreshDashboardScheduleState();
+    if (data.shift) {
+      const idx = state.workShifts.findIndex(s => String(s.id) === String(data.shift.id));
+      if (idx >= 0) state.workShifts[idx] = data.shift;
+      else state.workShifts.push(data.shift);
+      renderTasks();
+      renderCourses();
+      renderCalendar();
+      renderSidebarUpcoming();
+      updateStats();
+    }
+
+    try {
+      await refreshDashboardScheduleState();
+    } catch (err) {
+      console.warn('Unable to refresh schedule state after work-shift save.', err);
+    }
     closeModal('workShiftModal');
      closeModal('workShiftViewModal');
     await refreshWorkloadData();
@@ -4100,12 +4144,13 @@ function renderWeekCal() {
       startAsgs.forEach(a => {
         const ev = document.createElement('div');
         ev.className = 'cal-event';
-        ev.style.cssText = `background:${a.course_color};color:${getReadableTextColor(a.course_color)};`;
+        const isDone = a.status === 'complete';
+        ev.style.cssText = `background:${a.course_color};color:${getReadableTextColor(a.course_color)};${isDone ? 'opacity:.6;' : ''}`;
         applyWeekEventSegment(ev, getAssignmentHourSegment(a, h));
         const dueTime = parseLocalDate(a.due_date).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
         const durationLabel = a.estimated_hours ? ` · ${a.estimated_hours}h` : '';
         const asgDetail = `Start ${dueTime}${durationLabel}${a.course_code ? ' · ' + a.course_code : ''}`;
-        ev.innerHTML = `<div class="cal-event-title">${a.title}</div><div class="cal-event-detail">${asgDetail}</div>`;
+        ev.innerHTML = `<div class="cal-event-title"${isDone ? ' style="text-decoration:line-through;"' : ''}>${isDone ? '✓ ' : ''}${a.title}</div><div class="cal-event-detail">${asgDetail}</div>`;
         ev.title = `${a.title} — ${asgDetail}`;
         ev.onclick = () => openTaskView(a.id);
         cell.appendChild(ev);
@@ -4217,7 +4262,8 @@ function renderMonthCal() {
 
     let html = `<div class="month-date">${d}</div>`;
     asgs.slice(0,2).forEach(a => {
-      html += `<div class="month-event" style="background:${a.course_color};color:${getReadableTextColor(a.course_color)};cursor:pointer;" title="${a.title}" onclick="event.stopPropagation();openTaskView(${a.id})">${a.title}</div>`;
+      const isDone = a.status === 'complete';
+      html += `<div class="month-event" style="background:${a.course_color};color:${getReadableTextColor(a.course_color)};cursor:pointer;${isDone ? 'opacity:.6;' : ''}" title="${a.title}${isDone ? ' ✓' : ''}" onclick="event.stopPropagation();openTaskView(${a.id})"><span style="${isDone ? 'text-decoration:line-through;' : ''}">${isDone ? '✓ ' : ''}${a.title}</span></div>`;
     });
     if (asgs.length > 2) html += `<div class="month-more">+${asgs.length-2} more</div>`;
 
@@ -4339,7 +4385,8 @@ function renderDayCal() {
       const dueTime = parseLocalDate(a.due_date).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
       const durationLabel = a.estimated_hours ? ` · ${a.estimated_hours}h` : '';
       const asgDetail = `Start ${dueTime}${durationLabel}${a.course_code ? ' · ' + a.course_code : ''}`;
-      return `<div class="day-event clickable" style="background:${a.course_color};color:${getReadableTextColor(a.course_color)};" onclick="openTaskView(${a.id})" title="${a.title} — click to view"><div class="day-event-title">${a.title}</div><div class="day-event-detail">${asgDetail}</div></div>`;
+      const isDone = a.status === 'complete';
+      return `<div class="day-event clickable" style="background:${a.course_color};color:${getReadableTextColor(a.course_color)};${isDone ? 'opacity:.6;' : ''}" onclick="openTaskView(${a.id})" title="${a.title} — click to view"><div class="day-event-title"${isDone ? ' style="text-decoration:line-through;"' : ''}>${isDone ? '✓ ' : ''}${a.title}</div><div class="day-event-detail">${asgDetail}</div></div>`;
     }).join('');
 
     const startSubtasks = slotSubtasks.filter(st => parseLocalDate(st.due_date).getHours() === h);
@@ -4446,16 +4493,36 @@ function computeWeekClientMetrics(weekStartDate) {
   const weekEndDate = new Date(weekStartDate);
   weekEndDate.setDate(weekEndDate.getDate() + 7);
 
-  const assignments = state.assignments.filter((a) => {
+  const workloadAssignments = state.assignments.filter((a) => {
     if (a.status === 'complete') return false;
     if (a.contributes_to_workload === false) return false;
+    return true;
+  });
+
+  const assignmentsDueThisWeek = workloadAssignments.filter((a) => {
     const due = parseLocalDate(a.due_date);
     return !Number.isNaN(due.getTime()) && due >= weekStartDate && due < weekEndDate;
   });
 
-  const assignmentHours = assignments.reduce((sum, a) => {
+  const assignmentHours = assignmentsDueThisWeek.reduce((sum, a) => {
     const h = Number(a.estimated_hours || 0);
     return sum + (Number.isFinite(h) ? h : 0);
+  }, 0);
+
+  const subtaskHours = workloadAssignments.reduce((sum, a) => {
+    const activeSubtasks = (a.subtasks || []).filter((st) => {
+      if (!st || !st.due_date) return false;
+      if (st.status === 'complete') return false;
+      const due = parseLocalDate(st.due_date);
+      return !Number.isNaN(due.getTime()) && due >= weekStartDate && due < weekEndDate;
+    });
+
+    const subtaskTotal = activeSubtasks.reduce((innerSum, st) => {
+      const h = Number(st.estimated_hours || 0);
+      return innerSum + (Number.isFinite(h) ? h : 0);
+    }, 0);
+
+    return sum + subtaskTotal;
   }, 0);
 
   const workHours = state.workShifts.reduce((sum, shift) => {
@@ -4468,8 +4535,8 @@ function computeWeekClientMetrics(weekStartDate) {
   }, 0);
 
   return {
-    assignmentCount: assignments.length,
-    assignmentHours,
+    assignmentCount: assignmentsDueThisWeek.length,
+    assignmentHours: assignmentHours + subtaskHours,
     workHours,
   };
 }
@@ -4519,7 +4586,10 @@ function renderWorkloadWidgets() {
 
     $('workloadAssignmentHours').textContent = `${Number(selectedWeekClientMetrics.assignmentHours || 0).toFixed(1)}h`;
     $('workloadWorkHours').textContent = `${Number(selectedWeekClientMetrics.workHours || 0).toFixed(1)}h`;
-    $('workloadAvailableHours').textContent = `${Number(selectedWeekSummary.available_study_hours || 0).toFixed(1)}h`;
+    const remainingStudyHours = Number(
+      selectedWeekSummary.remaining_study_hours ?? selectedWeekSummary.available_study_hours ?? 0
+    );
+    $('workloadAvailableHours').textContent = `${remainingStudyHours.toFixed(1)}h`;
     $('workloadAssignmentCount').textContent = String(selectedWeekClientMetrics.assignmentCount || 0);
 
     const upcomingEl = $('workloadUpcomingWeek');
@@ -4547,11 +4617,14 @@ function renderWorkloadWidgets() {
   if (summaryWarningCard && summaryWarningValue && summaryWarningNote) {
     const summaryStatus = String(selectedWeekSummary.status || 'GREEN').toUpperCase();
     const summaryUtilPct = Number(selectedWeekSummary.utilization_percent || 0);
+    const summaryRemainingHours = Number(
+      selectedWeekSummary.remaining_study_hours ?? selectedWeekSummary.available_study_hours ?? 0
+    );
     const fallbackAlert = summaryStatus === 'RED'
       ? {
           color: SS_DATA.workloadDensityColors?.RED || '#E74C3C',
           title: 'Current week is overloaded',
-          message: `Utilization is ${summaryUtilPct.toFixed(1)}%. Consider redistributing work.`,
+          message: `Remaining study time is ${summaryRemainingHours.toFixed(1)}h. Consider redistributing work.`,
         }
       : summaryStatus === 'YELLOW'
         ? {
