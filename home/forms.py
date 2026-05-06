@@ -99,6 +99,7 @@ class PersonalEventForm(forms.ModelForm):
             start_time=self.cleaned_data.get("start_time"),
             end_time=self.cleaned_data.get("end_time"),
             location=self.cleaned_data.get("location", ""),
+            color_hex=self.cleaned_data.get("color_hex") or DEFAULT_PERSONAL_EVENT_COLOR,
             recurrence_pattern=recurrence_pattern,
             weekdays=",".join(sorted(selected_weekdays)) if recurrence_pattern in {"weekly", "biweekly"} else "",
             monthly_day=(self.cleaned_data.get("monthly_day") or event_date.day) if recurrence_pattern == "monthly" else None,

@@ -38,11 +38,20 @@ python manage.py runserver
 
 4. Open port `8000` in the browser.
 
-Default seeded user:
+Seeded accounts:
 
 ```text
-Username: tessab
-Password: StudyStream123!
+Default scenario (`python manage.py seed_demo_data --fresh`)
+	Username: testb
+	Password: Pass123!
+
+testA overload scenario (`python manage.py seed_demo_data --scenario testa --fresh`)
+	Username: testA
+	Password: Pass123!
+
+Emma spring-semester scenario (`python manage.py seed_demo_data --scenario emma --fresh`)
+	Username: emma
+	Password: Pass123!
 ```
 
 ## Local Setup
@@ -148,6 +157,12 @@ python manage.py run_workload_analysis --weeks 6
 ```bash
 # Seed a custom account and reset existing data for that user
 python manage.py seed_demo_data --username qa_user --password TestPass123! --email qa@example.com --fresh
+
+# Seed the testA overload scenario for current-week task-breakdown demos
+python manage.py seed_demo_data --scenario testa --fresh
+
+# Seed the Emma scenario (Spring 2026 student schedule)
+python manage.py seed_demo_data --scenario emma --fresh
 
 # Merge demo data into an existing user without clearing current records
 python manage.py seed_demo_data --username qa_user --password TestPass123!

@@ -92,6 +92,7 @@ def _generate_recurring_personal_occurrences(recurring_events, range_start, rang
                         "start_time": recurring_event.start_time,
                         "end_time": recurring_event.end_time,
                         "location": recurring_event.location,
+                        "color_hex": recurring_event.color_hex,
                         "recurrence_label": recurring_event.get_recurrence_pattern_display(),
                     }
                 )
@@ -120,6 +121,7 @@ def _generate_recurring_personal_occurrences(recurring_events, range_start, rang
                             "start_time": recurring_event.start_time,
                             "end_time": recurring_event.end_time,
                             "location": recurring_event.location,
+                            "color_hex": recurring_event.color_hex,
                             "recurrence_label": recurring_event.get_recurrence_pattern_display(),
                         }
                     )
@@ -197,7 +199,7 @@ def _serialize_personal_events(user, *, start_date=None, horizon_days=90):
                 'description': occ.get('description', '') or '',
                 'location': occ.get('location', '') or '',
                 'recurrence_label': occ.get('recurrence_label', ''),
-                'color_hex': '#FCAF17',
+                'color_hex': occ.get('color_hex') or DEFAULT_PERSONAL_EVENT_COLOR,
             }
         )
     personal_events_data.sort(key=lambda e: (e['event_date'], e['start_time'] or ''))

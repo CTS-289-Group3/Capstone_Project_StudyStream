@@ -6,7 +6,7 @@ from django.test import TestCase
 from django.utils import timezone
 
 from accounts.models import Assignment, AssignmentSubtask, Course, Semester
-from core.models import PersonalEvent, WorkShift
+from core.models import PersonalEvent, RecurringPersonalEvent, WorkShift
 
 
 class DashboardCalendarTests(TestCase):
@@ -508,3 +508,33 @@ class DashboardCalendarTests(TestCase):
 		self.assertEqual(work_response.status_code, 200)
 		self.assertEqual(personal_response.json()["personal_events"][0]["title"], "Study Group")
 		self.assertEqual(work_response.json()["work_shifts"][0]["title"], "Campus Desk")
+
+	def test_recurring_personal_event_preserves_selected_color(self):
+		event_date = timezone.localdate() + timedelta(days=1)
+
+		response = self.client.post(
+			"/home/dashboard/add/personal-event/",
+			{
+				"title": "Hair Appointment",
+				"description": "Trim and style",
+				"event_date": event_date.isoformat(),
+				"start_time": "13:00",
+				"end_time": "14:00",
+				"location": "Salon",
+				"color_hex": "#F43F5E",
+				"recurring_enabled": "on",
+				"recurrence_pattern": "weekly",
+				"selected_weekdays": [str(event_date.weekday())],
+				"recurring_is_active": "on",
+			},
+		)
+
+		self.assertEqual(response.status_code, 302)
+		recurring_event = RecurringPersonalEvent.objects.get(user=self.user, title="Hair Appointment")
+		self.assertEqual(recurring_event.color_hex, "#F43F5E")
+
+		personal_response = self.client.get("/home/api/personal-events/")
+		self.assertEqual(personal_response.status_code, 200)
+		personal_events = personal_response.json()["personal_events"]
+		hair_occurrence = next(item for item in personal_events if item["title"] == "Hair Appointment")
+		self.assertEqual(hair_occurrence["color_hex"], "#F43F5E")

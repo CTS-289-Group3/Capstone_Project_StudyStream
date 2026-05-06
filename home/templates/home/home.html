@@ -45,10 +45,10 @@
   --ss-soft-bubble-bg: #edf3fa;
   --ss-soft-bubble-border: #d6e2ef;
   --ss-soft-bubble-hover: #e3ecf7;
-  --ss-calendar-grid-line: rgba(3, 78, 162, 0.16);
-  --ss-calendar-grid-line-strong: rgba(3, 78, 162, 0.22);
+  --ss-calendar-grid-line: rgba(3, 78, 162, 0.24);
+  --ss-calendar-grid-line-strong: rgba(3, 78, 162, 0.34);
   --ss-calendar-grid-fill: #fbfdff;
-  --ss-calendar-header-fill: #f4f8fe;
+  --ss-calendar-header-fill: #f1f6fd;
 }
 @keyframes dashIn { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
 
@@ -575,14 +575,43 @@
   border-radius: 14px;
   padding: 1px;
 }
+[data-theme="light"] #monthGrid.active {
+  gap: 1px;
+  background: var(--ss-calendar-grid-line);
+  border: 1px solid var(--ss-calendar-grid-line-strong);
+  border-radius: 14px;
+  padding: 1px;
+}
+[data-theme="light"] .month-day-header {
+  background: var(--ss-calendar-header-fill);
+  border-bottom: 1px solid var(--ss-calendar-grid-line-strong);
+}
+[data-theme="light"] .month-cell {
+  background: var(--ss-calendar-grid-fill);
+  border-radius: 0;
+  box-shadow: inset 0 0 0 1px rgba(3, 78, 162, 0.10);
+}
+[data-theme="light"] #monthGrid.active .month-day-header:first-child {
+  border-top-left-radius: 13px;
+}
+[data-theme="light"] #monthGrid.active .month-day-header:nth-child(7) {
+  border-top-right-radius: 13px;
+}
 [data-theme="light"] .week-day-header,
 [data-theme="light"] .week-day-date,
 [data-theme="light"] .week-time-label {
   background: var(--ss-calendar-header-fill);
 }
+[data-theme="light"] .week-day-header,
+[data-theme="light"] .week-day-date {
+  border-bottom: 1px solid var(--ss-calendar-grid-line-strong);
+}
+[data-theme="light"] .week-time-label {
+  border-right: 1px solid var(--ss-calendar-grid-line-strong);
+}
 [data-theme="light"] .week-cell {
   background: var(--ss-calendar-grid-fill);
-  box-shadow: inset 0 0 0 1px rgba(3, 78, 162, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(3, 78, 162, 0.10);
 }
 [data-theme="light"] .week-cell:hover {
   background: #e8f1fb;
@@ -3677,6 +3706,13 @@ async function toggleSubtask(stId, el, asgId) {
   if (data.success) await refreshSubtaskPanel(asgId);
 }
 
+async function toggleTaskViewSubtask(stId, asgId) {
+  const data = await api(url(SS_DATA.urls.stToggle, stId), 'POST');
+  if (!data.success) return;
+  await refreshSubtaskPanel(asgId);
+  await renderTaskViewSubtasks(asgId);
+}
+
 async function saveSubtaskInline(stId, asgId) {
   const titleEl = document.querySelector(`.st-edit-title[data-subtask-id="${stId}"]`);
   const dueDateEl = document.querySelector(`.st-edit-due-date[data-subtask-id="${stId}"]`);
@@ -3727,6 +3763,39 @@ async function deleteSubtask(stId, asgId) {
 /* ═════════════════════════════════════════════
    TASK VIEW MODAL
 ═════════════════════════════════════════════ */
+function renderTaskViewMeta(assignment) {
+  const due = parseLocalDate(assignment.due_date);
+  $('tvMeta').innerHTML = `
+    <div style="background:var(--input-bg);border-radius:12px;padding:12px;">
+      <div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Due Date</div>
+      <div style="font-size:13px;font-weight:700;color:var(--text);">${due.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'})}</div>
+      <div style="font-size:12px;color:var(--text2);">${assignment.due_time || due.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})}</div>
+    </div>
+    <div style="background:var(--input-bg);border-radius:12px;padding:12px;">
+      <div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Type</div>
+      <div style="font-size:13px;font-weight:700;color:var(--text);">${assignment.assignment_type.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase())}</div>
+      ${assignment.estimated_hours ? `<div style="font-size:12px;color:var(--text2);">~${assignment.estimated_hours}h estimated</div>` : ''}
+    </div>
+    ${assignment.subtask_count > 0 ? `
+    <div style="background:var(--input-bg);border-radius:12px;padding:12px;grid-column:1/-1;">
+      <div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;">Progress</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="flex:1;height:8px;background:var(--card-border);border-radius:999px;overflow:hidden;">
+          <div style="height:100%;width:${assignment.completion_pct}%;background:linear-gradient(90deg,var(--ss-blue),var(--ss-blue-light));border-radius:999px;transition:width .6s ease;"></div>
+        </div>
+        <span style="font-size:12px;font-weight:800;color:var(--text2);">${assignment.subtask_done}/${assignment.subtask_count} steps (${assignment.completion_pct}%)</span>
+      </div>
+    </div>` : ''}
+    ${(assignment.canvas_link || assignment.rubric_link || assignment.submission_link) ? `
+    <div style="background:var(--input-bg);border-radius:12px;padding:12px;grid-column:1/-1;display:flex;flex-wrap:wrap;gap:10px;">
+      ${assignment.canvas_link ? `<a href="${assignment.canvas_link}" target="_blank" rel="noopener" style="font-size:12px;font-weight:700;color:var(--ss-blue);text-decoration:none;">Canvas</a>` : ''}
+      ${assignment.rubric_link ? `<a href="${assignment.rubric_link}" target="_blank" rel="noopener" style="font-size:12px;font-weight:700;color:var(--ss-blue);text-decoration:none;">Rubric</a>` : ''}
+      ${assignment.submission_link ? `<a href="${assignment.submission_link}" target="_blank" rel="noopener" style="font-size:12px;font-weight:700;color:var(--ss-blue);text-decoration:none;">Submission</a>` : ''}
+      ${assignment.contributes_to_workload === false ? `<span style="font-size:12px;color:var(--muted);margin-left:auto;">Excluded from workload</span>` : ''}
+    </div>` : ''}
+  `;
+}
+
 function openTaskView(id) {
   const a = state.assignments.find(x => x.id === id);
   if (!a) return;
@@ -3749,37 +3818,7 @@ function openTaskView(id) {
     ${a.tags.map(t=>`<span style="background:${t.color_hex};padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;color:#fff;">${t.name}</span>`).join('')}
   `;
 
-  // Meta grid
-  const due = parseLocalDate(a.due_date);
-  $('tvMeta').innerHTML = `
-    <div style="background:var(--input-bg);border-radius:12px;padding:12px;">
-      <div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Due Date</div>
-      <div style="font-size:13px;font-weight:700;color:var(--text);">${due.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'})}</div>
-      <div style="font-size:12px;color:var(--text2);">${a.due_time || due.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})}</div>
-    </div>
-    <div style="background:var(--input-bg);border-radius:12px;padding:12px;">
-      <div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Type</div>
-      <div style="font-size:13px;font-weight:700;color:var(--text);">${a.assignment_type.replace(/_/g,' ').replace(/\w/g,c=>c.toUpperCase())}</div>
-      ${a.estimated_hours ? `<div style="font-size:12px;color:var(--text2);">~${a.estimated_hours}h estimated</div>` : ''}
-    </div>
-    ${a.subtask_count > 0 ? `
-    <div style="background:var(--input-bg);border-radius:12px;padding:12px;grid-column:1/-1;">
-      <div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;">Progress</div>
-      <div style="display:flex;align-items:center;gap:10px;">
-        <div style="flex:1;height:8px;background:var(--card-border);border-radius:999px;overflow:hidden;">
-          <div style="height:100%;width:${a.completion_pct}%;background:linear-gradient(90deg,var(--ss-blue),var(--ss-blue-light));border-radius:999px;transition:width .6s ease;"></div>
-        </div>
-        <span style="font-size:12px;font-weight:800;color:var(--text2);">${a.subtask_done}/${a.subtask_count} steps (${a.completion_pct}%)</span>
-      </div>
-    </div>` : ''}
-    ${(a.canvas_link || a.rubric_link || a.submission_link) ? `
-    <div style="background:var(--input-bg);border-radius:12px;padding:12px;grid-column:1/-1;display:flex;flex-wrap:wrap;gap:10px;">
-      ${a.canvas_link ? `<a href="${a.canvas_link}" target="_blank" rel="noopener" style="font-size:12px;font-weight:700;color:var(--ss-blue);text-decoration:none;">Canvas</a>` : ''}
-      ${a.rubric_link ? `<a href="${a.rubric_link}" target="_blank" rel="noopener" style="font-size:12px;font-weight:700;color:var(--ss-blue);text-decoration:none;">Rubric</a>` : ''}
-      ${a.submission_link ? `<a href="${a.submission_link}" target="_blank" rel="noopener" style="font-size:12px;font-weight:700;color:var(--ss-blue);text-decoration:none;">Submission</a>` : ''}
-      ${a.contributes_to_workload === false ? `<span style="font-size:12px;color:var(--muted);margin-left:auto;">Excluded from workload</span>` : ''}
-    </div>` : ''}
-  `;
+  renderTaskViewMeta(a);
 
   // Description
   $('tvDesc').innerHTML = a.description
@@ -3788,23 +3827,7 @@ function openTaskView(id) {
 
   // Subtasks
   if (a.subtask_count > 0) {
-    fetch(`/accounts/api/assignments/${id}/subtasks/`)
-      .then(r=>r.json())
-      .then(d => {
-        if (!d.subtasks) return;
-        $('tvSubtasks').innerHTML = `
-          <div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;">Steps</div>
-          ${d.subtasks.map(s=>`
-            <div style="${buildSubtaskRowAccentStyle(s)}">
-              <div style="${buildSubtaskCheckStyle(s)}">✓</div>
-              <div style="display:flex;flex-direction:column;gap:2px;min-width:0;">
-                <span style="font-size:13px;font-weight:600;color:var(--text);${s.status==='complete'?'text-decoration:line-through;color:var(--muted);':''}">${s.title}</span>
-                <span style="font-size:11px;color:var(--muted);">${s.due_time || (s.due_date ? new Date(s.due_date).toLocaleString() : 'No due date')}${s.estimated_hours ? ` · ${s.estimated_hours}h` : ''}</span>
-              </div>
-            </div>
-          `).join('')}
-        `;
-      });
+    renderTaskViewSubtasks(id);
   } else {
     $('tvSubtasks').innerHTML = '';
   }
@@ -3814,6 +3837,41 @@ function openTaskView(id) {
   $('tvDeleteBtn').onclick = () => { closeModal('taskViewModal'); deleteAssignment(id); };
 
   openModal('taskViewModal');
+}
+
+async function renderTaskViewSubtasks(asgId) {
+  const response = await fetch(`/accounts/api/assignments/${asgId}/subtasks/`, { credentials: 'same-origin' });
+  const data = await response.json();
+  if (!data.subtasks) return;
+
+  const assignment = state.assignments.find(item => item.id === asgId);
+  if (assignment) {
+    assignment.subtask_count = data.subtasks.length;
+    assignment.subtask_done = data.subtasks.filter(subtask => subtask.status === 'complete').length;
+    assignment.completion_pct = data.completion_pct;
+    assignment.completion_percentage = data.completion_percentage;
+    assignment.subtasks = data.subtasks;
+    renderTaskViewMeta(assignment);
+  }
+
+  $('tvSubtasks').innerHTML = `
+    <div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;">Steps</div>
+    ${data.subtasks.map(subtask => `
+      <div style="${buildSubtaskRowAccentStyle(subtask)}">
+        <button
+          type="button"
+          style="${buildSubtaskCheckStyle(subtask)};cursor:pointer"
+          onclick="toggleTaskViewSubtask(${subtask.id},${asgId})"
+          aria-label="Mark ${escapeAttr(subtask.title)} ${subtask.status === 'complete' ? 'not complete' : 'complete'}"
+          title="${subtask.status === 'complete' ? 'Mark not complete' : 'Mark complete'}"
+        >${subtask.status === 'complete' ? '✓' : ''}</button>
+        <div style="display:flex;flex-direction:column;gap:2px;min-width:0;">
+          <span style="font-size:13px;font-weight:600;color:var(--text);${subtask.status==='complete'?'text-decoration:line-through;color:var(--muted);':''}">${subtask.title}</span>
+          <span style="font-size:11px;color:var(--muted);">${subtask.due_time || (subtask.due_date ? new Date(subtask.due_date).toLocaleString() : 'No due date')}${subtask.estimated_hours ? ` · ${subtask.estimated_hours}h` : ''}</span>
+        </div>
+      </div>
+    `).join('')}
+  `;
 }
 
 /* ═════════════════════════════════════════════

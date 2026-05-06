@@ -169,6 +169,7 @@ class RecurringPersonalEvent(models.Model):
     start_time = models.TimeField(null=True, blank=True)
     end_time = models.TimeField(null=True, blank=True)
     location = models.CharField(max_length=200, blank=True)
+    color_hex = models.CharField(max_length=7, default=DEFAULT_PERSONAL_EVENT_COLOR)
     recurrence_pattern = models.CharField(max_length=20, choices=RECUR_CHOICES)
     weekdays = models.CharField(max_length=20, blank=True)
     monthly_day = models.PositiveSmallIntegerField(null=True, blank=True)
