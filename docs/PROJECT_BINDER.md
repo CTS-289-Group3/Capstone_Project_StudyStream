@@ -355,17 +355,19 @@ Working on StudyStream pushed me to apply and deepen skills I had been building 
 
 ### Appendix B -- Full ERD
 
-See `docs/database-erd.md` in the project repository for the full entity relationship diagram. The file uses Mermaid syntax and renders directly on GitHub.
+![ERD Diagram](images/Appendix%20B.pdf)
 
 ### Appendix C -- Demo Data
 
 The repository includes a management command that seeds the database with realistic demo data:
 
 This creates sample users, semesters, courses, assignments, and work shifts that demonstrate the workload analysis and conflict detection features without manual data entry.
-
+```
+python manage.py seed_demo_data
+```
 ### Appendix D -- GitHub Project Board
 
-Sprint task tracking is available on the GitHub project board at: CTS-289-Group3 / Projects / StudyStream Group 3. Completed items include Feature: Semester Management, Feature: Course Management, Feature: Assignment Management, and others visible in the Done column.
+![Project Board](images/Appendix%20D.png)
 
 ### Appendix E -- Code Excerpts
 
